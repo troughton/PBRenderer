@@ -39,17 +39,15 @@ func main()
     glViewport(x: 0, y: 0, width: frameBufferWidth, height: framebufferHeight)
     
     
-    let vertices : [GLfloat] = [0.5, 0.5, 0, 0, 0, 0, 0.5, 0, 0]
-    let normals : [GLfloat] = [0, 0, 1, 0, 0, 1, 0, 0, 1]
-    let indices : [GLuint] = [0, 1, 2]
+    let vertices = GPUBuffer<GLfloat>(capacity: 18, data: [0.5, 0.5, 0, 0, 0, 0, 0.5, 0, 0,        0, 0, 1, 0, 0, 1, 0, 0, 1], accessFrequency: .Static, accessType: .Draw)
+    let indices = GPUBuffer<GLuint>(capacity: 3, data: [0, 1, 2], accessFrequency: .Static, accessType: .Draw)
     
-    let positionAttribute = VertexAttribute(data: vertices, glType: GL_FLOAT, stride: 3, typeSizeInBytes: sizeof(GLfloat), count: 3)
+    let positionAttribute = VertexAttribute(data: GPUBuffer<Void>(vertices), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, stride: 0, bufferOffsetInBytes: 0)
+    let normalAttribute = VertexAttribute(data: GPUBuffer<Void>(vertices), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, stride: 0, bufferOffsetInBytes: 9 * sizeof(GLfloat))
     
-    let normalAttribute =  VertexAttribute(data: normals, glType: GL_FLOAT, stride: 3, typeSizeInBytes: sizeof(GLfloat), count: 3)
+    let drawCommand = DrawCommand(data: GPUBuffer<Void>(indices), glPrimitiveType: GL_TRIANGLES, elementCount: 3, glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
     
-    let indexAttribute =  VertexAttribute(data: indices, glType: GL_UNSIGNED_INT, stride: 1, typeSizeInBytes: sizeof(GLint), count: 3)
-    
-    let mesh = GLMesh(vertexCount: 3, attributes: [.Index : indexAttribute, .Position : positionAttribute, .Normal : normalAttribute])
+    let mesh = GLMesh(drawCommand: drawCommand, attributes: [.Position: positionAttribute, .Normal: normalAttribute])
     
     
     let vertexShader = ["#version 410",

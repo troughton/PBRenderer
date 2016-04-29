@@ -27,30 +27,43 @@ public enum GPUBufferAccessType {
     case Copy
 }
 
+private func typeSize<U>(_ type: U.Type) -> Int {
+    var typeSize = sizeof(U)
+    if typeSize == 0 { typeSize = 1 }
+    return typeSize
+}
+
 public final class GPUBuffer<T> {
     
-    private let _bufferToBindTo : GLenum
+    public var bufferBinding : GLenum
     
     public let capacity : Int
     
     private let _contents : UnsafeMutableBufferPointer<T>
     private let _glBuffer : GLuint
     
+    
     public var capacityInBytes : Int {
-        return self.capacity * sizeof(T)
+        return self.capacity * typeSize(T)
+    }
+    
+    init<U>(_ buffer: GPUBuffer<U>) {
+        bufferBinding = buffer.bufferBinding
+        self.capacity = buffer.capacityInBytes / typeSize(T)
+        self._contents = UnsafeMutableBufferPointer<T>(start: UnsafeMutablePointer<T>(buffer._contents.baseAddress), count: self.capacity)
+        self._glBuffer = buffer._glBuffer
     }
     
     init(capacity: Int, data: [T]? = nil, bufferBinding : GLenum = GL_UNIFORM_BUFFER, accessFrequency: GPUBufferAccessFrequency, accessType: GPUBufferAccessType) {
         self.capacity = capacity
-        _bufferToBindTo = bufferBinding
+        self.bufferBinding = bufferBinding
         
         let baseAddress = UnsafeMutablePointer<T>(calloc(sizeof(T), capacity))
         _contents = UnsafeMutableBufferPointer(start: baseAddress, count: capacity)
         
-        
         var uniformBlockRef = GLuint(0)
         glGenBuffers(1, &uniformBlockRef);
-        glBindBuffer(_bufferToBindTo, uniformBlockRef);
+        glBindBuffer(bufferBinding, uniformBlockRef);
         _glBuffer = uniformBlockRef
         
         let usage : GLint
@@ -76,9 +89,9 @@ public final class GPUBuffer<T> {
             usage = GL_DYNAMIC_COPY
         }
         
-        glBufferData(_bufferToBindTo, self.capacityInBytes, data, usage);
+        glBufferData(bufferBinding, self.capacityInBytes, data, usage);
         
-        glBindBuffer(_bufferToBindTo, 0)
+        glBindBuffer(bufferBinding, 0)
     }
     
     subscript(_ idx: Int) -> T {
@@ -116,9 +129,9 @@ public final class GPUBuffer<T> {
     }
     
     public func didModifyRange(_ range: Range<Int>) {
-        glBindBuffer(_bufferToBindTo, _glBuffer)
-        glBufferSubData(target: _bufferToBindTo, offset: range.startIndex, size: range.count, data: _contents.baseAddress?.advanced(by: range.startIndex))
-        glBindBuffer(_bufferToBindTo, 0)
+        glBindBuffer(bufferBinding, _glBuffer)
+        glBufferSubData(target: bufferBinding, offset: range.startIndex, size: range.count, data: _contents.baseAddress?.advanced(by: range.startIndex))
+        glBindBuffer(bufferBinding, 0)
     }
     
     public func updateFromGPU() {
@@ -126,13 +139,13 @@ public final class GPUBuffer<T> {
     }
     
     public func updateFromGPU(range: Range<Int>) {
-        glBindBuffer(_bufferToBindTo, _glBuffer)
-        glGetBufferSubData(_bufferToBindTo, range.startIndex, range.count, _contents.baseAddress?.advanced(by: range.startIndex))
-        glBindBuffer(_bufferToBindTo, 0)
+        glBindBuffer(bufferBinding, _glBuffer)
+        glGetBufferSubData(bufferBinding, range.startIndex, range.count, _contents.baseAddress?.advanced(by: range.startIndex))
+        glBindBuffer(bufferBinding, 0)
     }
     
     func bindToGL() {
-        glBindBuffer(_bufferToBindTo, _glBuffer)
+        glBindBuffer(bufferBinding, _glBuffer)
     }
     
     public func bindToUniformBlockIndex(_ index: Int, elementOffset: Int = 0) {
