@@ -35,10 +35,12 @@ private func typeSize<U>(_ type: U.Type) -> Int {
 
 public final class GPUBuffer<T> {
     
+    
     public var bufferBinding : GLenum
     
     public let capacity : Int
     
+    private var _contentRetainCount = 1
     private let _contents : UnsafeMutableBufferPointer<T>
     private let _glBuffer : GLuint
     

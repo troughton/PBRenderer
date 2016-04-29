@@ -1,9 +1,19 @@
 import Foundation
 import CGLFW3
 import SGLOpenGL
+import SGLMath
+import ColladaParser
 
 // Window dimensions
 let WIDTH:GLsizei = 800, HEIGHT:GLsizei = 600
+
+enum BasicShaderProperty : String, ShaderProperty {
+    case mvp
+    
+    var name : String {
+        return self.rawValue
+    }
+}
 
 // The *main* function; where our program begins running
 func main()
@@ -38,23 +48,33 @@ func main()
     // Define the viewport dimensions
     glViewport(x: 0, y: 0, width: frameBufferWidth, height: framebufferHeight)
     
+//    
+//    let vertices = GPUBuffer<GLfloat>(capacity: 18, data: [0.5, 0.5, 0, 0, 0, 0, 0.5, 0, 0,        0, 0, 1, 0, 0, 1, 0, 0, 1], accessFrequency: .Static, accessType: .Draw)
+//    let indices = GPUBuffer<GLuint>(capacity: 3, data: [0, 1, 2], accessFrequency: .Static, accessType: .Draw)
+//    
+//    let positionAttribute = VertexAttribute(data: GPUBuffer<Void>(vertices), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, stride: 0, bufferOffsetInBytes: 0)
+//    let normalAttribute = VertexAttribute(data: GPUBuffer<Void>(vertices), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, stride: 0, bufferOffsetInBytes: 9 * sizeof(GLfloat))
+//    
+//    let drawCommand = DrawCommand(data: GPUBuffer<Void>(indices), glPrimitiveType: GL_TRIANGLES, elementCount: 3, glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
+//    
+//    let mesh = GLMesh(drawCommand: drawCommand, attributes: [.Position: positionAttribute, .Normal: normalAttribute])
     
-    let vertices = GPUBuffer<GLfloat>(capacity: 18, data: [0.5, 0.5, 0, 0, 0, 0, 0.5, 0, 0,        0, 0, 1, 0, 0, 1, 0, 0, 1], accessFrequency: .Static, accessType: .Draw)
-    let indices = GPUBuffer<GLuint>(capacity: 3, data: [0, 1, 2], accessFrequency: .Static, accessType: .Draw)
+    let collada = Collada.ColladaParser(contentsOfURL: NSURL(fileURLWithPath: "/Users/josephbennett/Downloads/ColladaTest.dae"))!
     
-    let positionAttribute = VertexAttribute(data: GPUBuffer<Void>(vertices), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, stride: 0, bufferOffsetInBytes: 0)
-    let normalAttribute = VertexAttribute(data: GPUBuffer<Void>(vertices), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, stride: 0, bufferOffsetInBytes: 9 * sizeof(GLfloat))
+    var mesh : GLMesh! = nil
     
-    let drawCommand = DrawCommand(data: GPUBuffer<Void>(indices), glPrimitiveType: GL_TRIANGLES, elementCount: 3, glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
-    
-    let mesh = GLMesh(drawCommand: drawCommand, attributes: [.Position: positionAttribute, .Normal: normalAttribute])
+    for geometryLibrary in collada.root.children where geometryLibrary is Collada.LibraryGeometriesNode {
+        mesh = GLMesh.meshesFromCollada((geometryLibrary as! Collada.LibraryGeometriesNode).geometries.first!.meshes.first!).first!
+        break
+    }
     
     
     let vertexShader = ["#version 410",
                         "layout(location = 0) in vec4 position;",
                         "layout(location = 1) in vec3 normal;",
+                        "uniform mat4 mvp;",
                         "void main() {",
-                        "gl_Position = position;",
+                        "gl_Position = mvp * position;",
                         "}"].joined(separator: "\n")
     
     let fragmentShader = ["#version 410",
@@ -65,6 +85,14 @@ func main()
     
     let shader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     shader.useProgram()
+    
+    let modelToView = SGLMath.translate(mat4(1), vec3(0, 0, -5))
+    let viewToProj = SGLMath.perspectiveFov(Float(60.0), 800, 600, 0.1, 1000.0)
+    let transform = viewToProj * modelToView
+    
+    shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
+    
+    
     // Game loop
     while glfwWindowShouldClose(window) == GL_FALSE
     {

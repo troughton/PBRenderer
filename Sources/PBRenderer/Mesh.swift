@@ -43,8 +43,10 @@ class GLMesh : Mesh {
     
     private let _vertexArrayObject : GLuint
     private let _drawCommand : DrawCommand
+    private let _attributes : [AttributeType : VertexAttribute]
     
     init(drawCommand: DrawCommand, attributes: [AttributeType : VertexAttribute]) {
+        _attributes = attributes
         
         var vao = GLuint(0)
         glGenVertexArrays(1, &vao);
