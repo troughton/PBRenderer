@@ -24,8 +24,8 @@ func main()
     defer { glfwTerminate() }
     
     // Set all the required options for GLFW
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
@@ -59,7 +59,7 @@ func main()
 //    
 //    let mesh = GLMesh(drawCommand: drawCommand, attributes: [.Position: positionAttribute, .Normal: normalAttribute])
     
-    let collada = Collada.ColladaParser(contentsOfURL: NSURL(fileURLWithPath: "/Users/josephbennett/Downloads/ColladaTest.dae"))!
+    let collada = Collada.ColladaParser(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"))!
     
     var mesh : GLMesh! = nil
     
@@ -86,8 +86,8 @@ func main()
     let shader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     shader.useProgram()
     
-    let modelToView = SGLMath.translate(mat4(1), vec3(0, 0, -5))
-    let viewToProj = SGLMath.perspectiveFov(Float(60.0), 800, 600, 0.1, 1000.0)
+    let modelToView = SGLMath.rotate(SGLMath.translate(mat4(1), vec3(0, 0, 5.0)), Float(0.6), vec3(1, 1, 0))
+    let viewToProj = SGLMath.perspectiveFov(Float(M_PI/4.0), 800, 600, 0.1, 100.0)
     let transform = viewToProj * modelToView
     
     shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)

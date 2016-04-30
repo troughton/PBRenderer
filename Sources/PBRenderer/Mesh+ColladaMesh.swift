@@ -18,21 +18,25 @@ extension GLMesh {
         for source in colladaMesh.sources {
             let buffer : GPUBuffer<Void>
             let glType : GLenum
+            let typeSizeInBytes : Int
             if let floatArray = source.data as? Collada.FloatArrayNode {
                 glType = GL_FLOAT
                 buffer = GPUBuffer<Void>(GPUBuffer<Float>(capacity: floatArray.values.count, data: floatArray.values, accessFrequency: .Static, accessType: .Draw))
+                typeSizeInBytes = sizeof(GLfloat)
             } else  {
                 assertionFailure("No valid conversion for collada source data")
                 continue
             }
 
-            sourcesToAttributes[source] = VertexAttribute(data: buffer, glTypeName: glType, componentsPerAttribute: source.techniqueCommon!.accessor.params.count, isNormalised: false, stride: source.techniqueCommon!.accessor.stride, bufferOffsetInBytes: 0)
+            sourcesToAttributes[source] = VertexAttribute(data: buffer, glTypeName: glType, componentsPerAttribute: source.techniqueCommon!.accessor.params.count, isNormalised: false, strideInBytes: source.techniqueCommon!.accessor.stride * typeSizeInBytes, bufferOffsetInBytes: 0)
         }
         
         var attributes = [AttributeType : VertexAttribute]()
         
-        let meshes = colladaMesh.drawCommands.flatMap { (drawCommand) -> GLMesh? in
-            if let primitive = drawCommand as? Collada.TrianglesNode {
+        var meshes = [GLMesh]()
+        
+        for primitive in colladaMesh.drawCommands {
+            if let primitive = primitive as? Collada.TrianglesNode {
                 for input in primitive.inputs {
                     let attributeType : AttributeType
                     
@@ -47,9 +51,6 @@ extension GLMesh {
                         attributeType = .Position
                     case .TexTangent:
                         continue
-                    default:
-                        assertionFailure("Missing attribute conversion")
-                        return nil
                     }
                     
                     var source = input.source
@@ -64,11 +65,10 @@ extension GLMesh {
                 
                 
                 let drawCommand = DrawCommand(data: GPUBuffer<Void>(buffer), glPrimitiveType: GL_TRIANGLES, elementCount: primitive.count, glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
-                return GLMesh(drawCommand: drawCommand, attributes: attributes)
+                meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributes))
             }
-            assertionFailure("Missing primitive")
-            return nil
         }
+        
         
         return meshes
     }

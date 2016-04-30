@@ -40,10 +40,11 @@ class Shader {
         }
         
         var location = glGetUniformLocation(_glProgramRef, property.name)
-        if location == 0 {
-            location = GLint(glGetUniformBlockIndex(_glProgramRef, property.name));
+        if location == -1 {
+            let blockIndex = glGetUniformBlockIndex(_glProgramRef, property.name)
+            location = unsafeBitCast(blockIndex, to: GLint.self)
         }
-        if location == 0 {
+        if location == -1 {
             print("Warning: uniform for property \(property) was not found.")
             return nil
         } else {

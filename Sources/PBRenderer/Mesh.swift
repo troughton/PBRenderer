@@ -27,7 +27,7 @@ struct VertexAttribute {
     let glTypeName : GLenum
     let componentsPerAttribute : Int
     let isNormalised : Bool
-    let stride : Int
+    let strideInBytes : Int
     let bufferOffsetInBytes : Int
 }
 
@@ -54,16 +54,14 @@ class GLMesh : Mesh {
         
         _drawCommand = drawCommand
         
-        _drawCommand.data.bufferBinding = GL_ELEMENT_ARRAY_BUFFER
-        _drawCommand.data.bindToGL()
+        _drawCommand.data.bindToGL(buffer: GL_ELEMENT_ARRAY_BUFFER)
         
         for (type, attribute) in attributes {
          
-            attribute.data.bufferBinding = GL_ARRAY_BUFFER
-            attribute.data.bindToGL()
+            attribute.data.bindToGL(buffer: GL_ARRAY_BUFFER)
             
             glEnableVertexAttribArray(GLuint(type.rawValue))
-            glVertexAttribPointer(index: GLuint(type.rawValue), size: GLint(attribute.componentsPerAttribute), type: attribute.glTypeName, normalized: attribute.isNormalised, stride: GLsizei(attribute.stride), pointer: UnsafePointer<Void>(bitPattern: attribute.bufferOffsetInBytes))
+            glVertexAttribPointer(index: GLuint(type.rawValue), size: GLint(attribute.componentsPerAttribute), type: attribute.glTypeName, normalized: attribute.isNormalised, stride: GLsizei(attribute.strideInBytes), pointer: UnsafePointer<Void>(bitPattern: attribute.bufferOffsetInBytes))
 
         }
         
