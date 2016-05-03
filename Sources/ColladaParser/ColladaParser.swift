@@ -17,7 +17,7 @@ extension ColladaNodeInternal {
 
 public protocol ColladaSource { }
 
-public protocol ColladaDrawCommand { }
+public protocol ColladaPrimitive { }
 
 public class Collada  {
     
@@ -54,7 +54,7 @@ public class Collada  {
     public final class MeshNode: ColladaNode, ColladaNodeInternal {
         public var sources = [SourceNode]()
         var vertices = [VerticesNode]()
-        public var drawCommands = [ColladaDrawCommand]()
+        public var primitives = [ColladaPrimitive]()
         
         init(parent: ColladaNodeInternal?, idsToNodes: inout [String : ColladaNode], attributes attributeDict: [String : String]) {
             (parent as! GeometryNode).meshes.append(self)
@@ -170,7 +170,7 @@ public class Collada  {
         }
     }
     
-    public final class TrianglesNode: ColladaNode, ColladaNodeInternal, ColladaDrawCommand {
+    public final class TrianglesNode: ColladaNode, ColladaNodeInternal, ColladaPrimitive {
         public let count : Int
         public var inputs = [InputNode]()
         public var indices : IndicesNode! = nil
@@ -178,7 +178,7 @@ public class Collada  {
         init(parent: ColladaNodeInternal?, idsToNodes: inout [String : ColladaNode], attributes attributeDict: [String : String]) {
             self.count = Int(attributeDict["count"]!)!
             
-            (parent as! MeshNode).drawCommands.append(self)
+            (parent as! MeshNode).primitives.append(self)
         }
     }
     

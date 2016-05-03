@@ -1,0 +1,255 @@
+//
+//  RenderPAss.swift
+//  PBRenderer
+//
+//  Created by Thomas Roughton on 30/04/16.
+//
+//
+
+import Foundation
+import SGLOpenGL
+import SGLMath
+
+//This is mainly a reimplementation of Metal's state-object based pipeline for OpenGL.
+
+struct ColourWriteMask : OptionSet {
+    
+    let rawValue : UInt
+
+    init(rawValue: UInt) {
+        self.rawValue = rawValue
+    }
+    
+    static let None = ColourWriteMask(rawValue: 0)
+    static let Red   = ColourWriteMask(rawValue: 0x1 << 3)
+    static let Green = ColourWriteMask(rawValue: 0x1 << 2)
+    static let Blue  = ColourWriteMask(rawValue: 0x1 << 1)
+    static let Alpha = ColourWriteMask(rawValue: 0x1 << 0)
+    static let All   = ColourWriteMask(rawValue: 0xf)
+}
+
+struct ColourAttachment {
+    /*! Pixel format.  Defaults to MTLPixelFormatInvalid */
+    var pixelFormat: GLenum
+    
+    /*! Enable blending.  Defaults to NO. */
+    var isBlendingEnabled: Bool = false
+    
+    /*! Defaults to GL_ONE */
+    var sourceRGBBlendFactor: GLint = GL_ONE
+    
+    
+    /*! Defaults to GL_ZERO */
+    var destinationRGBBlendFactor: GLint = GL_ZERO
+    
+    
+    /*! Defaults to GL_ADD */
+    var rgbBlendOperation: GLint = GL_ADD
+    
+    
+    /*! Defaults to GL_ONE */
+    var sourceAlphaBlendFactor: GLint = GL_ONE
+    
+    
+    /*! Defaults to GL_ZERO */
+    var destinationAlphaBlendFactor: GLint = GL_ZERO
+    
+    
+    /*! Defaults to GL_ADD */
+    var alphaBlendOperation: GLint = GL_ADD
+    
+    
+    /*! Defaults to ColourWriteMaskAll */
+    var writeMask: ColourWriteMask = .All
+    
+    func applyState(bufferIndex: GLuint) {
+        if isBlendingEnabled {
+            glEnablei(GL_BLEND, bufferIndex)
+        } else {
+            glDisablei(GL_BLEND, bufferIndex)
+        }
+        
+        glBlendFuncSeparatei(bufferIndex, sourceRGBBlendFactor, destinationRGBBlendFactor, sourceAlphaBlendFactor, destinationAlphaBlendFactor)
+        glBlendEquationSeparatei(buf: bufferIndex, modeRGB: rgbBlendOperation, modeAlpha: alphaBlendOperation)
+        
+        glColorMaski(bufferIndex, writeMask.contains(.Red), writeMask.contains(.Green), writeMask.contains(.Blue), writeMask.contains(.Alpha))
+    }
+}
+
+struct PipelineState {
+    var shader : Shader
+    
+    var colourAttachments : [ColourAttachment?]
+    
+    var alphaToCoverageEnabled : Bool
+    var alphaToOneEnabled : Bool
+    var rasterisationEnabled : Bool
+    
+    var multisamplingEnabled : Bool
+    
+    func applyState() {
+        shader.useProgram()
+        
+        for (i, colourAttachment) in colourAttachments.enumerated() where colourAttachment != nil {
+            colourAttachment!.applyState(bufferIndex: GLuint(i))
+        }
+        
+        if multisamplingEnabled {
+            glEnable(GL_MULTISAMPLE)
+        } else {
+            glDisable(GL_MULTISAMPLE)
+        }
+        
+        if alphaToCoverageEnabled {
+            glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE)
+        } else {
+            glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE)
+        }
+        
+        if alphaToOneEnabled {
+            glEnable(GL_SAMPLE_ALPHA_TO_ONE)
+        } else {
+            glDisable(GL_SAMPLE_ALPHA_TO_ONE)
+        }
+        
+        if rasterisationEnabled {
+            glDisable(GL_RASTERIZER_DISCARD)
+        } else {
+            glEnable(GL_RASTERIZER_DISCARD)
+        }
+    }
+    
+}
+
+struct StencilState {
+    
+    var stencilCompareFunction: GLint
+    
+    /*! Stencil is tested first. stencilFailureOperation declares how the stencil buffer is updated when the stencil test fails. */
+    var stencilFailureOperation: GLint
+    
+    
+    /*! If stencil passes, depth is tested next.  Declare what happens when the depth test fails. */
+    var depthFailureOperation: GLint
+    
+    
+    /*! If both the stencil and depth tests pass, declare how the stencil buffer is updated. */
+    var depthStencilPassOperation: GLint
+    
+    var readMask: UInt32
+    
+    var writeMask: UInt32
+    
+    var referenceValue : Int32
+    
+    func applyState(face: GLenum) {
+        glStencilFuncSeparate(face, stencilCompareFunction, referenceValue, readMask)
+        glStencilMaskSeparate(face, writeMask)
+        
+        glStencilOpSeparate(face: face, sfail: stencilFailureOperation, dpfail: depthFailureOperation, dppass: depthStencilPassOperation)
+    }
+}
+
+struct DepthStencilState {
+    /* Defaults to GL_ALWAYS, which effectively skips the depth test */
+    var depthCompareFunction: GLint = GL_ALWAYS
+    
+    /* Defaults to NO, so no depth writes are performed */
+    var isDepthWriteEnabled: Bool = false
+    
+    var frontFaceStencil: StencilState? = nil
+    
+    var backFaceStencil: StencilState? = nil
+    
+    func applyState() {
+        
+        glDepthMask(isDepthWriteEnabled)
+        
+        glDepthFunc(depthCompareFunction)
+        
+        if frontFaceStencil != nil || backFaceStencil != nil {
+            glEnable(GL_STENCIL_TEST)
+            
+            if let frontFaceStencil = frontFaceStencil {
+                frontFaceStencil.applyState(face: GL_FRONT)
+            } else {
+                glStencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0, GLuint.max)
+                glStencilMaskSeparate(GL_FRONT, GLuint.max)
+                glStencilOpSeparate(face: GL_FRONT, sfail: GL_KEEP, dpfail: GL_KEEP, dppass: GL_KEEP)
+            }
+            
+            if let backFaceStencil = backFaceStencil {
+                backFaceStencil.applyState(face: GL_BACK)
+            } else {
+                glStencilFuncSeparate(GL_BACK, GL_ALWAYS, 0, GLuint.max)
+                glStencilMaskSeparate(GL_BACK, GLuint.max)
+                glStencilOpSeparate(face: GL_BACK, sfail: GL_KEEP, dpfail: GL_KEEP, dppass: GL_KEEP)
+            }
+            
+        } else {
+            glDisable(GL_STENCIL_TEST)
+        }
+    }
+}
+
+struct Rectangle {
+    let x: Int
+    let y: Int
+    let width: Int
+    let height: Int
+}
+
+struct FixedRenderState {
+    
+    var cullMode : GLenum = GL_NONE
+    
+    var blendColour : vec4 = vec4(0)
+    
+    enum DepthClipMode {
+        case Clip
+        case Clamp
+    }
+    
+    var depthClipMode : DepthClipMode = .Clip
+    
+    var frontFaceWinding : GLint = GL_CCW
+    
+    var scissorRect : Rectangle? = nil
+    
+    var polygonFrontFaceFillMode : GLenum = GL_FILL
+    var polygonBackFaceFillMode : GLenum = GL_FILL
+        
+    var viewport : Rectangle
+    
+    func applyState() {
+        if cullMode == GL_NONE {
+            glDisable(GL_CULL_FACE)
+        } else {
+            glEnable(GL_CULL_FACE)
+            glCullFace(cullMode)
+        }
+        
+         glBlendColor(blendColour.r, blendColour.g, blendColour.b, blendColour.a)
+        
+        switch depthClipMode {
+        case .Clip:
+            glDisable(GL_DEPTH_CLAMP)
+        case .Clamp:
+            glEnable(GL_DEPTH_CLAMP)
+        }
+        
+        glFrontFace(frontFaceWinding)
+        
+        if let scissorRect = scissorRect {
+            glEnable(GL_SCISSOR_TEST)
+            glScissor(GLint(scissorRect.x), GLint(scissorRect.y), GLsizei(scissorRect.width), GLsizei(scissorRect.height))
+        } else {
+            glDisable(GL_SCISSOR_TEST)
+        }
+        
+        glPolygonMode(GL_FRONT, polygonFrontFaceFillMode)
+        glPolygonMode(GL_BACK, polygonBackFaceFillMode)
+     
+        glViewport(GLint(viewport.x), GLint(viewport.y), GLsizei(viewport.width), GLsizei(viewport.height))
+    }
+}

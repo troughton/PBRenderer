@@ -172,6 +172,10 @@ public final class GPUBuffer<T> {
         _internalBuffer.updateFromGPU(range: range)
     }
     
+    func bindToTexture(internalFormat: GLint) {
+        glTexBuffer(GL_TEXTURE_BUFFER, internalFormat, _internalBuffer._glBuffer)
+    }
+    
     func bindToGL(buffer: GLenum) {
         _internalBuffer.bindToGL(buffer: buffer)
     }

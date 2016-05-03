@@ -63,6 +63,24 @@ class Shader {
 }
 
 extension Shader {
+    static func shaderTextByExpandingIncludes(fromFile filePath: String) throws -> String {
+        var text = try String(contentsOfFile: filePath)
+        let directory = filePath.components(separatedBy: "/").dropLast().joined(separator: "/")
+        
+        let regex = try NSRegularExpression(pattern: "#include \"(.+)\"", options: [])
+        
+        while let match = regex.firstMatch(in: text, options: [], range: NSMakeRange(0, text.characters.count)) {
+            let includeFileNameRange = match.range(at: 1)
+            let includeFileName = text[text.startIndex.advanced(by: includeFileNameRange.location)..<text.startIndex.advanced(by: includeFileNameRange.location + includeFileNameRange.length)]
+            let includeFile = try String(contentsOfFile: directory + "/" + includeFileName)
+            text.replaceSubrange(text.startIndex.advanced(by: match.range.location)..<text.startIndex.advanced(by: match.range.location + match.range.length), with: includeFile)
+        }
+        
+        return text
+    }
+}
+
+extension Shader {
     
     /**
     * Creates and links a shader program using the specified OpenGL shader objects.

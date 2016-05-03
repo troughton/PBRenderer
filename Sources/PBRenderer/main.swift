@@ -4,8 +4,6 @@ import SGLOpenGL
 import SGLMath
 import ColladaParser
 
-// Window dimensions
-let WIDTH:GLsizei = 800, HEIGHT:GLsizei = 600
 
 enum BasicShaderProperty : String, ShaderProperty {
     case mvp
@@ -14,6 +12,9 @@ enum BasicShaderProperty : String, ShaderProperty {
         return self.rawValue
     }
 }
+
+let mainWindow : Window
+let document = try NSXMLDocument(contentsOf: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"), options: 0)
 
 // The *main* function; where our program begins running
 func main()
@@ -30,23 +31,7 @@ func main()
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
     
-    // Create a GLFWwindow object that we can use for GLFW's functions
-    let window = glfwCreateWindow(WIDTH, HEIGHT, "PBRenderer", nil, nil)
-    glfwMakeContextCurrent(window)
-    guard window != nil else
-    {
-        print("Failed to create GLFW window")
-        return
-    }
-    
-    // Set the required callback functions
-    glfwSetKeyCallback(window, keyCallback)
-    
-    var frameBufferWidth : GLint = 0, framebufferHeight : GLint = 0
-    glfwGetFramebufferSize(window, &frameBufferWidth, &framebufferHeight)
-    
-    // Define the viewport dimensions
-    glViewport(x: 0, y: 0, width: frameBufferWidth, height: framebufferHeight)
+    let mainWindow = Window(name: "PBRenderer", width: 800, height: 600)
     
 //    
 //    let vertices = GPUBuffer<GLfloat>(capacity: 18, data: [0.5, 0.5, 0, 0, 0, 0, 0.5, 0, 0,        0, 0, 1, 0, 0, 1, 0, 0, 1], accessFrequency: .Static, accessType: .Draw)
@@ -94,8 +79,7 @@ func main()
     
     
     // Game loop
-    while glfwWindowShouldClose(window) == GL_FALSE
-    {
+    while !mainWindow.shouldClose {
         // Check if any events have been activated
         // (key pressed, mouse moved etc.) and call
         // the corresponding response functions
@@ -108,20 +92,12 @@ func main()
         
         mesh.render()
         
-        // Swap the screen buffers
-        glfwSwapBuffers(window)
+        mainWindow.update()
     }
     shader.endUseProgram()
 }
 
-// called whenever a key is pressed/released via GLFW
-func keyCallback(window: OpaquePointer!, key: Int32, scancode: Int32, action: Int32, mode: Int32)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GL_TRUE)
-    }
-}
-
+print(document.rootElement()?.elements(forName: "library_geometries").first?.elements(forName: "geometry").first?.attributes)
 
 main()
 

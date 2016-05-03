@@ -35,7 +35,7 @@ extension GLMesh {
         
         var meshes = [GLMesh]()
         
-        for primitive in colladaMesh.drawCommands {
+        for primitive in colladaMesh.primitives {
             if let primitive = primitive as? Collada.TrianglesNode {
                 for input in primitive.inputs {
                     let attributeType : AttributeType
