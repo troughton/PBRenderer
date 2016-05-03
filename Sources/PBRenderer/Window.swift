@@ -9,7 +9,8 @@
 import Foundation
 import CGLFW3
 import SGLOpenGL
-
+import SGLMath
+import ColladaParser
 
 class Window {
     // called whenever a key is pressed/released via GLFW
@@ -65,9 +66,19 @@ class Window {
     }
     
     final func update() {
+        self.preRender()
         self.render()
+        self.postRender()
         
         glfwSwapBuffers(_glfwWindow)
+    }
+    
+    func preRender() {
+        
+    }
+    
+    func postRender() {
+        
     }
     
     func render() {
@@ -77,4 +88,96 @@ class Window {
     func keyAction(key: Int32, scanCode: Int32, action: Int32, modifiers: Int32) {
         
     }
+}
+
+class RenderWindow : Window {
+    
+    var framebuffer : Framebuffer! = nil
+    
+    var renderContextState : RenderContextState! = nil {
+        didSet {
+            renderContextState?.applyState()
+        }
+    }
+    var pipelineState : PipelineState! = nil {
+        didSet {
+            pipelineState?.applyState()
+        }
+    }
+    var depthStencilState : DepthStencilState! = nil {
+        didSet {
+            depthStencilState?.applyState()
+        }
+    }
+    
+    var shader : Shader! = nil
+    
+    var mesh : GLMesh! = nil
+    
+    override init(name: String, width: Int, height: Int) {
+        super.init(name: name, width: width, height: height)
+        
+        let (pixelWidth, pixelHeight) = self.pixelDimensions
+        self.framebuffer = Framebuffer.defaultFramebuffer(width: pixelWidth, height: pixelHeight)
+        self.renderContextState = RenderContextState(viewport: Rectangle(x: 0, y: 0, width: pixelWidth, height: pixelHeight))
+        self.depthStencilState = DepthStencilState()
+        
+        self.framebuffer.colourAttachments[0]?.clearColour = vec4(0, 0, 0, 0)
+        self.framebuffer.colourAttachments[0]?.loadAction = .Clear
+        
+        let vertexShader = ["#version 410",
+                            "layout(location = 0) in vec4 position;",
+                            "layout(location = 1) in vec3 normal;",
+                            "uniform mat4 mvp;",
+                            "void main() {",
+                            "gl_Position = mvp * position;",
+                            "}"].joined(separator: "\n")
+        
+        let fragmentShader = ["#version 410",
+                              "out vec4 outputColor;",
+                              "void main() {",
+                              "outputColor = vec4(1.0, 0.0, 0.0, 1.0);",
+                              "}"].joined(separator: "\n")
+        
+        self.shader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
+        
+        let firstColourAttachment = ColourAttachment()
+        self.pipelineState = PipelineState(shader: shader, colourAttachments: [firstColourAttachment])
+        
+        let collada = Collada.ColladaParser(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"))!
+        
+        var mesh : GLMesh! = nil
+        
+        for geometryLibrary in collada.root.children where geometryLibrary is Collada.LibraryGeometriesNode {
+            mesh = GLMesh.meshesFromCollada((geometryLibrary as! Collada.LibraryGeometriesNode).geometries.first!.meshes.first!).first!
+            break
+        }
+        self.mesh = mesh
+
+    }
+    
+    override func preRender() {
+        super.preRender()
+        
+        self.shader.useProgram()
+        self.framebuffer.beginRenderPass()
+    }
+    
+    override func render() {
+        
+        let modelToView = SGLMath.rotate(SGLMath.translate(mat4(1), vec3(0, 0, 5.0)), Float(0.6), vec3(1, 1, 0))
+        let viewToProj = SGLMath.perspectiveFov(Float(M_PI/4.0), 800, 600, 0.1, 100.0)
+        let transform = viewToProj * modelToView
+        
+        self.pipelineState.shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
+        
+        mesh.render()
+    }
+    
+    override func postRender() {
+        super.postRender()
+        self.framebuffer.endRenderPass()
+        self.shader.endUseProgram()
+    }
+    
 }

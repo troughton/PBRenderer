@@ -88,18 +88,20 @@ struct RenderPassStencilAttachment : RenderPassAttachment {
 
 public class Framebuffer {
     
-    static let defaultFramebuffer = Framebuffer()
+    static func defaultFramebuffer(width: Int32, height: Int32) -> Framebuffer {
+        return Framebuffer(defaultFramebufferWithWidth: width, height: height)
+    }
     
     private let _glFramebuffer : GLuint!
     
     let width : Int32
     let height : Int32
     
-    let colourAttachments: [RenderPassColourAttachment?]
+    var colourAttachments: [RenderPassColourAttachment?]
     
-    let depthAttachment: RenderPassDepthAttachment
+    var depthAttachment: RenderPassDepthAttachment
     
-    let stencilAttachment : RenderPassStencilAttachment?
+    var stencilAttachment : RenderPassStencilAttachment?
     
     init(width: Int32, height: Int32, colourAttachments: [RenderPassColourAttachment?], depthAttachment: RenderPassDepthAttachment, stencilAttachment: RenderPassStencilAttachment?) {
         
@@ -141,11 +143,9 @@ public class Framebuffer {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
     }
     
-    private convenience init() {
-        let colourAttachments : [RenderPassColourAttachment?] = [ RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 1)) ]
+    private convenience init(defaultFramebufferWithWidth width: Int32, height: Int32) {
+        let colourAttachments : [RenderPassColourAttachment?] = [ RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0)) ]
         let depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
-        
-        let (width, height) = mainWindow.pixelDimensions
         
         self.init(width: width, height: height, colourAttachments:colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
     }
@@ -172,6 +172,7 @@ public class Framebuffer {
                     glDrawBuffer(GL_BACK)
                 }
                 glClearColor(attachment!.clearColour.r, attachment!.clearColour.g, attachment!.clearColour.b, attachment!.clearColour.a)
+                glClear(GL_COLOR_BUFFER_BIT)
             }
         }
         
@@ -189,16 +190,17 @@ public class Framebuffer {
         
         if self.depthAttachment.loadAction == .Clear {
             glClearDepth(self.depthAttachment.clearDepth)
+            glClear(GL_DEPTH_BUFFER_BIT)
         }
         
         if self.stencilAttachment?.loadAction == .Clear {
             glClearStencil(unsafeBitCast(self.stencilAttachment!.clearStencil, to: GLint.self))
+            glClear(GL_STENCIL_BUFFER_BIT)
         }
         
     }
     
     func endRenderPass() {
-        glDrawBuffer(GL_NONE)
         
         for attachment in colourAttachments where attachment?.texture != nil {
             if case let .MultisampleResolveColour(framebuffer, attachmentIndex) = attachment!.storeAction {

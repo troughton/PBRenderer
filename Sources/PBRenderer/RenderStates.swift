@@ -29,8 +29,6 @@ struct ColourWriteMask : OptionSet {
 }
 
 struct ColourAttachment {
-    /*! Pixel format.  Defaults to MTLPixelFormatInvalid */
-    var pixelFormat: GLenum
     
     /*! Enable blending.  Defaults to NO. */
     var isBlendingEnabled: Bool = false
@@ -81,14 +79,18 @@ struct PipelineState {
     
     var colourAttachments : [ColourAttachment?]
     
-    var alphaToCoverageEnabled : Bool
-    var alphaToOneEnabled : Bool
-    var rasterisationEnabled : Bool
+    var alphaToCoverageEnabled : Bool = false
+    var alphaToOneEnabled : Bool = false
+    var rasterisationEnabled : Bool = true
     
-    var multisamplingEnabled : Bool
+    var multisamplingEnabled : Bool = false
+    
+    init(shader: Shader, colourAttachments: [ColourAttachment?]) {
+        self.shader = shader
+        self.colourAttachments = colourAttachments
+    }
     
     func applyState() {
-        shader.useProgram()
         
         for (i, colourAttachment) in colourAttachments.enumerated() where colourAttachment != nil {
             colourAttachment!.applyState(bufferIndex: GLuint(i))
@@ -193,13 +195,13 @@ struct DepthStencilState {
 }
 
 struct Rectangle {
-    let x: Int
-    let y: Int
-    let width: Int
-    let height: Int
+    let x: GLint
+    let y: GLint
+    let width: GLint
+    let height: GLint
 }
 
-struct FixedRenderState {
+struct RenderContextState {
     
     var cullMode : GLenum = GL_NONE
     
@@ -220,6 +222,10 @@ struct FixedRenderState {
     var polygonBackFaceFillMode : GLenum = GL_FILL
         
     var viewport : Rectangle
+    
+    init(viewport: Rectangle) {
+        self.viewport = viewport
+    }
     
     func applyState() {
         if cullMode == GL_NONE {
