@@ -37,30 +37,46 @@ extension GLMesh {
         
         for primitive in colladaMesh.choice0 {
             if case let .triangles(tris) = primitive {
+                
                 for input in tris.input {
                     let attributeType : AttributeType
                     
                     switch input.semantic {
                     case "VERTEX":
-                        attributeType = .Position
+                        if let vertices = root[input.source] as? VerticesType {
+                            for input in vertices.input {
+                                
+                                let attributeType : AttributeType
+                                
+                                switch input.semantic {
+                                case "POSITION":
+                                    attributeType = .Position
+                                case "NORMAL":
+                                    attributeType = .Normal
+                                default:
+                                    continue
+                                }
+                                
+                                attributes[attributeType] = sourcesToAttributes[input.source]
+                            }
+                        }
+                        continue
+                        
                     case "POSITION":
                         attributeType = .Position
+                    case "NORMAL":
+                        attributeType = .Normal
                     default:
                         continue
                     }
                     
-                    var source = input.source
-                    if root[source] is VerticesType {
-                        source = (root[source] as! VerticesType).input.first!.source
-                    }
-                    
-                    attributes[attributeType] = sourcesToAttributes[source]
+                    attributes[attributeType] = sourcesToAttributes[input.source]
                 }
                 
-                let buffer = GPUBuffer<GLuint>(capacity: Int(tris.count), data: tris.p!.data.enumerated().filter { $0.0 % 2 == 0 }.map { GLuint($1) }, accessFrequency: .Static, accessType: .Draw)
+                let buffer = GPUBuffer<GLuint>(capacity: Int(tris.count * 3), data: tris.p!.data.enumerated().filter { $0.0 % 2 == 0 }.map { GLuint($1) }, accessFrequency: .Static, accessType: .Draw)
                 
                 
-                let drawCommand = DrawCommand(data: GPUBuffer<Void>(buffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count), glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
+                let drawCommand = DrawCommand(data: GPUBuffer<Void>(buffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
                 meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributes))
             }
         }

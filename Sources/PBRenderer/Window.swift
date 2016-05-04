@@ -129,14 +129,17 @@ class RenderWindow : Window {
                             "layout(location = 0) in vec4 position;",
                             "layout(location = 1) in vec3 normal;",
                             "uniform mat4 mvp;",
+                            "out vec3 vertexNormal;",
                             "void main() {",
+                            "vertexNormal = normal;",
                             "gl_Position = mvp * position;",
                             "}"].joined(separator: "\n")
         
         let fragmentShader = ["#version 410",
                               "out vec4 outputColor;",
+                              "in vec3 vertexNormal;",
                               "void main() {",
-                              "outputColor = vec4(1.0, 0.0, 0.0, 1.0);",
+                              "outputColor = vec4((vertexNormal + 1) * 0.5, 1.0);",
                               "}"].joined(separator: "\n")
         
         self.shader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
@@ -144,7 +147,7 @@ class RenderWindow : Window {
         let firstColourAttachment = ColourAttachment()
         self.pipelineState = PipelineState(shader: shader, colourAttachments: [firstColourAttachment])
         
-        let collada = try! Collada(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"))
+        let collada = try! Collada(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTestSphere.dae"))
         
         var mesh : GLMesh! = nil
         
@@ -169,8 +172,8 @@ class RenderWindow : Window {
     
     override func render() {
         
-        let modelToView = SGLMath.rotate(SGLMath.translate(mat4(1), vec3(0, 0, 5.0)), Float(0.6), vec3(1, 1, 0))
-        let viewToProj = SGLMath.perspectiveFov(Float(M_PI/4.0), 800, 600, 0.1, 100.0)
+        let modelToView = SGLMath.rotate(SGLMath.translate(mat4(1), vec3(0, 0, 5.0)), Float(glfwGetTime()), vec3(0, 1, 0))
+        let viewToProj = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
         let transform = viewToProj * modelToView
         
         self.pipelineState.shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)

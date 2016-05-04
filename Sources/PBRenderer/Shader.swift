@@ -106,11 +106,11 @@ extension Shader {
             
             glGetProgramInfoLog(program, infoLogLength, nil, error);
             
-            let errorString = String(CString: error, encoding: NSUTF8StringEncoding)
+            let errorString = String(cString: UnsafePointer<CChar>(error!))
             
             free(error)
             
-            print("Linker failure: \(errorString)");
+            fatalError("Linker failure: \(errorString)");
         }
     
         for shader in shaderList {
@@ -147,7 +147,7 @@ extension Shader {
             
             glGetShaderInfoLog(shader, infoLogLength, nil, error);
             
-            let errorString = String(CString: error, encoding: NSUTF8StringEncoding)
+            let errorString = String(cString: UnsafePointer<CChar>(error!))
             
             free(error)
     
@@ -158,7 +158,7 @@ extension Shader {
                 case GL_FRAGMENT_SHADER: strShaderType = "fragment";
                 default: strShaderType = "";
             }
-            print("Compile failure in \(strShaderType) shader:\n\(errorString)")
+            fatalError("Compile failure in \(strShaderType) shader:\n\(errorString)")
         }
         return shader;
     }

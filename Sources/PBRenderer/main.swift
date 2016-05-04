@@ -14,7 +14,6 @@ enum BasicShaderProperty : String, ShaderProperty {
 }
 
 let mainWindow : Window
-let document = try NSXMLDocument(contentsOf: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"), options: 0)
 
 // The *main* function; where our program begins running
 func main()
@@ -55,8 +54,6 @@ func main()
         mainWindow.update()
     }
 }
-
-print(document.rootElement()?.elements(forName: "library_geometries").first?.elements(forName: "geometry").first?.attributes)
 
 main()
 
