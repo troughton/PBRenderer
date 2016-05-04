@@ -144,13 +144,17 @@ class RenderWindow : Window {
         let firstColourAttachment = ColourAttachment()
         self.pipelineState = PipelineState(shader: shader, colourAttachments: [firstColourAttachment])
         
-        let collada = Collada.ColladaParser(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"))!
+        let collada = try! Collada(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTest.dae"))
         
         var mesh : GLMesh! = nil
         
-        for geometryLibrary in collada.root.children where geometryLibrary is Collada.LibraryGeometriesNode {
-            mesh = GLMesh.meshesFromCollada((geometryLibrary as! Collada.LibraryGeometriesNode).geometries.first!.meshes.first!).first!
-            break
+        for geometryLibrary in collada.libraryGeometries {
+            switch geometryLibrary.geometry.first!.choice0 {
+            case let .mesh(colladaMesh):
+                mesh = GLMesh.meshesFromCollada(colladaMesh, root: collada).first!
+            default:
+                break
+            }
         }
         self.mesh = mesh
 
