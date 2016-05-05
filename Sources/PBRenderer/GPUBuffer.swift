@@ -94,13 +94,13 @@ private final class GPUBufferImpl {
     
     func didModifyRange(_ range: Range<Int>) {
         glBindBuffer(bufferBinding, _glBuffer)
-        glBufferSubData(target: bufferBinding, offset: range.startIndex, size: range.count, data: _contents.advanced(by: range.startIndex))
+        glBufferSubData(target: bufferBinding, offset: range.lowerBound, size: range.count, data: _contents.advanced(by: range.lowerBound))
         glBindBuffer(bufferBinding, 0)
     }
     
     func updateFromGPU(range: Range<Int>) {
         glBindBuffer(bufferBinding, _glBuffer)
-        glGetBufferSubData(bufferBinding, range.startIndex, range.count, _contents.advanced(by: range.startIndex))
+        glGetBufferSubData(bufferBinding, range.lowerBound, range.count, _contents.advanced(by: range.lowerBound))
         glBindBuffer(bufferBinding, 0)
     }
     
@@ -147,13 +147,13 @@ public final class GPUBuffer<T> {
     
     subscript(_ range: Range<Int>) -> [T] {
         get {
-            return [T](UnsafeMutableBufferPointer(start: UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.startIndex), count: range.count))
+            return [T](UnsafeMutableBufferPointer(start: UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.lowerBound), count: range.count))
         }
         set(newValue) {
             assert(range.count == newValue.count)
             
             newValue.withUnsafeBufferPointer { (toCopy) -> Void in
-                let destination = UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.startIndex)
+                let destination = UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.lowerBound)
                 memcpy(destination, toCopy.baseAddress, range.count * sizeof(T))
             }
         }
@@ -164,8 +164,7 @@ public final class GPUBuffer<T> {
     }
     
     public func didModifyRange(_ range: Range<Int>) {
-        let range = range.startIndex * sizeof(T)..<range.endIndex * sizeof(T)
-        _internalBuffer.didModifyRange(range)
+        _internalBuffer.didModifyRange(Range(uncheckedBounds: (range.lowerBound * sizeof(T), range.upperBound * sizeof(T))))
     }
     
     public func updateFromGPU() {
@@ -173,8 +172,7 @@ public final class GPUBuffer<T> {
     }
     
     public func updateFromGPU(range: Range<Int>) {
-        let range = range.startIndex * sizeof(T)...range.endIndex * sizeof(T)
-        _internalBuffer.updateFromGPU(range: range)
+        _internalBuffer.updateFromGPU(range: Range(uncheckedBounds: (range.lowerBound * sizeof(T), range.upperBound * sizeof(T))))
     }
     
     func bindToTexture(internalFormat: GLint) {

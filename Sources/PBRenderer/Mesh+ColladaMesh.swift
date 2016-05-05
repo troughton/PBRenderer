@@ -44,7 +44,7 @@ struct VertexLayout {
     }
 }
 
-class Vertex {
+class Vertex : Hashable {
     let layout : VertexLayout
     let data : UnsafeMutablePointer<UInt8>!
     
@@ -74,6 +74,10 @@ class Vertex {
     deinit {
         free(self.data)
     }
+}
+
+func ==(lhs: Vertex, rhs: Vertex) -> Bool {
+    return lhs.hashValue == rhs.hashValue
 }
 
 extension GLMesh {
@@ -119,7 +123,8 @@ extension GLMesh {
     static func meshesFromCollada(_ colladaMesh: MeshType, root: Collada) -> [GLMesh] {
         var attributesToSources = [AttributeType : (offset: Int, source: SourceType)]()
         
-        //TODO: Shared vertices between meshes.
+        
+        //TODO: Shared vertices between meshes. Requires a different buffer for each vertex layout and precomputing the size of the array for each layout to contain the vertices of every mesh.
         var meshes = [GLMesh]()
         
         for primitive in colladaMesh.choice0 {
@@ -187,9 +192,14 @@ extension GLMesh {
                             vertex.setAttribute(attribute: type, value: valuePtr)
                         }
                         
-                        //TODO: properly make use of duplicate vertices
-                        vertices.append(vertex)
-                        indices.append(UInt16(vertexIndex))
+                    
+                        if let existingIndex = vertices.index(of: vertex) {
+                            indices.append(UInt16(existingIndex))
+                            
+                        } else {
+                            indices.append(UInt16(vertices.count))
+                            vertices.append(vertex)
+                        }
                     }
                 }
             

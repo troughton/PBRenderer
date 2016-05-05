@@ -71,9 +71,17 @@ extension Shader {
         
         while let match = regex.firstMatch(in: text, options: [], range: NSMakeRange(0, text.characters.count)) {
             let includeFileNameRange = match.range(at: 1)
-            let includeFileName = text[text.startIndex.advanced(by: includeFileNameRange.location)..<text.startIndex.advanced(by: includeFileNameRange.location + includeFileNameRange.length)]
+            
+            let startIndex = text.index(text.startIndex, offsetBy: includeFileNameRange.location)
+            let endIndex = text.index(startIndex, offsetBy: includeFileNameRange.length)
+            
+            let includeFileName = text[startIndex..<endIndex]
             let includeFile = try String(contentsOfFile: directory + "/" + includeFileName)
-            text.replaceSubrange(text.startIndex.advanced(by: match.range.location)..<text.startIndex.advanced(by: match.range.location + match.range.length), with: includeFile)
+            
+            let matchStartIndex = text.index(text.startIndex, offsetBy: match.range.location)
+            let matchEndIndex = text.index(startIndex, offsetBy: match.range.length)
+            
+            text.replaceSubrange(matchStartIndex..<matchEndIndex, with: includeFile)
         }
         
         return text

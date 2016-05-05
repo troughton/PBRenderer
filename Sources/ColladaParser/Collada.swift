@@ -132,6 +132,6 @@ public final class Collada : ColladaType {
     }
     
     public subscript(string: String) -> ColladaType? {
-        return self.sourcesToObjects[string.substring(from: string.startIndex.successor())]
+        return self.sourcesToObjects[string.substring(from: string.index(after: string.startIndex))]
     }
 }
