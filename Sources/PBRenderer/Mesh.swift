@@ -23,7 +23,7 @@ enum AttributeType : Int {
 }
 
 struct VertexAttribute {
-    let data : GPUBuffer<Void>
+    let data : GPUBuffer<UInt8>
     let glTypeName : GLenum
     let componentsPerAttribute : Int
     let isNormalised : Bool
@@ -32,7 +32,7 @@ struct VertexAttribute {
 }
 
 struct DrawCommand {
-    let data : GPUBuffer<Void>
+    let data : GPUBuffer<UInt8>
     let glPrimitiveType : GLenum
     let elementCount : Int
     let glElementType : GLenum

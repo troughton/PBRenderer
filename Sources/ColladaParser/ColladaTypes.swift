@@ -153,10 +153,16 @@ public typealias SpringEnum = String
 public typealias CommonProfileInputEnum = String
 public typealias CommonProfileParamEnum = String
 public typealias DynamicLimitType = Float2Type
+
+public protocol InputType {
+    var semantic: String { get }
+    var source: String { get }
+}
+
 /**
 			The input_global_type element is used to represent inputs that can reference external resources.
 			*/
-public final class InputGlobalType : ColladaType {
+public final class InputGlobalType : ColladaType, InputType {
 	/**
 				The semantic attribute is the user-defined meaning of the input connection. Required attribute.
 				*/
@@ -179,7 +185,7 @@ public final class InputGlobalType : ColladaType {
 /**
 			The input_local_type element is used to represent inputs that can only reference resources declared in the same document.
 			*/
-public final class InputLocalType : ColladaType {
+public final class InputLocalType : ColladaType, InputType {
 	/**
 				The semantic attribute is the user-defined meaning of the input connection. Required attribute.
 				*/
@@ -202,7 +208,7 @@ public final class InputLocalType : ColladaType {
 /**
 			The input_local_offset_type element is used to represent indexed inputs that can only reference resources declared in the same document.
 			*/
-public final class InputLocalOffsetType : ColladaType {
+public final class InputLocalOffsetType : ColladaType, InputType {
 	/**
 				The offset attribute represents the offset into the list of indices.  If two input elements share 
 				the same offset, they will be indexed the same.  This works as a simple form of compression for the 

@@ -120,10 +120,18 @@ class RenderWindow : Window {
         let (pixelWidth, pixelHeight) = self.pixelDimensions
         self.framebuffer = Framebuffer.defaultFramebuffer(width: pixelWidth, height: pixelHeight)
         self.renderContextState = RenderContextState(viewport: Rectangle(x: 0, y: 0, width: pixelWidth, height: pixelHeight))
-        self.depthStencilState = DepthStencilState()
+        self.renderContextState.applyState()
+        
+        var depthState = DepthStencilState()
+        depthState.depthCompareFunction = GL_LESS
+        depthState.isDepthWriteEnabled = true
+        self.depthStencilState = depthState
+        self.depthStencilState.applyState()
         
         self.framebuffer.colourAttachments[0]?.clearColour = vec4(0, 0, 0, 0)
         self.framebuffer.colourAttachments[0]?.loadAction = .Clear
+        self.framebuffer.depthAttachment.clearDepth = 1.0
+        self.framebuffer.depthAttachment.loadAction = .Clear
         
         let vertexShader = ["#version 410",
                             "layout(location = 0) in vec4 position;",
@@ -146,6 +154,7 @@ class RenderWindow : Window {
         
         let firstColourAttachment = ColourAttachment()
         self.pipelineState = PipelineState(shader: shader, colourAttachments: [firstColourAttachment])
+        self.pipelineState.applyState()
         
         let collada = try! Collada(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTestSphere.dae"))
         
@@ -160,6 +169,7 @@ class RenderWindow : Window {
             }
         }
         self.mesh = mesh
+
 
     }
     

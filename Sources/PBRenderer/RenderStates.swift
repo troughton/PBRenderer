@@ -42,7 +42,7 @@ struct ColourAttachment {
     
     
     /*! Defaults to GL_ADD */
-    var rgbBlendOperation: GLint = GL_ADD
+    var rgbBlendOperation: GLint = GL_FUNC_ADD
     
     
     /*! Defaults to GL_ONE */
@@ -54,7 +54,7 @@ struct ColourAttachment {
     
     
     /*! Defaults to GL_ADD */
-    var alphaBlendOperation: GLint = GL_ADD
+    var alphaBlendOperation: GLint = GL_FUNC_ADD
     
     
     /*! Defaults to ColourWriteMaskAll */
@@ -165,6 +165,12 @@ struct DepthStencilState {
     
     func applyState() {
         
+        if isDepthWriteEnabled || depthCompareFunction != GL_ALWAYS {
+            glEnable(GL_DEPTH_TEST)
+        } else {
+            glDisable(GL_DEPTH_TEST)
+        }
+        
         glDepthMask(isDepthWriteEnabled)
         
         glDepthFunc(depthCompareFunction)
@@ -218,8 +224,7 @@ struct RenderContextState {
     
     var scissorRect : Rectangle? = nil
     
-    var polygonFrontFaceFillMode : GLenum = GL_FILL
-    var polygonBackFaceFillMode : GLenum = GL_FILL
+    var polygonFillMode : GLenum = GL_FILL
         
     var viewport : Rectangle
     
@@ -253,8 +258,7 @@ struct RenderContextState {
             glDisable(GL_SCISSOR_TEST)
         }
         
-        glPolygonMode(GL_FRONT, polygonFrontFaceFillMode)
-        glPolygonMode(GL_BACK, polygonBackFaceFillMode)
+        glPolygonMode(GL_FRONT_AND_BACK, polygonFillMode)
      
         glViewport(GLint(viewport.x), GLint(viewport.y), GLsizei(viewport.width), GLsizei(viewport.height))
     }

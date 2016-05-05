@@ -140,6 +140,11 @@ public final class GPUBuffer<T> {
         }
     }
     
+    func copyToIndex(_ index: Int, value: UnsafePointer<T>, sizeInBytes: Int) {
+        let destinationPtr = UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: index)
+        memcpy(destinationPtr, value, sizeInBytes)
+    }
+    
     subscript(_ range: Range<Int>) -> [T] {
         get {
             return [T](UnsafeMutableBufferPointer(start: UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.startIndex), count: range.count))
@@ -159,7 +164,7 @@ public final class GPUBuffer<T> {
     }
     
     public func didModifyRange(_ range: Range<Int>) {
-        let range = range.startIndex * sizeof(T)...range.endIndex * sizeof(T)
+        let range = range.startIndex * sizeof(T)..<range.endIndex * sizeof(T)
         _internalBuffer.didModifyRange(range)
     }
     
