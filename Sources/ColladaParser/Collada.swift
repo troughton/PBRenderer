@@ -8,6 +8,24 @@
 
 import Foundation
 
+#if os(Linux)
+    public extension NSXMLElement {
+        public func attribute(forName name: String) -> NSXMLNode? {
+            return self.attributeForName(name)
+        }
+        
+        public func elements(forName name: String) -> [NSXMLElement] {
+            return self.elementsForName(name)
+        }
+    }
+    
+    public extension NSXMLDocument {
+        public convenience init(contentsOf url: NSURL, options mask: Int) throws {
+            try self.init(contentsOfURL: url, options: mask)
+        }
+    }
+#endif
+
 /** The COLLADA element declares the root of the document that comprises some of the content in the COLLADA schema. */
 public final class Collada : ColladaType {
 
@@ -93,7 +111,7 @@ public final class Collada : ColladaType {
     public let sourcesToObjects: [String : ColladaType]
     
     public convenience init(contentsOfURL url: NSURL) throws {
-        self.init(xmlElement: try NSXMLDocument(contentsOf: url, options: 0).rootElement()!)
+        self.init(document: try NSXMLDocument(contentsOf: url, options: 0))
     }
     
     public convenience init(document: NSXMLDocument) {

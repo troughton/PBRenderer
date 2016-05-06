@@ -10,8 +10,6 @@ import Foundation
 import SGLOpenGL
 import SGLMath
 
-import Metal
-
 protocol Mesh {
     func render()
 }

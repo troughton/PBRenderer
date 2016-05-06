@@ -49,7 +49,7 @@ private final class GPUBufferImpl {
         _contents = contents
         
         data?.withUnsafeBufferPointer({ (buffer) -> Void in
-            memcpy(contents, buffer.baseAddress, capacityInBytes)
+            memcpy(contents, buffer.baseAddress!, capacityInBytes)
         })
         
         var uniformBlockRef = GLuint(0)
@@ -154,7 +154,7 @@ public final class GPUBuffer<T> {
             
             newValue.withUnsafeBufferPointer { (toCopy) -> Void in
                 let destination = UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.lowerBound)
-                memcpy(destination, toCopy.baseAddress, range.count * sizeof(T))
+                memcpy(destination, toCopy.baseAddress!, range.count * sizeof(T))
             }
         }
     }
