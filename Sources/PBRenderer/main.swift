@@ -3,7 +3,6 @@ import CGLFW3
 import SGLOpenGL
 import SGLMath
 import ColladaParser
-import CLibXML2
 
 enum BasicShaderProperty : String, ShaderProperty {
     case mvp
@@ -18,8 +17,15 @@ let mainWindow : Window
 // The *main* function; where our program begins running
 func main()
 {
+    if Process.arguments.count == 2 {
+        let colladaFilePath = Process.arguments[1]
+
+        let document = XMLDocument(contentsOfFile: colladaFilePath)!
+
+        let element = document.rootElement!.elements(forName: "library_geometries")
+    }
     
-    let document = xmlReadFile("/Users/Thomas/Desktop/ColladaTestSphere.dae", nil, 0);
+    
     // Init GLFW
     glfwInit()
     // Terminate GLFW when this function ends
