@@ -15,17 +15,8 @@ enum BasicShaderProperty : String, ShaderProperty {
 let mainWindow : Window
 
 // The *main* function; where our program begins running
-func main()
-{
-    if Process.arguments.count == 2 {
-        let colladaFilePath = Process.arguments[1]
+func main() {
 
-        let document = XMLDocument(contentsOfFile: colladaFilePath)!
-
-        let element = document.rootElement!.elements(forName: "library_geometries")
-    }
-    
-    
     // Init GLFW
     glfwInit()
     // Terminate GLFW when this function ends

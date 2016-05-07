@@ -176,7 +176,7 @@ public final class InputGlobalType : ColladaType, InputType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.semantic = String(xmlElement.attribute(forName: "semantic")!.stringValue!)
 		self.source = String(xmlElement.attribute(forName: "source")!.stringValue!)
 	}
@@ -199,7 +199,7 @@ public final class InputLocalType : ColladaType, InputType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.semantic = String(xmlElement.attribute(forName: "semantic")!.stringValue!)
 		self.source = UrifragmentType(xmlElement.attribute(forName: "source")!.stringValue!)
 	}
@@ -235,7 +235,7 @@ public final class InputLocalOffsetType : ColladaType, InputType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.offset = UintType(xmlElement.attribute(forName: "offset")!.stringValue!)!
 		self.semantic = String(xmlElement.attribute(forName: "semantic")!.stringValue!)
 		self.source = UrifragmentType(xmlElement.attribute(forName: "source")!.stringValue!)
@@ -255,7 +255,7 @@ public final class TargetableFloatType : ColladaType {
 
 	public let data: FloatType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = FloatType(xmlElement.stringValue!)!
 	}
 
@@ -270,7 +270,7 @@ public final class TargetableFloat3Type : ColladaType {
 
 	public let data: Float3Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float3Type(xmlElement.stringValue!)!
 	}
 
@@ -284,7 +284,7 @@ public final class TokenArrayType : ColladaType {
 
 	public let data: ListOfTokensType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfTokensType(xmlElement.stringValue!)!
 	}
 
@@ -298,7 +298,7 @@ public final class IdrefArrayType : ColladaType {
 
 	public let data: String
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = String(xmlElement.stringValue!)
 	}
 
@@ -312,7 +312,7 @@ public final class NameArrayType : ColladaType {
 
 	public let data: ListOfNamesType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfNamesType(xmlElement.stringValue!)!
 	}
 
@@ -326,7 +326,7 @@ public final class BoolArrayType : ColladaType {
 
 	public let data: ListOfBoolsType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfBoolsType(xmlElement.stringValue!)!
 	}
 
@@ -340,7 +340,7 @@ public final class FloatArrayType : ColladaType {
 
 	public let data: ListOfFloatsType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfFloatsType(xmlElement.stringValue!)!
 	}
 
@@ -354,7 +354,7 @@ public final class IntArrayType : ColladaType {
 
 	public let data: ListOfIntsType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfIntsType(xmlElement.stringValue!)!
 	}
 
@@ -368,7 +368,7 @@ public final class ParamType : ColladaType {
 
 	public let data: String
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = String(xmlElement.stringValue!)
 	}
 
@@ -409,7 +409,7 @@ public final class AccessorType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.count = UintType(xmlElement.attribute(forName: "count")!.stringValue!)!
 		if let attribute = xmlElement.attribute(forName: "offset") {
 			self.offset = UintType(attribute.stringValue!)!
@@ -433,7 +433,7 @@ public final class PType : ColladaType {
 
 	public let data: ListOfUintsType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfUintsType(xmlElement.stringValue!)!
 	}
 
@@ -451,7 +451,7 @@ public final class LookatType : ColladaType {
 
 	public let data: Float3x3Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float3x3Type(xmlElement.stringValue!)!
 	}
 
@@ -466,7 +466,7 @@ public final class MatrixType : ColladaType {
 
 	public let data: Float4x4Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float4x4Type(xmlElement.stringValue!)!
 	}
 
@@ -481,7 +481,7 @@ public final class ScaleType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -495,7 +495,7 @@ public final class SkewType : ColladaType {
 
 	public let data: Float7Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float7Type(xmlElement.stringValue!)!
 	}
 
@@ -510,7 +510,7 @@ public final class TranslateType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -522,7 +522,7 @@ public final class ImageSourceType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -539,7 +539,7 @@ in both OpenGL and DirectX.  One is no mips.*/
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.levels = UInt32(xmlElement.attribute(forName: "levels")!.stringValue!)!
 		self.autoGenerate = Bool(xmlElement.attribute(forName: "auto_generate")!.stringValue!)!
 	}
@@ -565,7 +565,7 @@ public final class ChannelType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.source = UrifragmentType(xmlElement.attribute(forName: "source")!.stringValue!)
 		self.target = String(xmlElement.attribute(forName: "target")!.stringValue!)
 	}
@@ -600,7 +600,7 @@ public final class SamplerType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -631,7 +631,7 @@ public final class TechniqueType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.profile = String(xmlElement.attribute(forName: "profile")!.stringValue!)
 	}
 
@@ -670,7 +670,7 @@ public final class ExtraType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -738,7 +738,7 @@ public final class PolylistType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -809,7 +809,7 @@ public final class Ph : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.p = PType(xmlElement: xmlElement.elements(forName: "p").first!, sourcesToObjects: &sourcesToObjects)
 		self.h = xmlElement.elements(forName: "h").map { ListOfUintsType($0.stringValue!)! }
 	}
@@ -824,7 +824,7 @@ public final class Ph : ColladaType {
 							The ph element may occur any number of times. It describes a polygon with holes.
 							*/
 		case ph(Ph)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "p" {	self = .p(PType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -847,7 +847,7 @@ return nil
 	public let choice0: [PolygonsTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -857,7 +857,7 @@ return nil
 		} else { self.material = nil }
 		self.input = xmlElement.elements(forName: "input").map { InputLocalOffsetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { PolygonsTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { PolygonsTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -905,7 +905,7 @@ public final class LinestripsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -963,7 +963,7 @@ public final class TristripsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -1021,7 +1021,7 @@ public final class LinesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -1081,7 +1081,7 @@ public final class TrianglesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -1141,7 +1141,7 @@ public final class TrifansType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
@@ -1185,7 +1185,7 @@ public final class VerticesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -1250,7 +1250,7 @@ public final class Contributor : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "author").first {
 			self.author = String(childElement.stringValue!)
 		} else { self.author = nil }
@@ -1304,7 +1304,7 @@ public final class Altitude : ColladaType {
 
 	public let data: Float
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float(xmlElement.stringValue!)!
 	}
 
@@ -1316,7 +1316,7 @@ public final class Altitude : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.longitude = Float(xmlElement.elements(forName: "longitude").first!.stringValue!)!
 		self.latitude = Float(xmlElement.elements(forName: "latitude").first!.stringValue!)!
 		self.altitude = Altitude(xmlElement: xmlElement.elements(forName: "altitude").first!, sourcesToObjects: &sourcesToObjects)
@@ -1330,7 +1330,7 @@ public final class Altitude : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "geographic_location").first {
 			self.geographicLocation = GeographicLocation(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.geographicLocation = nil }
@@ -1389,7 +1389,7 @@ public final class Unit : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "meter") {
 			self.meter = FloatType(attribute.stringValue!)!
 		} else { self.meter = nil }
@@ -1420,7 +1420,7 @@ public final class Unit : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.contributor = xmlElement.elements(forName: "contributor").map { Contributor(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "coverage").first {
 			self.coverage = Coverage(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
@@ -1478,7 +1478,7 @@ public final class Renderable : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.share = Bool(xmlElement.attribute(forName: "share")!.stringValue!)!
 	}
 
@@ -1499,7 +1499,7 @@ public final class InitFrom : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -1516,7 +1516,7 @@ public final class Array : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.length = UInt32(xmlElement.attribute(forName: "length")!.stringValue!)!
 	}
 
@@ -1546,7 +1546,7 @@ public final class Hint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.channels = ImageFormatHintChannelsEnum(xmlElement.attribute(forName: "channels")!.stringValue!)
 		self.range = ImageFormatHintRangeEnum(xmlElement.attribute(forName: "range")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "precision") {
@@ -1567,7 +1567,7 @@ public final class Hint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.hint = Hint(xmlElement: xmlElement.elements(forName: "hint").first!, sourcesToObjects: &sourcesToObjects)
 		if let childElement = xmlElement.elements(forName: "exact").first {
 			self.exact = String(childElement.stringValue!)
@@ -1586,7 +1586,7 @@ public final class InitFrom : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -1604,7 +1604,7 @@ public final class SizeExact : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.width = UInt32(xmlElement.attribute(forName: "width")!.stringValue!)!
 		self.height = UInt32(xmlElement.attribute(forName: "height")!.stringValue!)!
 	}
@@ -1622,7 +1622,7 @@ public final class SizeRatio : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.width = Float(xmlElement.attribute(forName: "width")!.stringValue!)!
 		self.height = Float(xmlElement.attribute(forName: "height")!.stringValue!)!
 	}
@@ -1633,7 +1633,7 @@ public final class SizeRatio : ColladaType {
 		case sizeExact(SizeExact)
 		/**Image size should be relative to the size of the viewport.  Ex 1,1 is the same size as the viewport.  0.5,0.5 is 1/2 the size of the viewport*/
 		case sizeRatio(SizeRatio)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "size_exact" {	self = .sizeExact(SizeExact(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -1661,7 +1661,7 @@ return nil
 		case mips(ImageMipsType)
 		/**Unnormalized addressing of texels.  (0-W, 0-H).  This cannot be used with mips since the addressing is not uniform per level.  This is equivilant to OpenGL textureRECT extension.*/
 		case unnormalized
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "mips" {	self = .mips(ImageMipsType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -1684,7 +1684,7 @@ return nil
 	public let choice1: Create2dChoice1
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "array").first {
 			self.array = Array(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.array = nil }
@@ -1716,7 +1716,7 @@ public final class Size : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.width = UInt32(xmlElement.attribute(forName: "width")!.stringValue!)!
 		self.height = UInt32(xmlElement.attribute(forName: "height")!.stringValue!)!
 		self.depth = UInt32(xmlElement.attribute(forName: "depth")!.stringValue!)!
@@ -1739,7 +1739,7 @@ public final class Array : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.length = UInt32(xmlElement.attribute(forName: "length")!.stringValue!)!
 	}
 
@@ -1769,7 +1769,7 @@ public final class Hint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.channels = ImageFormatHintChannelsEnum(xmlElement.attribute(forName: "channels")!.stringValue!)
 		self.range = ImageFormatHintRangeEnum(xmlElement.attribute(forName: "range")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "precision") {
@@ -1790,7 +1790,7 @@ public final class Hint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.hint = Hint(xmlElement: xmlElement.elements(forName: "hint").first!, sourcesToObjects: &sourcesToObjects)
 		if let childElement = xmlElement.elements(forName: "exact").first {
 			self.exact = String(childElement.stringValue!)
@@ -1809,7 +1809,7 @@ public final class InitFrom : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -1818,7 +1818,7 @@ public final class InitFrom : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.size = Size(xmlElement: xmlElement.elements(forName: "size").first!, sourcesToObjects: &sourcesToObjects)
 		self.mips = ImageMipsType(xmlElement: xmlElement.elements(forName: "mips").first!, sourcesToObjects: &sourcesToObjects)
 		if let childElement = xmlElement.elements(forName: "array").first {
@@ -1844,7 +1844,7 @@ public final class Size : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.width = UInt32(xmlElement.attribute(forName: "width")!.stringValue!)!
 	}
 
@@ -1865,7 +1865,7 @@ public final class Array : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.length = UInt32(xmlElement.attribute(forName: "length")!.stringValue!)!
 	}
 
@@ -1895,7 +1895,7 @@ public final class Hint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.channels = ImageFormatHintChannelsEnum(xmlElement.attribute(forName: "channels")!.stringValue!)
 		self.range = ImageFormatHintRangeEnum(xmlElement.attribute(forName: "range")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "precision") {
@@ -1916,7 +1916,7 @@ public final class Hint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.hint = Hint(xmlElement: xmlElement.elements(forName: "hint").first!, sourcesToObjects: &sourcesToObjects)
 		if let childElement = xmlElement.elements(forName: "exact").first {
 			self.exact = String(childElement.stringValue!)
@@ -1935,7 +1935,7 @@ public final class InitFrom : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -1944,7 +1944,7 @@ public final class InitFrom : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.size = Size(xmlElement: xmlElement.elements(forName: "size").first!, sourcesToObjects: &sourcesToObjects)
 		self.mips = ImageMipsType(xmlElement: xmlElement.elements(forName: "mips").first!, sourcesToObjects: &sourcesToObjects)
 		if let childElement = xmlElement.elements(forName: "array").first {
@@ -1966,7 +1966,7 @@ public final class InitFrom : ColladaType {
 		case create3d(Create3d)
 		/**Initialize a custom cube image*/
 		case createCube(CreateCube)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "init_from" {	self = .initFrom(InitFrom(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -2003,7 +2003,7 @@ return nil
 	public let choice0: ImageTypeChoice0?
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2057,7 +2057,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2081,7 +2081,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.techniqueCommon = TechniqueCommon(xmlElement: xmlElement.elements(forName: "technique_common").first!, sourcesToObjects: &sourcesToObjects)
 		self.technique = xmlElement.elements(forName: "technique").map { TechniqueType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -2112,7 +2112,7 @@ public final class Imager : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.technique = xmlElement.elements(forName: "technique").map { TechniqueType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -2131,7 +2131,7 @@ public final class Imager : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2179,7 +2179,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2203,7 +2203,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2249,7 +2249,7 @@ public final class InstanceWithExtraType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -2269,7 +2269,7 @@ public final class InstanceImageType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2282,7 +2282,7 @@ public final class InstanceCameraType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2295,7 +2295,7 @@ public final class InstanceForceFieldType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2308,7 +2308,7 @@ public final class InstanceLightType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2354,7 +2354,7 @@ public final class Bind : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.semantic = String(xmlElement.attribute(forName: "semantic")!.stringValue!)
 		self.target = String(xmlElement.attribute(forName: "target")!.stringValue!)
 	}
@@ -2386,7 +2386,7 @@ public final class BindVertexInput : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.semantic = String(xmlElement.attribute(forName: "semantic")!.stringValue!)
 		self.inputSemantic = String(xmlElement.attribute(forName: "input_semantic")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "input_set") {
@@ -2408,7 +2408,7 @@ public final class BindVertexInput : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 		self.target = String(xmlElement.attribute(forName: "target")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
@@ -2448,7 +2448,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.instanceMaterial = xmlElement.elements(forName: "instance_material").map { InstanceMaterialType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
 
@@ -2473,7 +2473,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.param = xmlElement.elements(forName: "param").map { ParamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.techniqueCommon = TechniqueCommon(xmlElement: xmlElement.elements(forName: "technique_common").first!, sourcesToObjects: &sourcesToObjects)
 		self.technique = xmlElement.elements(forName: "technique").map { TechniqueType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -2524,7 +2524,7 @@ public final class InstanceControllerType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -2576,7 +2576,7 @@ public final class InstanceGeometryType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -2600,7 +2600,7 @@ public final class InstanceNodeType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2614,7 +2614,7 @@ public final class InstancePhysicsMaterialType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -2645,7 +2645,7 @@ public final class InstanceRigidConstraintType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.constraint = String(xmlElement.attribute(forName: "constraint")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -2691,7 +2691,7 @@ public final class LibraryCamerasType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2740,7 +2740,7 @@ public final class LibraryImagesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2789,7 +2789,7 @@ public final class LibraryLightsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2846,7 +2846,7 @@ public final class TechniqueHint : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "platform") {
 			self.platform = String(attribute.stringValue!)
 		} else { self.platform = nil }
@@ -2871,7 +2871,7 @@ public final class Setparam : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -2889,7 +2889,7 @@ public final class Setparam : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -2937,7 +2937,7 @@ public final class MaterialType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -2986,7 +2986,7 @@ public final class LibraryMaterialsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -3010,7 +3010,7 @@ public final class FxSamplerType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "instance_image").first {
 			self.instanceImage = InstanceImageType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.instanceImage = nil }
@@ -3026,7 +3026,7 @@ public final class FxSampler1DType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3039,7 +3039,7 @@ public final class FxSampler2DType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3052,7 +3052,7 @@ public final class FxSampler3DType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3065,7 +3065,7 @@ public final class FxSamplerCUBEType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3078,7 +3078,7 @@ public final class FxSamplerRECTType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3091,7 +3091,7 @@ public final class FxSamplerDEPTHType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3113,7 +3113,7 @@ public final class FxRendertargetType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "index") {
 			self.index = UInt32(attribute.stringValue!)!
 		} else { self.index = nil }
@@ -3137,7 +3137,7 @@ public final class FxColortargetType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3149,7 +3149,7 @@ public final class FxDepthtargetType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3161,7 +3161,7 @@ public final class FxStenciltargetType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3173,7 +3173,7 @@ public final class FxClearcolorType : ColladaType {
 
 	public let data: FxColorType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = FxColorType(xmlElement.stringValue!)!
 	}
 
@@ -3186,7 +3186,7 @@ public final class FxCleardepthType : ColladaType {
 
 	public let data: FloatType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = FloatType(xmlElement.stringValue!)!
 	}
 
@@ -3199,7 +3199,7 @@ public final class FxClearstencilType : ColladaType {
 
 	public let data: [UInt8]
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = [UInt8](xmlElement.stringValue!)!
 	}
 
@@ -3213,7 +3213,7 @@ public final class FxAnnotateType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.name = String(xmlElement.attribute(forName: "name")!.stringValue!)
 	}
 
@@ -3247,7 +3247,7 @@ public final class FxNewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		self.annotate = xmlElement.elements(forName: "annotate").map { FxAnnotateType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "semantic").first {
@@ -3279,7 +3279,7 @@ public final class FxIncludeType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 	}
@@ -3294,7 +3294,7 @@ public final class FxCodeType : ColladaType {
 
 	public let data: String
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = String(xmlElement.stringValue!)
 	}
 
@@ -3313,7 +3313,7 @@ public final class Import : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -3323,7 +3323,7 @@ public final class Import : ColladaType {
 		case inline(String)
 		/**Ref attribute identifies the sid of a code or include element*/
 		case importing(Import)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "inline" {	self = .inline(xmlElement.stringValue!)
 	return
 }
@@ -3342,8 +3342,8 @@ return nil
 	public let choice0: [FxSourcesTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { FxSourcesTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+		self.choice0 = xmlElement.childElements.flatMap { FxSourcesTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -3365,7 +3365,7 @@ public final class Binary : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3374,7 +3374,7 @@ public final class Binary : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.platform = String(xmlElement.attribute(forName: "platform")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "target") {
 			self.target = String(attribute.stringValue!)
@@ -3396,7 +3396,7 @@ public final class FxCommonFloatOrParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3408,7 +3408,7 @@ public final class FxCommonColorOrTextureType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3420,7 +3420,7 @@ public final class FxCommonTransparentType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3447,7 +3447,7 @@ public final class FxCommonNewparamType : ColladaType {
 		case float4(Float4Type)
 		/***/
 		case sampler2D(FxSampler2DType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "float" {	self = .float(FloatType(xmlElement.stringValue!)!)
 	return
 }
@@ -3475,7 +3475,7 @@ return nil
 	public let choice0: FxCommonNewparamTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		if let childElement = xmlElement.elements(forName: "semantic").first {
 			self.semantic = String(childElement.stringValue!)
@@ -3556,7 +3556,7 @@ public final class Constant : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "emission").first {
 			self.emission = FxCommonColorOrTextureType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.emission = nil }
@@ -3616,7 +3616,7 @@ public final class Lambert : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "emission").first {
 			self.emission = FxCommonColorOrTextureType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.emission = nil }
@@ -3690,7 +3690,7 @@ public final class Phong : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "emission").first {
 			self.emission = FxCommonColorOrTextureType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.emission = nil }
@@ -3770,7 +3770,7 @@ public final class Blinn : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "emission").first {
 			self.emission = FxCommonColorOrTextureType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.emission = nil }
@@ -3813,7 +3813,7 @@ public final class Blinn : ColladaType {
 		case phong(Phong)
 		/***/
 		case blinn(Blinn)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "constant" {	self = .constant(Constant(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -3850,7 +3850,7 @@ return nil
 	public let choice0: TechniqueChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -3876,7 +3876,7 @@ return nil
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -3909,7 +3909,7 @@ public final class ProfileBridgeType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -3944,7 +3944,7 @@ public final class Gles2NewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		self.annotate = xmlElement.elements(forName: "annotate").map { FxAnnotateType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "semantic").first {
@@ -3968,7 +3968,7 @@ public final class Sources : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -3985,7 +3985,7 @@ public final class Sources : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.stage = FxPipelineStageEnum(xmlElement.attribute(forName: "stage")!.stringValue!)
 		self.sources = Sources(xmlElement: xmlElement.elements(forName: "sources").first!, sourcesToObjects: &sourcesToObjects)
 		self.compiler = xmlElement.elements(forName: "compiler").map { FxTargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4013,7 +4013,7 @@ public final class BindAttribute : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 	}
 
@@ -4030,7 +4030,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 	}
 
@@ -4040,7 +4040,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.shader = xmlElement.elements(forName: "shader").map { Gles2ShaderType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.linker = xmlElement.elements(forName: "linker").map { FxTargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.bindAttribute = xmlElement.elements(forName: "bind_attribute").map { BindAttribute(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4067,7 +4067,7 @@ public final class States : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -4112,7 +4112,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.colorTarget = xmlElement.elements(forName: "color_target").map { FxColortargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.depthTarget = xmlElement.elements(forName: "depth_target").map { FxDepthtargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.stencilTarget = xmlElement.elements(forName: "stencil_target").map { FxStenciltargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4134,7 +4134,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -4174,7 +4174,7 @@ public final class Newparam : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -4212,7 +4212,7 @@ public final class Technique : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -4240,7 +4240,7 @@ public final class Technique : ColladaType {
 		case include(FxIncludeType)
 		/**The fx_code_profile type allows you to specify an inline block of source code.  It is HIGHLY recommended to use a CDATA block inside to avoid issues with*/
 		case code(FxCodeType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "include" {	self = .include(FxIncludeType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -4263,7 +4263,7 @@ return nil
 	public let choice0: [ProfileGles2TypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -4277,7 +4277,7 @@ return nil
 		self.newparam = xmlElement.elements(forName: "newparam").map { Newparam(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.technique = xmlElement.elements(forName: "technique").map { Technique(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { ProfileGles2TypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ProfileGles2TypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -4293,7 +4293,7 @@ public final class GlslArrayType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.length = UInt32(xmlElement.attribute(forName: "length")!.stringValue!)!
 	}
 
@@ -4317,7 +4317,7 @@ public final class GlslNewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		self.annotate = xmlElement.elements(forName: "annotate").map { FxAnnotateType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "semantic").first {
@@ -4343,7 +4343,7 @@ public final class GlslShaderType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.stage = FxPipelineStageEnum(xmlElement.attribute(forName: "stage")!.stringValue!)
 		self.sources = FxSourcesType(xmlElement: xmlElement.elements(forName: "sources").first!, sourcesToObjects: &sourcesToObjects)
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4366,7 +4366,7 @@ public final class BindAttribute : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 	}
 
@@ -4383,7 +4383,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 	}
 
@@ -4393,7 +4393,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.shader = xmlElement.elements(forName: "shader").map { GlslShaderType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.bindAttribute = xmlElement.elements(forName: "bind_attribute").map { BindAttribute(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.bindUniform = xmlElement.elements(forName: "bind_uniform").map { BindUniform(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4464,7 +4464,7 @@ public final class States : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -4509,7 +4509,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.colorTarget = xmlElement.elements(forName: "color_target").map { FxColortargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.depthTarget = xmlElement.elements(forName: "depth_target").map { FxDepthtargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.stencilTarget = xmlElement.elements(forName: "stencil_target").map { FxStenciltargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4531,7 +4531,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -4560,7 +4560,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -4588,7 +4588,7 @@ public final class Evaluate : ColladaType {
 		case code(FxCodeType)
 		/***/
 		case include(FxIncludeType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "code" {	self = .code(FxCodeType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -4611,7 +4611,7 @@ return nil
 	public let choice0: [ProfileGlslTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -4624,7 +4624,7 @@ return nil
 		self.newparam = xmlElement.elements(forName: "newparam").map { GlslNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.technique = xmlElement.elements(forName: "technique").map { Technique(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { ProfileGlslTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ProfileGlslTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -4643,7 +4643,7 @@ public final class CgArrayType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.length = UInt32(xmlElement.attribute(forName: "length")!.stringValue!)!
 		if let attribute = xmlElement.attribute(forName: "resizable") {
 			self.resizable = Bool(attribute.stringValue!)!
@@ -4661,7 +4661,7 @@ public final class CgSetparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -4682,7 +4682,7 @@ public final class CgUserType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.typename = String(xmlElement.attribute(forName: "typename")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "source") {
 			self.source = String(attribute.stringValue!)
@@ -4717,7 +4717,7 @@ public final class CgNewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		self.annotate = xmlElement.elements(forName: "annotate").map { FxAnnotateType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "semantic").first {
@@ -4749,7 +4749,7 @@ public final class States : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -4775,7 +4775,7 @@ public final class Sources : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -4798,7 +4798,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 	}
 
@@ -4810,7 +4810,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.stage = FxPipelineStageEnum(xmlElement.attribute(forName: "stage")!.stringValue!)
 		self.sources = Sources(xmlElement: xmlElement.elements(forName: "sources").first!, sourcesToObjects: &sourcesToObjects)
 		self.compiler = xmlElement.elements(forName: "compiler").map { FxTargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4825,7 +4825,7 @@ public final class BindUniform : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.shader = xmlElement.elements(forName: "shader").map { Shader(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
 
@@ -4867,7 +4867,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.colorTarget = xmlElement.elements(forName: "color_target").map { FxColortargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.depthTarget = xmlElement.elements(forName: "depth_target").map { FxDepthtargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.stencilTarget = xmlElement.elements(forName: "stencil_target").map { FxStenciltargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -4889,7 +4889,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -4965,7 +4965,7 @@ public final class Technique : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -4993,7 +4993,7 @@ public final class Technique : ColladaType {
 		case code(FxCodeType)
 		/***/
 		case include(FxIncludeType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "code" {	self = .code(FxCodeType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -5016,7 +5016,7 @@ return nil
 	public let choice0: [ProfileCgTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5029,7 +5029,7 @@ return nil
 		self.newparam = xmlElement.elements(forName: "newparam").map { CgNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.technique = xmlElement.elements(forName: "technique").map { Technique(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { ProfileCgTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ProfileCgTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -5045,7 +5045,7 @@ public final class GlesTextureConstantType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "value") {
 			self.value = Float4Type(attribute.stringValue!)!
 		} else { self.value = nil }
@@ -5069,7 +5069,7 @@ public final class GlesTexenvCommandType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "operator") {
 			self.theOperator = GlesTexenvModeEnum(attribute.stringValue!)
 		} else { self.theOperator = nil }
@@ -5097,7 +5097,7 @@ public final class GlesTexcombinerArgumentRgbType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "source") {
 			self.source = GlesTexcombinerSourceEnum(attribute.stringValue!)
 		} else { self.source = nil }
@@ -5125,7 +5125,7 @@ public final class GlesTexcombinerArgumentAlphaType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "source") {
 			self.source = GlesTexcombinerSourceEnum(attribute.stringValue!)
 		} else { self.source = nil }
@@ -5153,7 +5153,7 @@ public final class GlesTexcombinerCommandRgbType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "operator") {
 			self.theOperator = GlesTexcombinerOperatorRgbEnum(attribute.stringValue!)
 		} else { self.theOperator = nil }
@@ -5178,7 +5178,7 @@ public final class GlesTexcombinerCommandAlphaType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "operator") {
 			self.theOperator = GlesTexcombinerOperatorAlphaEnum(attribute.stringValue!)
 		} else { self.theOperator = nil }
@@ -5207,7 +5207,7 @@ public final class GlesTexcombinerCommandType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "constant").first {
 			self.constant = GlesTextureConstantType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.constant = nil }
@@ -5233,7 +5233,7 @@ public final class GlesTexturePipelineType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -5256,7 +5256,7 @@ public final class Texcoord : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "semantic") {
 			self.semantic = String(attribute.stringValue!)
 		} else { self.semantic = nil }
@@ -5268,7 +5268,7 @@ public final class Texcoord : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "instance_image").first {
 			self.instanceImage = InstanceImageType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.instanceImage = nil }
@@ -5307,7 +5307,7 @@ public final class GlesNewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		self.annotate = xmlElement.elements(forName: "annotate").map { FxAnnotateType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "semantic").first {
@@ -5380,7 +5380,7 @@ public final class States : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -5421,7 +5421,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.colorTarget = xmlElement.elements(forName: "color_target").map { FxColortargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.depthTarget = xmlElement.elements(forName: "depth_target").map { FxDepthtargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.stencilTarget = xmlElement.elements(forName: "stencil_target").map { FxStenciltargetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -5443,7 +5443,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -5469,7 +5469,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5494,7 +5494,7 @@ public final class Evaluate : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5550,7 +5550,7 @@ public final class EffectType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -5598,7 +5598,7 @@ public final class LibraryEffectsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5632,7 +5632,7 @@ public final class BoxType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.halfExtents = Float3Type(xmlElement.elements(forName: "half_extents").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -5657,7 +5657,7 @@ public final class PlaneType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.equation = Float4Type(xmlElement.elements(forName: "equation").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -5682,7 +5682,7 @@ public final class SphereType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = FloatType(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -5698,7 +5698,7 @@ public final class EllipsoidType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.size = Float3Type(xmlElement.elements(forName: "size").first!.stringValue!)!
 	}
 
@@ -5728,7 +5728,7 @@ public final class CylinderType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.height = FloatType(xmlElement.elements(forName: "height").first!.stringValue!)!
 		self.radius = Float2Type(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -5761,7 +5761,7 @@ public final class CapsuleType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.height = FloatType(xmlElement.elements(forName: "height").first!.stringValue!)!
 		self.radius = Float3Type(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -5802,7 +5802,7 @@ public final class ForceFieldType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5851,7 +5851,7 @@ public final class LibraryForceFieldsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5911,7 +5911,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "dynamic_friction").first {
 			self.dynamicFriction = TargetableFloatType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.dynamicFriction = nil }
@@ -5944,7 +5944,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -5994,7 +5994,7 @@ public final class LibraryPhysicsMaterialsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -6040,7 +6040,7 @@ public final class EdgesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6088,7 +6088,7 @@ public final class WiresType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6140,7 +6140,7 @@ public final class FacesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6189,7 +6189,7 @@ public final class ShellsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6238,7 +6238,7 @@ public final class SolidsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6270,7 +6270,7 @@ public final class LineType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.origin = Float3Type(xmlElement.elements(forName: "origin").first!.stringValue!)!
 		self.direction = Float3Type(xmlElement.elements(forName: "direction").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -6290,7 +6290,7 @@ public final class CircleType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = FloatType(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -6309,7 +6309,7 @@ public final class EllipseType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = Float2Type(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -6328,7 +6328,7 @@ public final class ParabolaType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.focal = FloatType(xmlElement.elements(forName: "focal").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -6347,7 +6347,7 @@ public final class HyperbolaType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = Float2Type(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -6367,7 +6367,7 @@ public final class TorusType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = Float2Type(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -6406,7 +6406,7 @@ public final class PcurvesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6430,7 +6430,7 @@ public final class SidrefArrayType : ColladaType {
 
 	public let data: ListOfSidrefsType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = ListOfSidrefsType(xmlElement.stringValue!)!
 	}
 
@@ -6468,7 +6468,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.accessor = AccessorType(xmlElement: xmlElement.elements(forName: "accessor").first!, sourcesToObjects: &sourcesToObjects)
 	}
 
@@ -6516,7 +6516,7 @@ public final class TechniqueCommon : ColladaType {
 		case intArray(IntArrayType)
 		/***/
 		case SIDREFArray(SidrefArrayType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "token_array" {	self = .tokenArray(TokenArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -6574,7 +6574,7 @@ return nil
 	public let choice0: SourceTypeChoice0?
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -6621,7 +6621,7 @@ public final class AnimationType : ColladaType {
 	public enum AnimationTypeChoice0 {
 		/***/
 		case animation(AnimationType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "animation" {	self = .animation(AnimationType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -6637,7 +6637,7 @@ return nil
 	public let choice0: AnimationTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -6686,7 +6686,7 @@ public final class LibraryAnimationsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -6742,7 +6742,7 @@ public final class Joints : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.input = xmlElement.elements(forName: "input").map { InputLocalType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -6790,7 +6790,7 @@ public final class VertexWeights : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.count = UintType(xmlElement.attribute(forName: "count")!.stringValue!)!
 		self.input = xmlElement.elements(forName: "input").map { InputLocalOffsetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "vcount").first {
@@ -6816,7 +6816,7 @@ public final class VertexWeights : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.source = String(xmlElement.attribute(forName: "source")!.stringValue!)
 		if let childElement = xmlElement.elements(forName: "bind_shape_matrix").first {
 			self.bindShapeMatrix = Float4x4Type(childElement.stringValue!)!
@@ -6869,7 +6869,7 @@ public final class ConvexMeshType : ColladaType {
 		case trifans(TrifansType)
 		/***/
 		case tristrips(TristripsType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "lines" {	self = .lines(LinesType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -6927,14 +6927,14 @@ return nil
 	public let choice0: [ConvexMeshTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "convex_hull_of") {
 			self.convexHullOf = String(attribute.stringValue!)
 		} else { self.convexHullOf = nil }
 		self.source = xmlElement.elements(forName: "source").map { SourceType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.vertices = VerticesType(xmlElement: xmlElement.elements(forName: "vertices").first!, sourcesToObjects: &sourcesToObjects)
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { ConvexMeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ConvexMeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -6990,7 +6990,7 @@ public final class MeshType : ColladaType {
 							The mesh element may contain any number of tristrips elements.
 							*/
 		case tristrips(TristripsType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "lines" {	self = .lines(LinesType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -7048,11 +7048,11 @@ return nil
 	public let choice0: [MeshTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.source = xmlElement.elements(forName: "source").map { SourceType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.vertices = VerticesType(xmlElement: xmlElement.elements(forName: "vertices").first!, sourcesToObjects: &sourcesToObjects)
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { MeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { MeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -7086,7 +7086,7 @@ public final class ControlVertices : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.input = xmlElement.elements(forName: "input").map { InputLocalType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7103,7 +7103,7 @@ public final class ControlVertices : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "closed") {
 			self.closed = Bool(attribute.stringValue!)!
 		} else { self.closed = nil }
@@ -7152,7 +7152,7 @@ public final class ControlVertices : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.input = xmlElement.elements(forName: "input").map { InputLocalType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7171,7 +7171,7 @@ public final class ControlVertices : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.degreeU = UintType(xmlElement.attribute(forName: "degree_u")!.stringValue!)!
 		if let attribute = xmlElement.attribute(forName: "closed_u") {
 			self.closedU = Bool(attribute.stringValue!)!
@@ -7216,7 +7216,7 @@ public final class ControlVertices : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.input = xmlElement.elements(forName: "input").map { InputLocalType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7231,7 +7231,7 @@ public final class ControlVertices : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.degree = UintType(xmlElement.attribute(forName: "degree")!.stringValue!)!
 		if let attribute = xmlElement.attribute(forName: "closed") {
 			self.closed = Bool(attribute.stringValue!)!
@@ -7281,7 +7281,7 @@ public final class Targets : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.input = xmlElement.elements(forName: "input").map { InputLocalType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7301,7 +7301,7 @@ public final class Targets : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "method") {
 			self.method = MorphMethodEnum(attribute.stringValue!)
 		} else { self.method = nil }
@@ -7348,7 +7348,7 @@ public final class ControllerType : ColladaType {
 							The controller element may contain either a skin element or a morph element.
 							*/
 		case morph(MorphType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "skin" {	self = .skin(SkinType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -7371,7 +7371,7 @@ return nil
 	public let choice0: ControllerTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -7420,7 +7420,7 @@ public final class LibraryControllersType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -7443,7 +7443,7 @@ public final class OriginType : ColladaType {
 
 	public let data: Float3Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float3Type(xmlElement.stringValue!)!
 	}
 
@@ -7456,7 +7456,7 @@ public final class OrientType : ColladaType {
 
 	public let data: Float4Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float4Type(xmlElement.stringValue!)!
 	}
 
@@ -7489,7 +7489,7 @@ public final class CurveType : ColladaType {
 		case hyperbola(HyperbolaType)
 		/***/
 		case nurbs(NurbsType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "line" {	self = .line(LineType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -7540,7 +7540,7 @@ return nil
 	public let choice0: CurveTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -7572,7 +7572,7 @@ public final class SurfaceCurvesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.curve = xmlElement.elements(forName: "curve").map { CurveType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7595,7 +7595,7 @@ public final class CurvesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.curve = xmlElement.elements(forName: "curve").map { CurveType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7615,7 +7615,7 @@ public final class SweptSurfaceType : ColladaType {
 	public enum SweptSurfaceTypeChoice0 {
 		/***/
 		case direction(Float3Type)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "direction" {	self = .direction(Float3Type(xmlElement.stringValue!)!)
 	return
 }
@@ -7627,7 +7627,7 @@ return nil
 	public let choice0: SweptSurfaceTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.curve = CurveType(xmlElement: xmlElement.elements(forName: "curve").first!, sourcesToObjects: &sourcesToObjects)
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.choice0 = SweptSurfaceTypeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
@@ -7652,7 +7652,7 @@ public final class ConeType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = FloatType(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.angle = Float(xmlElement.elements(forName: "angle").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -7687,7 +7687,7 @@ public final class Cylinder : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.radius = FloatType(xmlElement.elements(forName: "radius").first!.stringValue!)!
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7708,7 +7708,7 @@ public final class Cylinder : ColladaType {
 		case cone(ConeType)
 		/***/
 		case cylinder(Cylinder)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "plane" {	self = .plane(PlaneType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -7766,7 +7766,7 @@ return nil
 	public let choice0: SurfaceTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -7795,7 +7795,7 @@ public final class SurfacesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.surface = xmlElement.elements(forName: "surface").map { SurfaceType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
@@ -7899,7 +7899,7 @@ public final class BrepType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "curves").first {
 			self.curves = CurvesType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.curves = nil }
@@ -7977,7 +7977,7 @@ public final class GeometryType : ColladaType {
 		case spline(SplineType)
 		/***/
 		case brep(BrepType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "convex_mesh" {	self = .convexMesh(ConvexMeshType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8014,7 +8014,7 @@ return nil
 	public let choice0: GeometryTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -8063,7 +8063,7 @@ public final class LibraryGeometriesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -8086,7 +8086,7 @@ public final class LimitsSubType : ColladaType {
 
 	public let data: FloatType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = FloatType(xmlElement.stringValue!)!
 	}
 
@@ -8099,7 +8099,7 @@ public final class InstanceJointType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -8111,7 +8111,7 @@ public final class TargetableFloat4Type : ColladaType {
 
 	public let data: Float4Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float4Type(xmlElement.stringValue!)!
 	}
 
@@ -8125,7 +8125,7 @@ public final class RotateType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -8144,7 +8144,7 @@ public final class LinkType : ColladaType {
 		case rotate(RotateType)
 		/***/
 		case translate(TranslateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "rotate" {	self = .rotate(RotateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8180,7 +8180,7 @@ public final class AttachmentFull : ColladaType {
 		case rotate(RotateType)
 		/***/
 		case translate(TranslateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "rotate" {	self = .rotate(RotateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8203,10 +8203,10 @@ return nil
 	public let choice0: [AttachmentFullChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.joint = String(xmlElement.attribute(forName: "joint")!.stringValue!)
 		self.link = LinkType(xmlElement: xmlElement.elements(forName: "link").first!, sourcesToObjects: &sourcesToObjects)
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { AttachmentFullChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { AttachmentFullChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -8219,7 +8219,7 @@ public final class AttachmentStart : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.joint = String(xmlElement.attribute(forName: "joint")!.stringValue!)
 	}
 
@@ -8233,7 +8233,7 @@ public final class AttachmentEnd : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.joint = String(xmlElement.attribute(forName: "joint")!.stringValue!)
 	}
 
@@ -8245,7 +8245,7 @@ public final class AttachmentEnd : ColladaType {
 		case attachmentStart(AttachmentStart)
 		/***/
 		case attachmentEnd(AttachmentEnd)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "attachment_full" {	self = .attachmentFull(AttachmentFull(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8275,15 +8275,15 @@ return nil
 	public let choice1: [LinkTypeChoice1]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { LinkTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
-		self.choice1 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { LinkTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { LinkTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice1 = xmlElement.childElements.flatMap { LinkTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -8325,7 +8325,7 @@ public final class RefAttachment : ColladaType {
 										Allows you to "position" the attachment point.
 										*/
 		case rotate(RotateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "translate" {	self = .translate(TranslateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8348,12 +8348,12 @@ return nil
 	public let choice0: [RefAttachmentChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "rigid_body") {
 			self.rigidBody = String(attribute.stringValue!)
 		} else { self.rigidBody = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { RefAttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { RefAttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -8384,7 +8384,7 @@ public final class Attachment : ColladaType {
 										Allows you to "position" the attachment point.
 										*/
 		case rotate(RotateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "translate" {	self = .translate(TranslateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8407,12 +8407,12 @@ return nil
 	public let choice0: [AttachmentChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "rigid_body") {
 			self.rigidBody = String(attribute.stringValue!)
 		} else { self.rigidBody = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { AttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { AttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -8433,7 +8433,7 @@ public final class Enabled : ColladaType {
 
 	public let data: Bool
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Bool(xmlElement.stringValue!)!
 	}
 
@@ -8451,7 +8451,7 @@ public final class Interpenetrate : ColladaType {
 
 	public let data: Bool
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Bool(xmlElement.stringValue!)!
 	}
 
@@ -8483,7 +8483,7 @@ public final class SwingConeAndTwist : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "min").first {
 			self.min = TargetableFloat3Type(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.min = nil }
@@ -8517,7 +8517,7 @@ public final class Linear : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "min").first {
 			self.min = TargetableFloat3Type(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.min = nil }
@@ -8534,7 +8534,7 @@ public final class Linear : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "swing_cone_and_twist").first {
 			self.swingConeAndTwist = SwingConeAndTwist(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.swingConeAndTwist = nil }
@@ -8578,7 +8578,7 @@ public final class Angular : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "stiffness").first {
 			self.stiffness = TargetableFloatType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.stiffness = nil }
@@ -8620,7 +8620,7 @@ public final class Linear : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "stiffness").first {
 			self.stiffness = TargetableFloatType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.stiffness = nil }
@@ -8640,7 +8640,7 @@ public final class Linear : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "angular").first {
 			self.angular = Angular(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.angular = nil }
@@ -8657,7 +8657,7 @@ public final class Linear : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "enabled").first {
 			self.enabled = Enabled(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.enabled = nil }
@@ -8693,7 +8693,7 @@ public final class Linear : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.sid = SidType(xmlElement.attribute(forName: "sid")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
@@ -8813,7 +8813,7 @@ public final class NodeType : ColladaType {
 							The node element may contain any number of translate elements.
 							*/
 		case translate(TranslateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "lookat" {	self = .lookat(LookatType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -8864,7 +8864,7 @@ return nil
 	public let choice0: [NodeTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -8890,7 +8890,7 @@ return nil
 		self.instanceNode = xmlElement.elements(forName: "instance_node").map { InstanceNodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.node = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { NodeTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { NodeTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -8928,7 +8928,7 @@ public final class LibraryNodesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -9023,7 +9023,7 @@ public final class TechniqueOverride : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "pass") {
 			self.pass = String(attribute.stringValue!)
@@ -9052,7 +9052,7 @@ public final class Bind : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.semantic = String(xmlElement.attribute(forName: "semantic")!.stringValue!)
 		self.target = String(xmlElement.attribute(forName: "target")!.stringValue!)
 	}
@@ -9071,7 +9071,7 @@ public final class Bind : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let childElement = xmlElement.elements(forName: "technique_override").first {
 			self.techniqueOverride = TechniqueOverride(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
@@ -9094,7 +9094,7 @@ public final class Bind : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -9126,7 +9126,7 @@ public final class Bind : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -9159,7 +9159,7 @@ public final class Bind : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -9209,7 +9209,7 @@ public final class LibraryVisualScenesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -9255,7 +9255,7 @@ public final class Dynamic : ColladaType {
 
 	public let data: Bool
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Bool(xmlElement.stringValue!)!
 	}
 
@@ -9279,7 +9279,7 @@ public final class MassFrame : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -9309,7 +9309,7 @@ public final class Hollow : ColladaType {
 
 	public let data: Bool
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Bool(xmlElement.stringValue!)!
 	}
 
@@ -9346,7 +9346,7 @@ public final class Hollow : ColladaType {
 													Defines a physics_material for the shape.
 													*/
 		case physicsMaterial(PhysicsMaterialType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_physics_material" {	self = .instancePhysicsMaterial(InstancePhysicsMaterialType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9394,7 +9394,7 @@ return nil
 													Defines a capsule to use for this shape.
 													*/
 		case capsule(CapsuleType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_geometry" {	self = .instanceGeometry(InstanceGeometryType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9454,7 +9454,7 @@ return nil
 													Allows a tranformation for the shape.
 													*/
 		case rotate(RotateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "translate" {	self = .translate(TranslateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9477,7 +9477,7 @@ return nil
 	public let choice2: [ShapeChoice2]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "hollow").first {
 			self.hollow = Hollow(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.hollow = nil }
@@ -9490,7 +9490,7 @@ return nil
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.choice0 = ShapeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)
 		self.choice1 = ShapeChoice1(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
-		self.choice2 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice2 = xmlElement.childElements.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -9508,7 +9508,7 @@ return nil
 										Defines a physics_material for the rigid_body.
 										*/
 		case physicsMaterial(PhysicsMaterialType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_physics_material" {	self = .instancePhysicsMaterial(InstancePhysicsMaterialType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9531,7 +9531,7 @@ return nil
 	public let choice0: TechniqueCommonChoice0?
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "dynamic").first {
 			self.dynamic = Dynamic(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.dynamic = nil }
@@ -9569,7 +9569,7 @@ return nil
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -9633,7 +9633,7 @@ public final class Dynamic : ColladaType {
 
 	public let data: Bool
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Bool(xmlElement.stringValue!)!
 	}
 
@@ -9653,7 +9653,7 @@ public final class MassFrame : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -9676,7 +9676,7 @@ public final class Hollow : ColladaType {
 
 	public let data: Bool
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Bool(xmlElement.stringValue!)!
 	}
 
@@ -9703,7 +9703,7 @@ public final class Hollow : ColladaType {
 		case instancePhysicsMaterial(InstancePhysicsMaterialType)
 		/***/
 		case physicsMaterial(PhysicsMaterialType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_physics_material" {	self = .instancePhysicsMaterial(InstancePhysicsMaterialType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9739,7 +9739,7 @@ return nil
 		case cylinder(CylinderType)
 		/***/
 		case capsule(CapsuleType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_geometry" {	self = .instanceGeometry(InstanceGeometryType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9795,7 +9795,7 @@ return nil
 		case translate(TranslateType)
 		/***/
 		case rotate(RotateType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "translate" {	self = .translate(TranslateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9818,7 +9818,7 @@ return nil
 	public let choice2: [ShapeChoice2]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "hollow").first {
 			self.hollow = Hollow(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.hollow = nil }
@@ -9831,7 +9831,7 @@ return nil
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.choice0 = ShapeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)
 		self.choice1 = ShapeChoice1(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
-		self.choice2 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice2 = xmlElement.childElements.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -9843,7 +9843,7 @@ return nil
 		case instancePhysicsMaterial(InstancePhysicsMaterialType)
 		/***/
 		case physicsMaterial(PhysicsMaterialType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_physics_material" {	self = .instancePhysicsMaterial(InstancePhysicsMaterialType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -9866,7 +9866,7 @@ return nil
 	public let choice0: TechniqueCommonChoice0?
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "angular_velocity").first {
 			self.angularVelocity = Float3Type(childElement.stringValue!)!
 		} else { self.angularVelocity = nil }
@@ -9910,7 +9910,7 @@ return nil
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.body = String(xmlElement.attribute(forName: "body")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -9979,7 +9979,7 @@ public final class InstancePhysicsModelType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -10044,7 +10044,7 @@ public final class PhysicsModelType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -10095,7 +10095,7 @@ public final class LibraryPhysicsModelsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -10159,7 +10159,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "gravity").first {
 			self.gravity = TargetableFloat3Type(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.gravity = nil }
@@ -10189,7 +10189,7 @@ public final class TechniqueCommon : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -10241,7 +10241,7 @@ public final class LibraryPhysicsScenesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -10265,7 +10265,7 @@ public final class KinematicsNewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -10281,7 +10281,7 @@ public final class KinematicsFrameType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "link") {
 			self.link = String(attribute.stringValue!)
 		} else { self.link = nil }
@@ -10296,7 +10296,7 @@ public final class CommonParamType : ColladaType {
 
 	public let data: String
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = String(xmlElement.stringValue!)
 	}
 
@@ -10309,7 +10309,7 @@ public final class CommonIntOrParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10321,7 +10321,7 @@ public final class CommonBoolOrParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10333,7 +10333,7 @@ public final class CommonFloatOrParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10351,7 +10351,7 @@ public final class KinematicsLimitsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.min = CommonFloatOrParamType(xmlElement: xmlElement.elements(forName: "min").first!, sourcesToObjects: &sourcesToObjects)
 		self.max = CommonFloatOrParamType(xmlElement: xmlElement.elements(forName: "max").first!, sourcesToObjects: &sourcesToObjects)
 	}
@@ -10365,7 +10365,7 @@ public final class CommonSidrefOrParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10384,7 +10384,7 @@ public final class BindJointAxisType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "target") {
 			self.target = String(attribute.stringValue!)
 		} else { self.target = nil }
@@ -10401,7 +10401,7 @@ public final class BindKinematicsModelType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10414,7 +10414,7 @@ public final class KinematicsConnectParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -10428,7 +10428,7 @@ public final class KinematicsSetparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -10470,7 +10470,7 @@ public final class InstanceKinematicsSceneType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -10497,7 +10497,7 @@ public final class KinematicsIndexType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10510,7 +10510,7 @@ public final class KinematicsParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -10524,7 +10524,7 @@ public final class KinematicsBindType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.symbol = String(xmlElement.attribute(forName: "symbol")!.stringValue!)
 	}
 
@@ -10570,7 +10570,7 @@ public final class MotionAxisInfoType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -10625,7 +10625,7 @@ public final class InstanceKinematicsModelType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.url = String(xmlElement.attribute(forName: "url")!.stringValue!)
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
@@ -10669,7 +10669,7 @@ public final class InstanceArticulatedSystemType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -10710,7 +10710,7 @@ public final class KinematicsSceneType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -10748,7 +10748,7 @@ public final class LibraryKinematicsScenesType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -10771,7 +10771,7 @@ public final class CommonFloat2OrParamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -10813,7 +10813,7 @@ public final class MotionEffectorInfoType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -10852,7 +10852,7 @@ public final class MotionTechniqueType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.axisInfo = xmlElement.elements(forName: "axis_info").map { MotionAxisInfoType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let childElement = xmlElement.elements(forName: "effector_info").first {
 			self.effectorInfo = MotionEffectorInfoType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
@@ -10882,7 +10882,7 @@ public final class MotionType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.instanceArticulatedSystem = InstanceArticulatedSystemType(xmlElement: xmlElement.elements(forName: "instance_articulated_system").first!, sourcesToObjects: &sourcesToObjects)
 		self.techniqueCommon = MotionTechniqueType(xmlElement: xmlElement.elements(forName: "technique_common").first!, sourcesToObjects: &sourcesToObjects)
 		self.technique = xmlElement.elements(forName: "technique").map { TechniqueType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -10898,7 +10898,7 @@ public final class MinmaxType : ColladaType {
 
 	public let data: FloatType
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = FloatType(xmlElement.stringValue!)!
 	}
 
@@ -10917,7 +10917,7 @@ public final class JointLimitsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let childElement = xmlElement.elements(forName: "min").first {
 			self.min = MinmaxType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.min = nil }
@@ -10935,7 +10935,7 @@ public final class AxisType : ColladaType {
 
 	public let data: Float3Type
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.data = Float3Type(xmlElement.stringValue!)!
 	}
 
@@ -10955,7 +10955,7 @@ public final class AxisConstraintType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -10986,7 +10986,7 @@ public final class JointType : ColladaType {
 		case prismatic(AxisConstraintType)
 		/***/
 		case revolute(AxisConstraintType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "prismatic" {	self = .prismatic(AxisConstraintType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -11009,7 +11009,7 @@ return nil
 	public let choice0: [JointTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11020,7 +11020,7 @@ return nil
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { JointTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { JointTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -11046,7 +11046,7 @@ public final class LibraryJointsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11069,7 +11069,7 @@ public final class FormulaTechniqueType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 	}
 
 }
@@ -11082,7 +11082,7 @@ public final class FormulaNewparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -11098,7 +11098,7 @@ public final class FormulaSetparamType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.ref = String(xmlElement.attribute(forName: "ref")!.stringValue!)
 	}
 
@@ -11120,7 +11120,7 @@ public final class InstanceFormulaType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -11189,7 +11189,7 @@ public final class AnimationClipType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11245,7 +11245,7 @@ public final class LibraryAnimationClipsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11289,7 +11289,7 @@ public final class FormulaType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11323,7 +11323,7 @@ public final class KinematicsModelTechniqueType : ColladaType {
 		case instanceJoint(InstanceJointType)
 		/***/
 		case joint(JointType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "instance_joint" {	self = .instanceJoint(InstanceJointType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -11351,7 +11351,7 @@ return nil
 		case formula(FormulaType)
 		/***/
 		case instanceFormula(InstanceFormulaType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "formula" {	self = .formula(FormulaType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -11374,11 +11374,11 @@ return nil
 	public let choice1: [KinematicsModelTechniqueTypeChoice1]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.newparam = xmlElement.elements(forName: "newparam").map { KinematicsNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.link = xmlElement.elements(forName: "link").map { LinkType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { KinematicsModelTechniqueTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
-		self.choice1 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { KinematicsModelTechniqueTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { KinematicsModelTechniqueTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice1 = xmlElement.childElements.flatMap { KinematicsModelTechniqueTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -11408,7 +11408,7 @@ public final class KinematicsModelType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11446,7 +11446,7 @@ public final class LibraryKinematicsModelsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11497,7 +11497,7 @@ public final class KinematicsAxisInfoType : ColladaType {
 		case formula(FormulaType)
 		/***/
 		case instanceFormula(InstanceFormulaType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "formula" {	self = .formula(FormulaType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -11520,7 +11520,7 @@ return nil
 	public let choice0: [KinematicsAxisInfoTypeChoice0]
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "sid") {
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
@@ -11539,7 +11539,7 @@ return nil
 		if let childElement = xmlElement.elements(forName: "limits").first {
 			self.limits = KinematicsLimitsType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.limits = nil }
-		self.choice0 = xmlElement.children?.flatMap { $0 as? NSXMLElement }.flatMap { KinematicsAxisInfoTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { KinematicsAxisInfoTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 	}
 
 }
@@ -11569,7 +11569,7 @@ public final class KinematicsTechniqueType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.axisInfo = xmlElement.elements(forName: "axis_info").map { KinematicsAxisInfoType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.frameOrigin = KinematicsFrameType(xmlElement: xmlElement.elements(forName: "frame_origin").first!, sourcesToObjects: &sourcesToObjects)
 		self.frameTip = KinematicsFrameType(xmlElement: xmlElement.elements(forName: "frame_tip").first!, sourcesToObjects: &sourcesToObjects)
@@ -11604,7 +11604,7 @@ public final class KinematicsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.instanceKinematicsModel = xmlElement.elements(forName: "instance_kinematics_model").map { InstanceKinematicsModelType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.techniqueCommon = KinematicsTechniqueType(xmlElement: xmlElement.elements(forName: "technique_common").first!, sourcesToObjects: &sourcesToObjects)
 		self.technique = xmlElement.elements(forName: "technique").map { TechniqueType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -11633,7 +11633,7 @@ public final class ArticulatedSystemType : ColladaType {
 		case kinematics(KinematicsType)
 		/***/
 		case motion(MotionType)
-	init?(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "kinematics" {	self = .kinematics(KinematicsType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
@@ -11656,7 +11656,7 @@ return nil
 	public let choice0: ArticulatedSystemTypeChoice0
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11693,7 +11693,7 @@ public final class LibraryArticulatedSystemsType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }
@@ -11730,7 +11730,7 @@ public final class LibraryFormulasType : ColladaType {
 
 
 
-	init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		if let attribute = xmlElement.attribute(forName: "id") {
 			self.id = String(attribute.stringValue!)
 		} else { self.id = nil }

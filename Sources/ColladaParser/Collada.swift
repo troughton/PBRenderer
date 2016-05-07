@@ -8,24 +8,6 @@
 
 import Foundation
 
-#if os(Linux)
-    public extension NSXMLElement {
-        public func attribute(forName name: String) -> NSXMLNode? {
-            return self.attributeForName(name)
-        }
-        
-        public func elements(forName name: String) -> [NSXMLElement] {
-            return self.elementsForName(name)
-        }
-    }
-    
-    public extension NSXMLDocument {
-        public convenience init(contentsOf url: NSURL, options mask: Int) throws {
-            try self.init(contentsOfURL: url, options: mask)
-        }
-    }
-#endif
-
 /** The COLLADA element declares the root of the document that comprises some of the content in the COLLADA schema. */
 public final class Collada : ColladaType {
 
@@ -95,7 +77,7 @@ public final class Collada : ColladaType {
         /** The extra element may appear any number of times. */
         public let extra : [ExtraType]
 
-        init(xmlElement: NSXMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
             self.instancePhysicsScene = xmlElement.elements(forName: "instance_physics_scene").map { InstanceWithExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
             self.instanceVisualScene = xmlElement.elements(forName: "instance_visual_scene").first.flatMap { InstanceWithExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
             self.instanceKinematicsScene = xmlElement.elements(forName: "instance_kinematics_scene").map { InstanceKinematicsSceneType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
@@ -110,15 +92,19 @@ public final class Collada : ColladaType {
 
     public let sourcesToObjects: [String : ColladaType]
     
-    public convenience init(contentsOfURL url: NSURL) throws {
-        self.init(document: try NSXMLDocument(contentsOf: url, options: 0))
+    public convenience init?(contentsOfFile filePath: String) {
+        if let document = XMLDocument(contentsOfFile: filePath) {
+            self.init(document: document)
+        } else {
+            return nil
+        }
     }
     
-    public convenience init(document: NSXMLDocument) {
-        self.init(xmlElement: document.rootElement()!)
+    public convenience init(document: XMLDocument) {
+        self.init(xmlElement: document.rootElement!)
     }
     
-    init(xmlElement: NSXMLElement) {
+    init(xmlElement: XMLElement) {
         
         var sourcesToObjects = [String : ColladaType]()
         

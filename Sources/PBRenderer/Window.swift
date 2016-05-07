@@ -156,7 +156,7 @@ class RenderWindow : Window {
         self.pipelineState = PipelineState(shader: shader, colourAttachments: [firstColourAttachment])
         self.pipelineState.applyState()
         
-        let collada = try! Collada(contentsOfURL: NSURL(fileURLWithPath: "/Users/Thomas/Desktop/ColladaTestSphere.dae"))
+        guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
         
         var mesh : GLMesh! = nil
         
