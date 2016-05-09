@@ -119,6 +119,12 @@ struct PipelineState {
         } else {
             glEnable(GL_RASTERIZER_DISCARD)
         }
+        
+        var error = glGetError()
+        while error != 0 {
+            print("OpenGL Error: \(error)")
+            error = glGetError()
+        }
     }
     
 }
@@ -197,6 +203,12 @@ struct DepthStencilState {
         } else {
             glDisable(GL_STENCIL_TEST)
         }
+        
+        var error = glGetError()
+        while error != 0 {
+            print("OpenGL Error: \(error)")
+            error = glGetError()
+        }
     }
 }
 
@@ -261,5 +273,11 @@ struct RenderContextState {
         glPolygonMode(GL_FRONT_AND_BACK, polygonFillMode)
      
         glViewport(GLint(viewport.x), GLint(viewport.y), GLsizei(viewport.width), GLsizei(viewport.height))
+        
+        var error = glGetError()
+        while error != 0 {
+            print("OpenGL Error: \(error)")
+            error = glGetError()
+        }
     }
 }
