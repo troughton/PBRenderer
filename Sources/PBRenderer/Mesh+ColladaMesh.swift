@@ -11,12 +11,12 @@ import ColladaParser
 import SGLOpenGL
 
 /** multiple must be a power of two. http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number */
-func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
+private func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
     assert(multiple > 0 && ((multiple & (multiple - 1)) == 0));
     return (numToRound + multiple - 1) & ~(multiple - 1);
 }
 
-struct VertexLayout {
+private struct VertexLayout {
     var size : Int = 0
     var attributes = [AttributeType : (lengthInBytes: Int, offset: Int, glType: GLint)]()
     
@@ -33,6 +33,11 @@ struct VertexLayout {
     }
     
     mutating func addAttribute(_ type : AttributeType, glType: GLint, alignment: Int, lengthInBytes: Int) {
+        if let existingAttribute = self.attributes[type] {
+            assert(existingAttribute.lengthInBytes == lengthInBytes && existingAttribute.glType == glType)
+            return
+        }
+        
         let offset = self.size
         let alignedOffset = self.alignedOffsetForValueWithAlignment(alignment, offset: offset)
         self.attributes[type] = (lengthInBytes, alignedOffset, glType)
@@ -44,7 +49,7 @@ struct VertexLayout {
     }
 }
 
-class Vertex : Hashable {
+private class Vertex : Hashable {
     let layout : VertexLayout
     let data : UnsafeMutablePointer<UInt8>!
     
@@ -76,16 +81,11 @@ class Vertex : Hashable {
     }
 }
 
-func ==(lhs: Vertex, rhs: Vertex) -> Bool {
+private func ==(lhs: Vertex, rhs: Vertex) -> Bool {
     return lhs.hashValue == rhs.hashValue
 }
 
 extension GLMesh {
-    
-    //Per vertex, we have:
-    //an array of inputs
-    //  each of which has a source
-    
     
     static func classifySourcesFromInput(_ input: InputType, root: Collada, dictionary: inout [AttributeType : (offset: Int, source: SourceType)], offset inOffset: Int? = nil) {
             let attributeType : AttributeType
@@ -126,15 +126,16 @@ extension GLMesh {
         
         //TODO: Shared vertices between meshes. Requires a different buffer for each vertex layout and precomputing the size of the array for each layout to contain the vertices of every mesh.
         var meshes = [GLMesh]()
+        var vertexLayout = VertexLayout()
+        var vertices = [Vertex]()
         
-        for primitive in colladaMesh.choice0 {
+        for primitive in colladaMesh.choice0 { //Construct vertex layout.
             if case let .triangles(tris) = primitive {
                 
                 for input in tris.input {
                     self.classifySourcesFromInput(input, root: root, dictionary: &attributesToSources)
                 }
                 
-                var vertexLayout = VertexLayout()
                 
                 for (type, value) in attributesToSources {
                     let stride = Int(value.source.techniqueCommon!.accessor.stride!)
@@ -155,9 +156,11 @@ extension GLMesh {
                     
                     vertexLayout.addAttribute(type, glType: glType, alignment: alignment, lengthInBytes: sizeInBytes)
                 }
-                
-                var vertices = [Vertex]()
-                
+            }
+        }
+        
+        let drawCommands = colladaMesh.choice0.flatMap { (primitive) -> DrawCommand? in
+            if case let .triangles(tris) = primitive {
                 var indices = [UInt16]()
                 
                 let stride = tris.input.count
@@ -192,7 +195,7 @@ extension GLMesh {
                             vertex.setAttribute(attribute: type, value: valuePtr)
                         }
                         
-                    
+                        
                         if let existingIndex = vertices.index(of: vertex) {
                             indices.append(UInt16(existingIndex))
                             
@@ -202,105 +205,37 @@ extension GLMesh {
                         }
                     }
                 }
-            
-                let vertexBuffer = GPUBuffer<UInt8>(capacity: vertices.count * vertexLayout.alignedSize, data: nil, accessFrequency: .Static, accessType: .Draw)
-                for (i, vertex) in vertices.enumerated() {
-                    vertexBuffer.copyToIndex(i * vertexLayout.alignedSize, value: vertex.data, sizeInBytes: vertexLayout.size)
-                }
-                vertexBuffer.didModify()
-                
-                var attributeTypesToVertexAttributes = [AttributeType : VertexAttribute]()
-                for (attribute, value) in vertexLayout.attributes {
-                    let offset = value.offset
-                    let source = attributesToSources[attribute]!.source
-                    
-                    attributeTypesToVertexAttributes[attribute] = VertexAttribute(data: vertexBuffer, glTypeName: value.glType, componentsPerAttribute: Int(source.techniqueCommon!.accessor.param.count), isNormalised: false, strideInBytes: vertexLayout.alignedSize, bufferOffsetInBytes: offset)
-                }
-                
                 
                 let indexBuffer = GPUBuffer<GLushort>(capacity: Int(tris.count * 3), data: indices, accessFrequency: .Static, accessType: .Draw)
                 
-                let drawCommand = DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_SHORT, bufferOffsetInBytes: 0)
-                meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributeTypesToVertexAttributes))
+                return DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_SHORT, bufferOffsetInBytes: 0)
             
+            } else {
+                print("Warning: mesh of type \(primitive) not supported.")
+                return nil
             }
-            
         }
 
+            
+        let vertexBuffer = GPUBuffer<UInt8>(capacity: vertices.count * vertexLayout.alignedSize, data: nil, accessFrequency: .Static, accessType: .Draw)
+        for (i, vertex) in vertices.enumerated() {
+                vertexBuffer.copyToIndex(i * vertexLayout.alignedSize, value: vertex.data, sizeInBytes: vertexLayout.size)
+        }
         
+        vertexBuffer.didModify()
+        
+        var attributeTypesToVertexAttributes = [AttributeType : VertexAttribute]()
+        for (attribute, value) in vertexLayout.attributes {
+                let offset = value.offset
+                let source = attributesToSources[attribute]!.source
+                    
+                attributeTypesToVertexAttributes[attribute] = VertexAttribute(data: vertexBuffer, glTypeName: value.glType, componentsPerAttribute: Int(source.techniqueCommon!.accessor.param.count), isNormalised: false, strideInBytes: vertexLayout.alignedSize, bufferOffsetInBytes: offset)
+            }
+        
+        for drawCommand in drawCommands {
+            meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributeTypesToVertexAttributes))
+        }
+
         return meshes
     }
-    
-//    static func meshesFromCollada(_ colladaMesh: MeshType, root: Collada) -> [GLMesh] {
-//        var sourcesToAttributes = [String : VertexAttribute]()
-//
-//        for source in colladaMesh.source {
-//            let buffer : GPUBuffer<Void>
-//            let glType : GLenum
-//            let typeSizeInBytes : Int
-//            if case let .floatArray(floatArray) = source.choice0! {
-//                glType = GL_FLOAT
-//                buffer = GPUBuffer<Void>(GPUBuffer<Float>(capacity: floatArray.data.count, data: floatArray.data, accessFrequency: .Static, accessType: .Draw))
-//                typeSizeInBytes = sizeof(GLfloat)
-//            } else  {
-//                assertionFailure("No valid conversion for collada source data")
-//                continue
-//            }
-//
-//            sourcesToAttributes["#" + source.id] = VertexAttribute(data: buffer, glTypeName: glType, componentsPerAttribute: Int(source.techniqueCommon!.accessor.param.count), isNormalised: false, strideInBytes: Int(source.techniqueCommon!.accessor.stride!) * typeSizeInBytes, bufferOffsetInBytes: 0)
-//        }
-//        
-//        var attributes = [AttributeType : VertexAttribute]()
-//        
-//        var meshes = [GLMesh]()
-//        
-//        for primitive in colladaMesh.choice0 {
-//            if case let .triangles(tris) = primitive {
-//                
-//                for input in tris.input {
-//                    let attributeType : AttributeType
-//                    
-//                    switch input.semantic {
-//                    case "VERTEX":
-//                        if let vertices = root[input.source] as? VerticesType {
-//                            for input in vertices.input {
-//                                
-//                                let attributeType : AttributeType
-//                                
-//                                switch input.semantic {
-//                                case "POSITION":
-//                                    attributeType = .Position
-//                                case "NORMAL":
-//                                    attributeType = .Normal
-//                                default:
-//                                    continue
-//                                }
-//                                
-//                                attributes[attributeType] = sourcesToAttributes[input.source]
-//                            }
-//                        }
-//                        continue
-//                        
-//                    case "POSITION":
-//                        attributeType = .Position
-//                    case "NORMAL":
-//                        attributeType = .Normal
-//                    default:
-//                        continue
-//                    }
-//                    
-//                    attributes[attributeType] = sourcesToAttributes[input.source]
-//                }
-//                
-//                let buffer = GPUBuffer<GLuint>(capacity: Int(tris.count * 3), data: tris.p!.data.enumerated().filter { $0.0 % 2 == 0 }.map { GLuint($1) }, accessFrequency: .Static, accessType: .Draw)
-//                
-//                
-//                let drawCommand = DrawCommand(data: GPUBuffer<Void>(buffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
-//                meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributes))
-//            }
-//        }
-//        
-//        
-//        return meshes
-//    }
 }

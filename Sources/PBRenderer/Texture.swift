@@ -193,7 +193,7 @@ class Texture {
         
         glBindTexture(descriptor.textureType, _glTexture)
         
-        let texCreationFunction : (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, type: GLenum, pixels: UnsafePointer<Void>!) -> ()
+        let texCreationFunction : (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, type: GLenum, pixels: UnsafePointer<Void>?) -> ()
         
         switch descriptor.textureType {
         case GL_TEXTURE_1D:

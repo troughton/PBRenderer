@@ -27,7 +27,7 @@ public class XMLDocument {
         }
         
         let rootElementPointer = xmlDocGetRootElement(_documentPointer)
-        self.rootElement = XMLElement(document: self, nodePointer: rootElementPointer)
+        self.rootElement = XMLElement(document: self, nodePointer: rootElementPointer!)
     }
     
     deinit {

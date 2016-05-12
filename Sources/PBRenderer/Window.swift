@@ -56,7 +56,7 @@ class Window {
         
         // Set the required callback functions
         glfwSetKeyCallback(_glfwWindow) { (glfwWindow, key, scanCode, action, modifiers) in
-            let window = Window.glfwWindowsToWindows[glfwWindow]!
+            let window = Window.glfwWindowsToWindows[glfwWindow!]!
             window.keyAction(key: key, scanCode: scanCode, action: action, modifiers: modifiers)
         }
     }
