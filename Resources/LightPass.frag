@@ -3,6 +3,8 @@
 out vec4 outputColor;
 in vec2 uv;
 
+uniform sampler2D gBufferSampler;
+
 void main() {
-    outputColor = vec4(uv, 0, 1);
+    outputColor = texture(gBufferSampler, uv);
 }

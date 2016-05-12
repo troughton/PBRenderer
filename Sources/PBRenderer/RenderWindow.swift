@@ -128,9 +128,11 @@ class RenderWindow : Window {
         
         self.lightAccumulationBuffer.renderPass {
             self.lightPassShader.withProgram { shader in
+                self.gBuffer.colourAttachments[0]?.texture!.bindToIndex(1)
+                shader.setUniform(GLint(1), forProperty: StringShaderProperty("gBufferSampler"))
+                
                 GLMesh.fullScreenQuad.render()
             }
-            
         }
     }
     

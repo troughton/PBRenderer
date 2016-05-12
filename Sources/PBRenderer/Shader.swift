@@ -14,6 +14,14 @@ protocol ShaderProperty {
     var name: String { get }
 }
 
+struct StringShaderProperty : ShaderProperty {
+    let name: String
+    
+    init(_ value: String) {
+        self.name = value
+    }
+}
+
 class Shader {
     
     private var uniformMappings = [String : GLint]()
