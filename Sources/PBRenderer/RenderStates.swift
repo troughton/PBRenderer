@@ -75,7 +75,6 @@ struct ColourAttachment {
 }
 
 struct PipelineState {
-    var shader : Shader
     
     var colourAttachments : [ColourAttachment?]
     
@@ -85,8 +84,7 @@ struct PipelineState {
     
     var multisamplingEnabled : Bool = false
     
-    init(shader: Shader, colourAttachments: [ColourAttachment?]) {
-        self.shader = shader
+    init(colourAttachments: [ColourAttachment?]) {
         self.colourAttachments = colourAttachments
     }
     

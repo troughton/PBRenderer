@@ -137,7 +137,28 @@ public class Framebuffer {
         let completeness = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER)
         
         if completeness != GL_FRAMEBUFFER_COMPLETE {
-            fatalError("Error creating framebuffer: \(completeness)")
+            let error : String
+            
+            switch completeness {
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                error = "incomplete attachment. One of the framebuffer attachment points is framebuffer incomplete."
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                error = "the framebuffer does not have at least one image attached to it."
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                error = "the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for one of the colour attachment point(s) named by GL_DRAW_BUFFERi"
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                error = "GL_READ_BUFFER is not GL_NONE and the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment point named by GL_READ_BUFFER."
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                error = "unsupported framebuffer. The combination of internal formats of the attached images violates an implementation-dependent set of restrictions."
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                error = "the value of GL_RENDERBUFFER_SAMPLES is not the same for all attached renderbuffers; the value of GL_TEXTURE_SAMPLES is the not same for all attached textures; or, if the attached images are a mix of renderbuffers and textures, the value of GL_RENDERBUFFER_SAMPLES does not match the value of GL_TEXTURE_SAMPLES.\n Alternatively, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same for all attached textures; or, if the attached images are a mix of renderbuffers and textures, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures."
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                error = "any framebuffer attachment is layered, and any populated attachment is not layered, or all populated color attachments are not from textures of the same target."
+            default:
+                error = "unknown error."
+            }
+            
+            fatalError("Error creating framebuffer: \(error) (OpenGL error: \(completeness))")
         }
         
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
@@ -156,7 +177,14 @@ public class Framebuffer {
         }
     }
     
-    func beginRenderPass() {
+    func renderPass<T>(_ function: @noescape () throws -> T) rethrows -> T {
+        self.beginRenderPass()
+        let value = try function()
+        self.endRenderPass()
+        return value
+    }
+    
+    private func beginRenderPass() {
         
         if let glFramebuffer = _glFramebuffer {
             glBindFramebuffer(GL_FRAMEBUFFER, glFramebuffer)
@@ -200,12 +228,13 @@ public class Framebuffer {
         
     }
     
-    func endRenderPass() {
+    private func endRenderPass() {
         
         for attachment in colourAttachments where attachment?.texture != nil {
             if case let .MultisampleResolveColour(framebuffer, attachmentIndex) = attachment!.storeAction {
                     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer._glFramebuffer ?? 0)   // Make sure no FBO is set as the draw framebuffer
                     glBindFramebuffer(GL_READ_FRAMEBUFFER, _glFramebuffer) // Make sure your multisampled FBO is the read framebuffer
+                    glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex)
                     glDrawBuffer(framebuffer._glFramebuffer != nil ? GL_COLOR_ATTACHMENT0 + attachmentIndex : GL_BACK);
                     glBlitFramebuffer(0, 0, self.width, self.height, 0, 0, framebuffer.width, framebuffer.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
                 }
@@ -224,4 +253,14 @@ public class Framebuffer {
             glBlitFramebuffer(0, 0, self.width, self.height, 0, 0, framebuffer.width, framebuffer.height, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
         }
     }
+    
+    func asReadBuffer<T>(_ function: @noescape (GLuint) throws -> T) rethrows -> T {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, _glFramebuffer) // Make sure your multisampled FBO is the read framebuffer
+        
+        let result = try function(_glFramebuffer)
+        
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0)
+        return result
+    }
+    
 }

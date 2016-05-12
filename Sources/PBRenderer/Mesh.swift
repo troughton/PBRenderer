@@ -74,4 +74,16 @@ class GLMesh : Mesh {
         glDrawElements(_drawCommand.glPrimitiveType, GLsizei(_drawCommand.elementCount), _drawCommand.glElementType, UnsafePointer<Void>(bitPattern: _drawCommand.bufferOffsetInBytes));
         glBindVertexArray(0);
     }
+    
+    static let fullScreenQuad : GLMesh = {
+        let vertices = [vec4(-1, -1, 0, 1), vec4(-1, 1, 0, 1), vec4(1, -1, 0, 1), vec4(1, 1, 0, 1)]
+        let indices : [UInt8] = [0, 2, 1, 3, 1, 2]
+        let vertexBuffer = GPUBuffer(capacity: vertices.count, data: vertices, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        let indexBuffer = GPUBuffer(capacity: indices.count, data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        
+        let vertexAttributes = [AttributeType.Position : VertexAttribute(data: GPUBuffer<UInt8>(vertexBuffer), glTypeName: GL_FLOAT, componentsPerAttribute: 4, isNormalised: false, strideInBytes: 0, bufferOffsetInBytes: 0)]
+        let drawCommand = DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: indices.count, glElementType: GL_UNSIGNED_BYTE, bufferOffsetInBytes: 0)
+        
+        return GLMesh(drawCommand: drawCommand, attributes: vertexAttributes)
+    }()
 }

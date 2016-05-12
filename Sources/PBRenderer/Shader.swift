@@ -25,13 +25,20 @@ class Shader {
         _glProgramRef = Shader.createProgram(shaderList: shaders)
     }
     
-    func useProgram() {
+    private func useProgram() {
 
         glUseProgram(_glProgramRef)
     }
     
-    func endUseProgram() {
+    private func endUseProgram() {
         glUseProgram(0)
+    }
+    
+    func withProgram<T>(_ function: @noescape (Shader) throws -> T) rethrows -> T {
+        self.useProgram()
+        let value = try function(self)
+        self.endUseProgram()
+        return value
     }
     
     private func uniformLocation(forProperty property: ShaderProperty) -> GLint? {
