@@ -98,6 +98,14 @@ class RenderWindow : Window {
         var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         colourAttachment.texture = colourTexture
         colourAttachment.loadAction = .Clear
+        colourAttachment.storeAction = .Store
+        
+        let normalTexture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        
+        var normalAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+        normalAttachment.texture = normalTexture
+        normalAttachment.loadAction = .Clear
+        colourAttachment.storeAction = .Store
         
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: Int(pixelWidth), height: Int(pixelHeight), mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_STENCIL, type: GL_UNSIGNED_INT_24_8, data: nil as [Void]?)
@@ -105,7 +113,7 @@ class RenderWindow : Window {
         depthAttachment.loadAction = .Clear
         depthAttachment.texture = depthTexture
         
-        self.gBuffer = Framebuffer(width: pixelWidth, height: pixelHeight, colourAttachments: [colourAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
+        self.gBuffer = Framebuffer(width: pixelWidth, height: pixelHeight, colourAttachments: [colourAttachment, normalAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     override func preRender() {
@@ -129,7 +137,9 @@ class RenderWindow : Window {
         self.lightAccumulationBuffer.renderPass {
             self.lightPassShader.withProgram { shader in
                 self.gBuffer.colourAttachments[0]?.texture!.bindToIndex(1)
-                shader.setUniform(GLint(1), forProperty: StringShaderProperty("gBufferSampler"))
+                shader.setUniform(GLint(1), forProperty: StringShaderProperty("positionSampler"))
+                self.gBuffer.colourAttachments[1]?.texture!.bindToIndex(2)
+                shader.setUniform(GLint(2), forProperty: StringShaderProperty("normalSampler"))
                 
                 GLMesh.fullScreenQuad.render()
             }
