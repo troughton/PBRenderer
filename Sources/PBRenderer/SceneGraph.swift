@@ -21,7 +21,7 @@ extension Matrix4x4 {
     }
 }
 
-class Scene {
+final class Scene {
     
     let nodes : [SceneNode]
     
@@ -37,21 +37,44 @@ class Scene {
         self.nodes = nodes
     }
 
+    var flattenedScene : [SceneNode] {
+        var nodes = [SceneNode]()
+        var stack = [SceneNode]()
+        
+        for node in self.nodes {
+            stack.append(node)
+        }
+        
+        while let node = stack.popLast() {
+            stack.append(contentsOf: node.children)
+            nodes.append(node)
+        }
+        return nodes
+    }
 }
 
-class SceneNode {
+final class SceneNode {
     let id : String?
     let name : String?
     let transform : Transform
     let meshes : [GLMesh]
     let children : [SceneNode]
+    let cameras : [Camera]
     
-    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = []) {
+    func initialiseComponents() {
+        self.transform.sceneNode = self
+        self.cameras.forEach { $0.sceneNode = self }
+    }
+    
+    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = []) {
         self.id = id
         self.name = name;
         self.transform = transform
         self.meshes = meshes
         self.children = children
+        self.cameras = cameras
+        
+        self.initialiseComponents()
     }
     
     convenience init(colladaNode node: NodeType, root: Collada, parentTransform: Transform? = nil) {
@@ -67,7 +90,7 @@ class SceneNode {
             case .scale(let scale):
                 currentTransform = SGLMath.scale(currentTransform, vec3(scale.data))
             case .rotate(let rotation):
-                currentTransform = currentTransform * quat(angle: rotation.data.last!, axis: vec4(rotation.data).xyz)
+                currentTransform = currentTransform * quat(angle: radians(degrees: rotation.data.last!), axis: vec4(rotation.data).xyz)
             case .lookat(let lookat):
                 currentTransform = currentTransform *
                     SGLMath.lookAt(vec3(lookat.data[0], lookat.data[1], lookat.data[2]),
@@ -107,12 +130,61 @@ class SceneNode {
         
         let children = node.nodes.map { SceneNode(colladaNode: $0, root: root, parentTransform: transform) }
         
-        self.init(id: node.id, name: node.name, transform: transform, meshes: meshes, children: children)
+        let cameras : [Camera] = node.instanceCamera.map { root[$0.url] as! CameraType }.map { camera in
+            let projectionMatrix : mat4
+            switch camera.optics.techniqueCommon.projection {
+            case let .Perspective(xFov, yFov, aspectRatio, zNear, zFar):
+                if let yFov = yFov, let aspectRatio = aspectRatio {
+                    projectionMatrix = SGLMath.perspective(radians(degrees: yFov), aspectRatio, zNear, zFar)
+                } else if let xFov = xFov, let aspectRatio = aspectRatio {
+                    projectionMatrix = SGLMath.perspective(radians(degrees: xFov * aspectRatio), aspectRatio, zNear, zFar)
+                } else if let xFov = xFov, let yFov = yFov {
+                    projectionMatrix = SGLMath.perspective(radians(degrees: yFov), xFov / yFov, zNear, zFar)
+                } else {
+                    fatalError("Unsupported field of view combination.")
+                }
+                return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar)
+            case let .Orthographic(xMag, yMag, aspectRatio, zNear, zFar):
+                if let xMag = xMag, yMag = yMag {
+                    projectionMatrix = SGLMath.ortho(0, xMag, 0, yMag, zNear, zFar)
+                } else if let xMag = xMag, aspectRatio = aspectRatio {
+                    projectionMatrix = SGLMath.ortho(0, xMag, 0, xMag / aspectRatio, zNear, zFar)
+                } else if let yMag = yMag, aspectRatio = aspectRatio {
+                    projectionMatrix = SGLMath.ortho(0, yMag * aspectRatio, 0, yMag, zNear, zFar)
+                } else {
+                    fatalError("Invalid orthographic matrix terms.")
+                }
+                return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar)
+            }
+        }
+        
+        self.init(id: node.id, name: node.name, transform: transform, meshes: meshes, children: children, cameras: cameras)
     }
     
 }
 
+final class Camera {
+    var sceneNode : SceneNode! = nil
+    
+    let id : String?
+    let name: String?
+    
+    let projectionMatrix: mat4
+    let zNear: Float
+    let zFar: Float
+    
+    init(id: String?, name: String?, projectionMatrix: mat4, zNear: Float, zFar: Float) {
+        self.id = id
+        self.name = name
+        self.projectionMatrix = projectionMatrix
+        self.zNear = zNear
+        self.zFar = zFar
+    }
+}
+
 final class Transform {
+    var sceneNode : SceneNode! = nil
+    
     var parent : Transform? = nil
     
     var translation : vec3

@@ -2048,16 +2048,39 @@ public final class Optics : ColladaType {
 
 	/**
 */
-public final class TechniqueCommon : ColladaType {
+    public final class TechniqueCommon : ColladaType {
 
 
+        public enum Projection {
+            case Orthographic(xMag: Float?, yMag: Float?, aspectRatio: Float? , zNear: Float, zFar: Float)
+            case Perspective(xFov: Float?, yFov: Float?, aspectRatio: Float?, zNear: Float, zFar: Float)
+            
+            
+        }
 
+        public let projection: Projection
 
+        init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+            if let orthographicElement = xmlElement.elements(forName: "orthographic").first {
+                let xMag = orthographicElement.elements(forName: "xmag").first.map { Float($0.stringValue!)! }
+                let yMag = orthographicElement.elements(forName: "ymag").first.map { Float($0.stringValue!)! }
+                let aspectRatio = orthographicElement.elements(forName: "aspect_ratio").first.map { Float($0.stringValue!)! }
+                let zNear = orthographicElement.elements(forName: "znear").first.map { Float($0.stringValue!)! }!
+                let zFar = orthographicElement.elements(forName: "zfar").first.map { Float($0.stringValue!)! }!
+                self.projection = .Orthographic(xMag: xMag, yMag: yMag, aspectRatio: aspectRatio, zNear: zNear, zFar: zFar)
+            } else if let perspectiveElement = xmlElement.elements(forName: "perspective").first {
+                let xFov = perspectiveElement.elements(forName: "xfov").first.map { Float($0.stringValue!)! }
+                let yFov = perspectiveElement.elements(forName: "yfov").first.map { Float($0.stringValue!)! }
+                let aspectRatio = perspectiveElement.elements(forName: "aspect_ratio").first.map { Float($0.stringValue!)! }
+                let zNear = perspectiveElement.elements(forName: "znear").first.map { Float($0.stringValue!)! }!
+                let zFar = perspectiveElement.elements(forName: "zfar").first.map { Float($0.stringValue!)! }!
+                self.projection = .Perspective(xFov: xFov, yFov: yFov, aspectRatio: aspectRatio, zNear: zNear, zFar: zFar)
+            } else {
+                fatalError()
+            }
+        }
 
-	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
-	}
-
-}
+    }
 	/**
 									The technique_common element specifies the optics information for the common profile 
 									which all COLLADA implementations need to support.
@@ -2263,11 +2286,11 @@ public final class InstanceWithExtraType : ColladaType {
 public final class InstanceImageType : ColladaType {
 
 
-
-
-
-	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
-	}
+    public let url : String
+    
+    init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.url = xmlElement.attribute(forName: "url")!.stringValue!
+    }
 
 }
 /**
@@ -2275,11 +2298,10 @@ public final class InstanceImageType : ColladaType {
 			*/
 public final class InstanceCameraType : ColladaType {
 
-
-
-
+    public let url : String
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.url = xmlElement.attribute(forName: "url")!.stringValue!
 	}
 
 }
@@ -2301,12 +2323,11 @@ public final class InstanceForceFieldType : ColladaType {
 			*/
 public final class InstanceLightType : ColladaType {
 
-
-
-
-
-	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
-	}
+    public let url : String
+    
+    init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.url = xmlElement.attribute(forName: "url")!.stringValue!
+    }
 
 }
 /**

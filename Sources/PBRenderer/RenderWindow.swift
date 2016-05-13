@@ -141,8 +141,11 @@ class RenderWindow : Window {
         
         self.gBuffer.renderPass {
             self.geometryShader.withProgram { shader in
-                let worldToCamera = SGLMath.translate(mat4(1), vec3(0, 0, 12.0))
-                let cameraToClip = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
+                
+                let camera = self.scene.flattenedScene.flatMap { $0.cameras.first }.first!
+                
+                let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
+                let cameraToClip = camera.projectionMatrix
             
                 for node in scene.nodes {
                     self.renderNode(node, worldToCameraMatrix: worldToCamera, cameraToClipMatrix: cameraToClip, shader: shader)

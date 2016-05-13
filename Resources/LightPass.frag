@@ -17,5 +17,5 @@ void main() {
     
     vec3 normal = texture(gBuffer0, uv).xyz;
     
-    outputColour = vec4(cameraSpacePosition.z, 0, 0, 1);
+    outputColour = vec4(normal, 1);
 }
