@@ -36,7 +36,7 @@ class RenderWindow : Window {
     var geometryShader : Shader! = nil
     var lightPassShader : Shader! = nil
     
-    var mesh : GLMesh! = nil
+    var scene : Scene! = nil
     
     override init(name: String, width: Int, height: Int) {
         super.init(name: name, width: width, height: height)
@@ -75,17 +75,8 @@ class RenderWindow : Window {
         
         guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
         
-        var mesh : GLMesh! = nil
+        self.scene = Scene(fromCollada: collada)
         
-        for geometryLibrary in collada.libraryGeometries {
-            switch geometryLibrary.geometry.first!.choice0 {
-            case let .mesh(colladaMesh):
-                mesh = GLMesh.meshesFromCollada(colladaMesh, root: collada).first!
-            default:
-                break
-            }
-        }
-        self.mesh = mesh
     }
     
     func setupGBuffer() {
@@ -120,17 +111,29 @@ class RenderWindow : Window {
         super.preRender()
     }
     
+    func renderNode(_ node: SceneNode, worldToCameraMatrix: mat4, cameraToClipMatrix: mat4, shader: Shader) {
+        let transform = cameraToClipMatrix * worldToCameraMatrix * node.transform.nodeToWorldMatrix
+        shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
+        
+        for mesh in node.meshes {
+            mesh.render()
+        }
+        
+        for child in node.children {
+            self.renderNode(child, worldToCameraMatrix: worldToCameraMatrix, cameraToClipMatrix: cameraToClipMatrix, shader: shader)
+        }
+    }
+    
     override func render() {
         
         self.gBuffer.renderPass {
             self.geometryShader.withProgram { shader in
-                let modelToView = SGLMath.rotate(SGLMath.translate(mat4(1), vec3(0, 0, 5.0)), Float(glfwGetTime()), vec3(0, 1, 0))
-                let viewToProj = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
-                let transform = viewToProj * modelToView
-                
-                shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
-                
-                mesh.render()
+                let worldToCamera = SGLMath.translate(mat4(1), vec3(0, 0, 12.0))
+                let cameraToClip = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
+            
+                for node in scene.nodes {
+                    self.renderNode(node, worldToCameraMatrix: worldToCamera, cameraToClipMatrix: cameraToClip, shader: shader)
+                }
             }
         }
         

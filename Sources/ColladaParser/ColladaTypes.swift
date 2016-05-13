@@ -477,11 +477,10 @@ public final class MatrixType : ColladaType {
 			*/
 public final class ScaleType : ColladaType {
 
-
-
-
+    public let data : Float3Type
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.data = Float3Type(xmlElement.stringValue!)!
 	}
 
 }
@@ -506,11 +505,9 @@ public final class SkewType : ColladaType {
 			*/
 public final class TranslateType : ColladaType {
 
-
-
-
-
+    public let data : Float3Type
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.data = Float3Type(xmlElement.stringValue!)!
 	}
 
 }
@@ -8011,7 +8008,7 @@ return nil
 	}
 
 	/***/
-	public let choice0: GeometryTypeChoice0
+	public let geometry: GeometryTypeChoice0
 
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
@@ -8025,7 +8022,7 @@ return nil
 			self.asset = AssetType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.asset = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = GeometryTypeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
+		self.geometry = GeometryTypeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -8121,11 +8118,10 @@ public final class TargetableFloat4Type : ColladaType {
 			*/
 public final class RotateType : ColladaType {
 
-
-
-
+    public let data: Float4Type
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.data = Float4Type(xmlElement.stringValue!)!
 	}
 
 }
@@ -8780,7 +8776,7 @@ public final class NodeType : ColladaType {
 	/**
 						The node element may be hierarchical and be the parent of any number of other node elements.
 						*/
-	public let node: [NodeType]
+	public let nodes: [NodeType]
 
 
 	/**
@@ -8788,7 +8784,7 @@ public final class NodeType : ColladaType {
 						*/
 	public let extra: [ExtraType]
 
-	public enum NodeTypeChoice0 {
+	public enum NodeTypeTransforms {
 		/**
 							The node element may contain any number of lookat elements.
 							*/
@@ -8861,7 +8857,7 @@ return nil
 	}
 
 	/***/
-	public let choice0: [NodeTypeChoice0]
+	public let transforms: [NodeTypeTransforms]
 
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
@@ -8888,9 +8884,9 @@ return nil
 		self.instanceGeometry = xmlElement.elements(forName: "instance_geometry").map { InstanceGeometryType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.instanceLight = xmlElement.elements(forName: "instance_light").map { InstanceLightType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.instanceNode = xmlElement.elements(forName: "instance_node").map { InstanceNodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.node = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
+		self.nodes = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { NodeTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.transforms = xmlElement.childElements.flatMap { NodeTypeTransforms(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -8918,7 +8914,7 @@ public final class LibraryNodesType : ColladaType {
 	/**
 						There must be at least one node element.
 						*/
-	public let node: [NodeType]
+	public let nodes: [NodeType]
 
 
 	/**
@@ -8938,7 +8934,7 @@ public final class LibraryNodesType : ColladaType {
 		if let childElement = xmlElement.elements(forName: "asset").first {
 			self.asset = AssetType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.asset = nil }
-		self.node = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
+		self.nodes = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
@@ -8969,7 +8965,7 @@ public final class VisualSceneType : ColladaType {
 	/**
 						The visual_scene element must have at least one node element.
 						*/
-	public let node: [NodeType]
+	public let nodes: [NodeType]
 
 	/**
 */
@@ -9169,7 +9165,7 @@ public final class Bind : ColladaType {
 		if let childElement = xmlElement.elements(forName: "asset").first {
 			self.asset = AssetType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.asset = nil }
-		self.node = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
+		self.nodes = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.evaluateScene = xmlElement.elements(forName: "evaluate_scene").map { EvaluateScene(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let id = self.id { sourcesToObjects[id] = self	} }

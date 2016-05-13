@@ -10,10 +10,6 @@ import Foundation
 import SGLOpenGL
 import SGLMath
 
-protocol Mesh {
-    func render()
-}
-
 enum AttributeType : Int {
     case Position = 0
     case Normal = 1
@@ -37,7 +33,7 @@ struct DrawCommand {
     let bufferOffsetInBytes : Int
 }
 
-class GLMesh : Mesh {
+final class GLMesh {
     
     private let _vertexArrayObject : GLuint
     private let _drawCommand : DrawCommand
