@@ -25,18 +25,30 @@ class Window {
     
     private let _glfwWindow : OpaquePointer!
     
-    typealias Size = (width: GLint, height: GLint)
+    struct Size {
+        let width: GLint
+        let height: GLint
+        
+        init(_ width: GLint, _ height: GLint) {
+            self.width = width
+            self.height = height
+        }
+        
+        var aspect : Float {
+            return Float(self.width) / Float(self.height)
+        }
+    }
     
     var dimensions : Size {
         var width : GLint = 0, height : GLint = 0
         glfwGetWindowSize(_glfwWindow, &width, &height)
-        return (width, height)
+        return Size(width, height)
     }
     
     var pixelDimensions : Size {
         var width : GLint = 0, height : GLint = 0
         glfwGetFramebufferSize(_glfwWindow, &width, &height)
-        return (width, height)
+        return Size(width, height)
     }
     
     var shouldClose : Bool {

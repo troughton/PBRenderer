@@ -1,5 +1,5 @@
 //
-//  RenderPAss.swift
+//  RenderPass.swift
 //  PBRenderer
 //
 //  Created by Thomas Roughton on 30/04/16.
