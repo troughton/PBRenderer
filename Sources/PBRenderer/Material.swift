@@ -28,7 +28,10 @@ struct DisneyBaseMaterial : Material {
     }
     
     var perceptuallyLinearRoughness : Float {
-        let oneMinusSmoothness = 1 - self.smoothness
-        return oneMinusSmoothness * oneMinusSmoothness
+        return 1 - self.smoothness
+    }
+    
+    var roughness : Float {
+        return self.perceptuallyLinearRoughness * self.perceptuallyLinearRoughness
     }
 }

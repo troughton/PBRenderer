@@ -38,12 +38,16 @@ class RenderWindow : Window {
     
     var mesh : GLMesh! = nil
     
+    var projectionMatrix: mat4 = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
+    var cameraNear: Float = 0.1
+    
     override init(name: String, width: Int, height: Int) {
+        
         super.init(name: name, width: width, height: height)
         
-        let (pixelWidth, pixelHeight) = self.pixelDimensions
-        self.lightAccumulationBuffer = Framebuffer.defaultFramebuffer(width: pixelWidth, height: pixelHeight)
-        self.renderContextState = RenderContextState(viewport: Rectangle(x: 0, y: 0, width: pixelWidth, height: pixelHeight))
+        let pixelDimensions = self.pixelDimensions
+        self.lightAccumulationBuffer = Framebuffer.defaultFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
+        self.renderContextState = RenderContextState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height))
         self.renderContextState.applyState()
         
         var depthState = DepthStencilState()
@@ -89,9 +93,9 @@ class RenderWindow : Window {
     }
     
     func setupGBuffer() {
-        let (pixelWidth, pixelHeight) = self.pixelDimensions
+        let pixelDimensions = self.pixelDimensions
         
-        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: Int(pixelWidth), height: Int(pixelHeight), mipmapped: false)
+        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: Int(pixelDimensions.width), height: Int(pixelDimensions.height), mipmapped: false)
         
         let colourTexture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
         
@@ -107,13 +111,22 @@ class RenderWindow : Window {
         normalAttachment.loadAction = .Clear
         colourAttachment.storeAction = .Store
         
-        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: Int(pixelWidth), height: Int(pixelHeight), mipmapped: false)
+        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: Int(pixelDimensions.width), height: Int(pixelDimensions.height), mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_STENCIL, type: GL_UNSIGNED_INT_24_8, data: nil as [Void]?)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.loadAction = .Clear
         depthAttachment.texture = depthTexture
         
-        self.gBuffer = Framebuffer(width: pixelWidth, height: pixelHeight, colourAttachments: [colourAttachment, normalAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
+        self.gBuffer = Framebuffer(width: pixelDimensions.width, height: pixelDimensions.height, colourAttachments: [colourAttachment, normalAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
+        
+    }
+    
+    func calculateNearPlaneSize(zNear: Float, windowDimensions : Size, projectionMatrix: mat4) -> vec3 {
+        let cameraAspect = windowDimensions.aspect;
+        let tanHalfFoV = 1/(projectionMatrix[0][0] * cameraAspect);
+        let y = tanHalfFoV * zNear;
+        let x = y * cameraAspect;
+        return vec3(x, y, -zNear)
     }
     
     override func preRender() {
@@ -125,8 +138,7 @@ class RenderWindow : Window {
         self.gBuffer.renderPass {
             self.geometryShader.withProgram { shader in
                 let modelToView = SGLMath.rotate(SGLMath.translate(mat4(1), vec3(0, 0, 5.0)), Float(glfwGetTime()), vec3(0, 1, 0))
-                let viewToProj = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
-                let transform = viewToProj * modelToView
+                let transform = self.projectionMatrix * modelToView
                 
                 shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
                 
@@ -136,10 +148,17 @@ class RenderWindow : Window {
         
         self.lightAccumulationBuffer.renderPass {
             self.lightPassShader.withProgram { shader in
-                self.gBuffer.colourAttachments[0]?.texture!.bindToIndex(1)
-                shader.setUniform(GLint(1), forProperty: StringShaderProperty("positionSampler"))
-                self.gBuffer.colourAttachments[1]?.texture!.bindToIndex(2)
-                shader.setUniform(GLint(2), forProperty: StringShaderProperty("normalSampler"))
+                self.gBuffer.colourAttachments[0]?.texture!.bindToIndex(0)
+                shader.setUniform(GLint(0), forProperty: StringShaderProperty("gBuffer0"))
+                self.gBuffer.depthAttachment.texture!.bindToIndex(1)
+                shader.setUniform(GLint(1), forProperty: StringShaderProperty("gBufferDepth"))
+                
+                let nearPlaneSize = self.calculateNearPlaneSize(zNear: self.cameraNear, windowDimensions: self.pixelDimensions, projectionMatrix: projectionMatrix)
+                shader.setUniform(nearPlaneSize.x, nearPlaneSize.y, nearPlaneSize.z, forProperty: StringShaderProperty("nearPlane"))
+                
+                shader.setUniform(0.0, 1.0, forProperty: StringShaderProperty("depthRange"))
+                
+                shader.setUniform(projectionMatrix[3][2], projectionMatrix[2][3], projectionMatrix[2][2], forProperty: StringShaderProperty("matrixTerms"))
                 
                 GLMesh.fullScreenQuad.render()
             }

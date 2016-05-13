@@ -1,14 +1,21 @@
 #version 410
 
-out vec4 outputColor;
-in vec2 uv;
+#include "CameraSpacePosition.glsl"
 
-uniform sampler2D positionSampler;
-uniform sampler2D normalSampler;
+out vec4 outputColour;
+in vec2 uv;
+in vec3 cameraDirection;
+
+uniform sampler2D gBuffer0;
+uniform sampler2D gBufferDepth;
+
+uniform vec2 depthRange;
+uniform vec3 matrixTerms;
 
 void main() {
+    vec3 cameraSpacePosition = CalculateCameraSpacePositionFromWindow(texture(gBufferDepth, uv).r, cameraDirection, depthRange, matrixTerms);
     
-    vec3 normal = texture(positionSampler, uv).xyz;
+    vec3 normal = texture(gBuffer0, uv).xyz;
     
-    outputColor = vec4(normal, 1);
+    outputColour = vec4(cameraSpacePosition.z, 0, 0, 1);
 }

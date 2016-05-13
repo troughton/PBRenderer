@@ -91,10 +91,10 @@ extension Shader {
             let endIndex = text.index(startIndex, offsetBy: includeFileNameRange.length)
             
             let includeFileName = text[startIndex..<endIndex]
-            let includeFile = try String(contentsOfFile: directory + "/" + includeFileName)
+            let includeFile = try String(contentsOfFile: (directory.isEmpty ? "" : directory + "/") + includeFileName)
             
             let matchStartIndex = text.index(text.startIndex, offsetBy: match.range.location)
-            let matchEndIndex = text.index(startIndex, offsetBy: match.range.length)
+            let matchEndIndex = text.index(matchStartIndex, offsetBy: match.range.length)
             
             text.replaceSubrange(matchStartIndex..<matchEndIndex, with: includeFile)
         }
