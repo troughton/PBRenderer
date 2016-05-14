@@ -10,12 +10,6 @@ import Foundation
 import ColladaParser
 import SGLOpenGL
 
-/** multiple must be a power of two. http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number */
-private func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
-    assert(multiple > 0 && ((multiple & (multiple - 1)) == 0));
-    return (numToRound + multiple - 1) & ~(multiple - 1);
-}
-
 private struct VertexLayout {
     var size : Int = 0
     var attributes = [AttributeType : (lengthInBytes: Int, offset: Int, glType: GLint)]()
@@ -128,6 +122,7 @@ extension GLMesh {
         var vertexLayout = VertexLayout()
         var vertices = [Vertex]()
         var vertexIndices = [Vertex : Int]()
+        var materialNames = [String?]()
         
         for primitive in colladaMesh.choice0 { //Construct vertex layout.
             if case let .triangles(tris) = primitive {
@@ -207,7 +202,9 @@ extension GLMesh {
                     }
                 }
                 
-                let indexBuffer = GPUBuffer<GLushort>(capacity: Int(tris.count * 3), data: indices, accessFrequency: .Static, accessType: .Draw)
+                let indexBuffer = GPUBuffer<GLushort>(capacity: Int(tris.count * 3), data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+                
+                materialNames.append(tris.material)
                 
                 return DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_SHORT, bufferOffsetInBytes: 0)
             
@@ -218,7 +215,7 @@ extension GLMesh {
         }
 
             
-        let vertexBuffer = GPUBuffer<UInt8>(capacity: vertices.count * vertexLayout.alignedSize, data: nil, accessFrequency: .Static, accessType: .Draw)
+        let vertexBuffer = GPUBuffer<UInt8>(capacity: vertices.count * vertexLayout.alignedSize, data: nil, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
         for (i, vertex) in vertices.enumerated() {
                 vertexBuffer.copyToIndex(i * vertexLayout.alignedSize, value: vertex.data, sizeInBytes: vertexLayout.size)
         }
@@ -233,8 +230,8 @@ extension GLMesh {
                 attributeTypesToVertexAttributes[attribute] = VertexAttribute(data: vertexBuffer, glTypeName: value.glType, componentsPerAttribute: Int(source.techniqueCommon!.accessor.param.count), isNormalised: false, strideInBytes: vertexLayout.alignedSize, bufferOffsetInBytes: offset)
             }
         
-        for drawCommand in drawCommands {
-            meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributeTypesToVertexAttributes))
+        for (drawCommand, material) in zip(drawCommands, materialNames) {
+            meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributeTypesToVertexAttributes, materialName: material))
         }
 
         return meshes

@@ -115,14 +115,20 @@ final class RenderWindow : Window {
     
     func renderNode(_ node: SceneNode, worldToCameraMatrix: mat4, cameraToClipMatrix: mat4, shader: Shader) {
         let transform = cameraToClipMatrix * worldToCameraMatrix * node.transform.nodeToWorldMatrix
-        
-        
         let normalTransform = node.transform.worldToNodeMatrix.upperLeft.transpose
         
         shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
         shader.setMatrix(normalTransform, forProperty: StringShaderProperty("normalModelToCameraMatrix"))
         
+        let materialBlockIndex = 0
+        
+        shader.setUniformBlockBindingPoints(forProperties: [StringShaderProperty("Material")])
+        
         for mesh in node.meshes {
+            if let materialName = mesh.materialName, let material = node.materials[materialName] {
+                material.bindToUniformBlockIndex(materialBlockIndex)
+            }
+            
             mesh.render()
         }
         
@@ -135,10 +141,10 @@ final class RenderWindow : Window {
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             let camera = self.scene.flattenedScene.flatMap { $0.cameras.first }.first!
+            let materialBuffer = self.scene.materialBuffer
             
             let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
             let cameraToClip = camera.projectionMatrix
-            
             
             for node in scene.nodes {
                 self.renderNode(node, worldToCameraMatrix: worldToCamera, cameraToClipMatrix: cameraToClip, shader: shader)
@@ -148,8 +154,12 @@ final class RenderWindow : Window {
         self.lightingPassState.renderPass { (framebuffer, shader) in
             self.gBufferPassState.framebuffer.colourAttachments[0]?.texture!.bindToIndex(0)
             shader.setUniform(GLint(0), forProperty: StringShaderProperty("gBuffer0"))
-            self.gBufferPassState.framebuffer.depthAttachment.texture!.bindToIndex(1)
-            shader.setUniform(GLint(1), forProperty: StringShaderProperty("gBufferDepth"))
+            
+            self.gBufferPassState.framebuffer.colourAttachments[1]?.texture!.bindToIndex(1)
+            shader.setUniform(GLint(1), forProperty: StringShaderProperty("gBuffer1"))
+            
+            self.gBufferPassState.framebuffer.depthAttachment.texture!.bindToIndex(2)
+            shader.setUniform(GLint(2), forProperty: StringShaderProperty("gBufferDepth"))
             
             let nearPlaneSize = self.calculateNearPlaneSize(zNear: self.cameraNear, windowDimensions: self.pixelDimensions, projectionMatrix: projectionMatrix)
             shader.setUniform(nearPlaneSize.x, nearPlaneSize.y, nearPlaneSize.z, forProperty: StringShaderProperty("nearPlane"))

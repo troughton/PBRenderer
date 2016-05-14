@@ -9,6 +9,14 @@
 import Foundation
 import SGLMath
 
+/** multiple must be a power of two. http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number */
+func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
+    assert(multiple > 0 && ((multiple & (multiple - 1)) == 0));
+    
+    let notTerm = ~(multiple - 1)
+    return (numToRound + multiple - 1) & notTerm;
+}
+
 func *<T:FloatingPoint>(lhs: Quaternion<T>, rhs: Quaternion<T>) -> Quaternion<T> {
     let w = lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z
     var x = lhs.w * rhs.x + lhs.x * rhs.w

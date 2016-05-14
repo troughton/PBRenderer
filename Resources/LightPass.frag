@@ -8,6 +8,7 @@ in vec2 uv;
 in vec3 cameraDirection;
 
 uniform sampler2D gBuffer0;
+uniform sampler2D gBuffer1;
 uniform sampler2D gBufferDepth;
 
 uniform vec2 depthRange;
@@ -18,5 +19,5 @@ void main() {
     
     vec3 normal = normalize(decode(texture(gBuffer0, uv).xy));
     
-    outputColour = vec4(vec3(max(dot(normal, vec3(0, 0, 1)), 0)), 1);
+    outputColour = vec4(max(dot(normal, vec3(0, 0, 1)), 0) * texture(gBuffer1, uv).xyz, 1);
 }

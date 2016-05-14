@@ -3560,7 +3560,7 @@ extension MaterialDetailType {
     }
     
     public var diffuse : FxCommonColorOrTextureType? {
-        return .color(sid: "", fxColorType: [0, 0, 0, 0])
+        return .color(sid: "", fxColorType: [0.5, 0.5, 0.5, 1])
     }
     
     public var shininess : FxCommonFloatOrParamType? {
