@@ -46,6 +46,8 @@ struct RenderPassColourAttachment : RenderPassAttachment {
     var loadAction : LoadAction = .DontCare
     var storeAction : StoreAction = .DontCare
     
+    var blendState = BlendState()
+    
     init(clearColour : vec4) {
         self.clearColour = clearColour
         self.texture = nil
@@ -177,11 +179,10 @@ public class Framebuffer {
         }
     }
     
-    func renderPass<T>(_ function: @noescape () throws -> T) rethrows -> T {
+    func renderPass(_ function: @noescape () -> ()){
         self.beginRenderPass()
-        let value = try function()
+        function()
         self.endRenderPass()
-        return value
     }
     
     private func beginRenderPass() {
@@ -202,6 +203,8 @@ public class Framebuffer {
                 glClearColor(attachment!.clearColour.r, attachment!.clearColour.g, attachment!.clearColour.b, attachment!.clearColour.a)
                 glClear(GL_COLOR_BUFFER_BIT)
             }
+            
+            attachment!.blendState.applyState(bufferIndex: GLuint(i))
         }
         
         if _glFramebuffer != nil {

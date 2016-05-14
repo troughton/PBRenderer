@@ -28,7 +28,7 @@ struct ColourWriteMask : OptionSet {
     static let All   = ColourWriteMask(rawValue: 0xf)
 }
 
-struct ColourAttachment {
+struct BlendState {
     
     /*! Enable blending.  Defaults to NO. */
     var isBlendingEnabled: Bool = false
@@ -72,59 +72,6 @@ struct ColourAttachment {
         
         glColorMaski(bufferIndex, writeMask.contains(.Red), writeMask.contains(.Green), writeMask.contains(.Blue), writeMask.contains(.Alpha))
     }
-}
-
-struct PipelineState {
-    
-    var colourAttachments : [ColourAttachment?]
-    
-    var alphaToCoverageEnabled : Bool = false
-    var alphaToOneEnabled : Bool = false
-    var rasterisationEnabled : Bool = true
-    
-    var multisamplingEnabled : Bool = false
-    
-    init(colourAttachments: [ColourAttachment?]) {
-        self.colourAttachments = colourAttachments
-    }
-    
-    func applyState() {
-        
-        for (i, colourAttachment) in colourAttachments.enumerated() where colourAttachment != nil {
-            colourAttachment!.applyState(bufferIndex: GLuint(i))
-        }
-        
-        if multisamplingEnabled {
-            glEnable(GL_MULTISAMPLE)
-        } else {
-            glDisable(GL_MULTISAMPLE)
-        }
-        
-        if alphaToCoverageEnabled {
-            glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE)
-        } else {
-            glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE)
-        }
-        
-        if alphaToOneEnabled {
-            glEnable(GL_SAMPLE_ALPHA_TO_ONE)
-        } else {
-            glDisable(GL_SAMPLE_ALPHA_TO_ONE)
-        }
-        
-        if rasterisationEnabled {
-            glDisable(GL_RASTERIZER_DISCARD)
-        } else {
-            glEnable(GL_RASTERIZER_DISCARD)
-        }
-        
-        var error = glGetError()
-        while error != 0 {
-            print("OpenGL Error: \(error)")
-            error = glGetError()
-        }
-    }
-    
 }
 
 struct StencilState {
@@ -217,7 +164,7 @@ struct Rectangle {
     let height: GLint
 }
 
-struct RenderContextState {
+struct PipelineState {
     
     var cullMode : GLenum = GL_NONE
     
@@ -238,8 +185,21 @@ struct RenderContextState {
         
     var viewport : Rectangle
     
-    init(viewport: Rectangle) {
+    var alphaToCoverageEnabled : Bool = false
+    var alphaToOneEnabled : Bool = false
+    var rasterisationEnabled : Bool = true
+    
+    var multisamplingEnabled : Bool = false
+    
+    var framebuffer : Framebuffer
+    var shader : Shader
+    var depthStencilState : DepthStencilState
+    
+    init(viewport: Rectangle, framebuffer: Framebuffer, shader: Shader, depthStencilState: DepthStencilState) {
         self.viewport = viewport
+        self.framebuffer = framebuffer
+        self.shader = shader
+        self.depthStencilState = depthStencilState
     }
     
     func applyState() {
@@ -250,7 +210,7 @@ struct RenderContextState {
             glCullFace(cullMode)
         }
         
-         glBlendColor(blendColour.r, blendColour.g, blendColour.b, blendColour.a)
+        glBlendColor(blendColour.r, blendColour.g, blendColour.b, blendColour.a)
         
         switch depthClipMode {
         case .Clip:
@@ -272,10 +232,46 @@ struct RenderContextState {
      
         glViewport(GLint(viewport.x), GLint(viewport.y), GLsizei(viewport.width), GLsizei(viewport.height))
         
+        if multisamplingEnabled {
+            glEnable(GL_MULTISAMPLE)
+        } else {
+            glDisable(GL_MULTISAMPLE)
+        }
+        
+        if alphaToCoverageEnabled {
+            glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE)
+        } else {
+            glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE)
+        }
+        
+        if alphaToOneEnabled {
+            glEnable(GL_SAMPLE_ALPHA_TO_ONE)
+        } else {
+            glDisable(GL_SAMPLE_ALPHA_TO_ONE)
+        }
+        
+        if rasterisationEnabled {
+            glDisable(GL_RASTERIZER_DISCARD)
+        } else {
+            glEnable(GL_RASTERIZER_DISCARD)
+        }
+        
+        self.depthStencilState.applyState()
+        
         var error = glGetError()
         while error != 0 {
             print("OpenGL Error: \(error)")
             error = glGetError()
+        }
+    }
+    
+    func renderPass(_ function: @noescape (Framebuffer, Shader) -> ()) {
+        self.applyState()
+        
+        self.framebuffer.renderPass { 
+            self.shader.withProgram({ (shader) in
+                function(self.framebuffer, shader)
+            })
         }
     }
 }

@@ -53,6 +53,16 @@ private class Vertex : Hashable {
     let layout : VertexLayout
     let data : UnsafeMutablePointer<UInt8>!
     
+    lazy var hashValue : Int = {
+        var h = 2166136261;
+        
+        for i in 0..<self.layout.size {
+            h = (h &* 16777619) ^ Int(self.data.advanced(by: i).pointee);
+        }
+        
+        return h;
+    }() //can guarantee that hashValue isn't accessed until the vertex has been fully initialised
+    
     init(layout: VertexLayout) {
         self.layout = layout
         self.data = UnsafeMutablePointer<UInt8>(calloc(1, layout.size))
@@ -64,16 +74,7 @@ private class Vertex : Hashable {
         }
         
         memcpy(self.data.advanced(by: offset), value, lengthInBytes)
-    }
-    
-    var hashValue : Int {
-        var h : Int = 2166136261;
-        
-        for i in 0..<layout.size {
-            h = (h &* 16777619) ^ Int(self.data.advanced(by: i).pointee);
-        }
-        
-        return h;
+
     }
     
     deinit {
@@ -123,11 +124,10 @@ extension GLMesh {
     static func meshesFromCollada(_ colladaMesh: MeshType, root: Collada) -> [GLMesh] {
         var attributesToSources = [AttributeType : (offset: Int, source: SourceType)]()
         
-        
-        //TODO: Shared vertices between meshes. Requires a different buffer for each vertex layout and precomputing the size of the array for each layout to contain the vertices of every mesh.
         var meshes = [GLMesh]()
         var vertexLayout = VertexLayout()
         var vertices = [Vertex]()
+        var vertexIndices = [Vertex : Int]()
         
         for primitive in colladaMesh.choice0 { //Construct vertex layout.
             if case let .triangles(tris) = primitive {
@@ -196,10 +196,11 @@ extension GLMesh {
                         }
                         
                         
-                        if let existingIndex = vertices.index(of: vertex) {
+                        if let existingIndex = vertexIndices[vertex] {
                             indices.append(UInt16(existingIndex))
                             
                         } else {
+                            vertexIndices[vertex] = vertices.count
                             indices.append(UInt16(vertices.count))
                             vertices.append(vertex)
                         }

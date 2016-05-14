@@ -1,6 +1,7 @@
 #version 410
 
 #include "CameraSpacePosition.glsl"
+#include "Encoding.glsl"
 
 out vec4 outputColour;
 in vec2 uv;
@@ -15,7 +16,7 @@ uniform vec3 matrixTerms;
 void main() {
     vec3 cameraSpacePosition = CalculateCameraSpacePositionFromWindow(texture(gBufferDepth, uv).r, cameraDirection, depthRange, matrixTerms);
     
-    vec3 normal = texture(gBuffer0, uv).xyz;
+    vec3 normal = normalize(decode(texture(gBuffer0, uv).xy));
     
-    outputColour = vec4(normal, 1);
+    outputColour = vec4(vec3(max(dot(normal, vec3(0, 0, 1)), 0)), 1);
 }

@@ -24,6 +24,59 @@ extension Matrix4x4 {
 final class Scene {
     
     let nodes : [SceneNode]
+    let materialBuffer : GPUBuffer<Material>
+    
+    static func parseMaterialsFromCollada(_ root: Collada) -> [String : Material] {
+        var materials = [String : Material]()
+        
+        for materialLibrary in root.libraryMaterials {
+            for mat in materialLibrary.material {
+                let effect = root[mat.instanceEffect.url] as! EffectType
+                if let technique = effect.profileCommon?.technique {
+                    var material = Material()
+                    
+                    let materialParams : MaterialDetailType
+                    switch technique.choice0 {
+                    case .blinn(let blinn):
+                        materialParams = blinn
+                    case .lambert(let lambert):
+                        materialParams = lambert
+                    case .constant(let constant):
+                        materialParams = constant
+                    case .phong(let phong):
+                        materialParams = phong
+                    }
+                    
+                    if let diffuse = materialParams.diffuse {
+                        if case let .color(_, colour) = diffuse {
+                            material.baseColour = vec4(colour).xyz
+                        }
+                    }
+                    if let reflectivity = materialParams.reflectivity {
+                        if case let .float(_, value) = reflectivity {
+                            material.reflectance = value
+                        }
+                    }
+                    if let shininess = materialParams.shininess {
+                        if case let .float(_, value) = shininess {
+                            material.smoothness = value
+                        }
+                    }
+                    
+                    if let specular = materialParams.specular {
+                        if case let .color(_, colour) = specular {
+                            material.metalMask = vec4(colour).a
+                        }
+                    }
+                    
+                    materials[mat.id ?? effect.id] = material
+                }
+            }
+        }
+        
+        return materials
+        
+    }
     
     init(fromCollada root: Collada) {
         guard let scene = root.scene?.instanceVisualScene else { fatalError("Why is there no scene in your scene graph?") }
@@ -35,6 +88,10 @@ final class Scene {
             nodes.append(SceneNode(colladaNode: node, root: root, parentTransform: nil))
         }
         self.nodes = nodes
+        
+        let materials = Scene.parseMaterialsFromCollada(root)
+        
+        self.materialBuffer = GPUBuffer(capacity: materials.values.count, data: [Material](materials.values), accessFrequency: .Dynamic, accessType: .Draw)
     }
 
     var flattenedScene : [SceneNode] {

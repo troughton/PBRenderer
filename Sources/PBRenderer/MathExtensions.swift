@@ -50,6 +50,14 @@ func *<T>(quaternion: Quaternion<T>, vector: Vector3<T>) -> Vector3<T> {
     return Vector3<T>(rotatedQuaternion.x, rotatedQuaternion.y, rotatedQuaternion.z);
 }
 
+extension Matrix4x4 {
+    var upperLeft : Matrix3x3<T> {
+        return Matrix3x3(self[0][0], self[0][1], self[0][2],
+                            self[1][0], self[1][1], self[1][2],
+                            self[2][0], self[2][1], self[2][2])
+    }
+}
+
 extension Quaternion where T : FloatingPoint {
     init(angle: T, axis: Vector3<T>) {
         let halfAngle = angle * 0.5;

@@ -35,11 +35,13 @@ struct DrawCommand {
 
 final class GLMesh {
     
+    let material : GPUBufferElement<Material>?
+    
     private let _vertexArrayObject : GLuint
     private let _drawCommand : DrawCommand
     private let _attributes : [AttributeType : VertexAttribute]
     
-    init(drawCommand: DrawCommand, attributes: [AttributeType : VertexAttribute]) {
+    init(drawCommand: DrawCommand, attributes: [AttributeType : VertexAttribute], material: GPUBufferElement<Material>? = nil) {
         _attributes = attributes
         
         var vao = GLuint(0)
@@ -62,6 +64,8 @@ final class GLMesh {
         glBindVertexArray(0);
         
         _vertexArrayObject = vao
+        
+        self.material = material
     }
     
     func render() {

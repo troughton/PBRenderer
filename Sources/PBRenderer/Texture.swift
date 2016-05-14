@@ -160,7 +160,6 @@ class Texture {
     private let _glTexture : GLuint!
     private let _renderBuffer : GLuint!
     
-    
     let descriptor : TextureDescriptor
     
     let buffer : GPUBuffer<UInt8>?

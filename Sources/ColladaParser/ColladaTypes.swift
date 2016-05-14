@@ -3408,25 +3408,43 @@ public final class Binary : ColladaType {
 }
 /**
 */
-public final class FxCommonFloatOrParamType : ColladaType {
+public enum FxCommonFloatOrParamType : ColladaType {
 
+    case float(sid: String?, value: FloatType)
+    case param(ref: String)
+    
+    
+    init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        if let childElement = xmlElement.elements(forName: "float").first {
+            self = .float(sid: childElement.attribute(forName: "sid")?.stringValue!, value: FloatType(childElement.stringValue!)!)
+        } else if let childElement = xmlElement.elements(forName: "param").first {
+            self = .param(ref: childElement.attribute(forName: "ref")!.stringValue!)
+        } else {
+            fatalError()
+        }
+    }
 
-
-
-
-	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
-	}
 
 }
 /**
 */
-public final class FxCommonColorOrTextureType : ColladaType {
+public enum FxCommonColorOrTextureType : ColladaType {
 
-
-
+    case color(sid: String?, fxColorType: FxColorType)
+    case param(ref: String)
+    case texture(texture: String, texCoord: String, extra: [ExtraType])
 
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        if let childElement = xmlElement.elements(forName: "color").first {
+            self = .color(sid: childElement.attribute(forName: "sid")?.stringValue!, fxColorType: FxColorType(childElement.stringValue!)!)
+        } else if let childElement = xmlElement.elements(forName: "param").first {
+	     	self = .param(ref: childElement.attribute(forName: "ref")!.stringValue!)   
+	    } else if let childElement = xmlElement.elements(forName: "texture").first {
+            self = .texture(texture: childElement.attribute(forName: "texture")!.stringValue!, texCoord: childElement.attribute(forName: "texcoord")!.stringValue!, extra: childElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) })
+		} else {
+			fatalError()
+		}
 	}
 
 }
@@ -3490,7 +3508,7 @@ return nil
 	}
 
 	/***/
-	public let choice0: FxCommonNewparamTypeChoice0
+	public let choice0: FxCommonNewparamTypeChoice0?
 
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
@@ -3498,10 +3516,58 @@ return nil
 		if let childElement = xmlElement.elements(forName: "semantic").first {
 			self.semantic = String(childElement.stringValue!)
 		} else { self.semantic = nil }
-		self.choice0 = FxCommonNewparamTypeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
+		self.choice0 = FxCommonNewparamTypeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)
 	}
 
 }
+
+public protocol MaterialDetailType {
+    var emission: FxCommonColorOrTextureType? { get }
+    
+    
+    /***/
+    var reflective: FxCommonColorOrTextureType? { get }
+    
+    
+    /***/
+    var reflectivity: FxCommonFloatOrParamType? { get }
+    
+    
+    /***/
+    var transparent: FxCommonTransparentType? { get }
+    
+    
+    /***/
+    var transparency: FxCommonFloatOrParamType? { get }
+    
+    
+    /***/
+    var indexOfRefraction: FxCommonFloatOrParamType? { get }
+    
+    /***/
+    var specular: FxCommonColorOrTextureType? { get }
+    
+    
+    /***/
+    var shininess: FxCommonFloatOrParamType? { get }
+    
+    var diffuse: FxCommonColorOrTextureType? { get }
+}
+
+extension MaterialDetailType {
+    public var specular : FxCommonColorOrTextureType? {
+        return .color(sid: "", fxColorType: [0, 0, 0, 0])
+    }
+    
+    public var diffuse : FxCommonColorOrTextureType? {
+        return .color(sid: "", fxColorType: [0, 0, 0, 0])
+    }
+    
+    public var shininess : FxCommonFloatOrParamType? {
+        return .float(sid: "", value: 0)
+    }
+}
+
 /**
 			Opens a block of COMMON platform-specific data types and technique declarations.
 			*/
@@ -3546,7 +3612,10 @@ public final class Technique : ColladaType {
 	public let extra: [ExtraType]
 /**
 */
-public final class Constant : ColladaType {
+    
+   
+    
+public final class Constant : ColladaType, MaterialDetailType {
 
 
 	/***/
@@ -3598,7 +3667,7 @@ public final class Constant : ColladaType {
 }
 /**
 */
-public final class Lambert : ColladaType {
+public final class Lambert : ColladaType, MaterialDetailType {
 
 
 	/***/
@@ -3664,7 +3733,7 @@ public final class Lambert : ColladaType {
 }
 /**
 */
-public final class Phong : ColladaType {
+public final class Phong : ColladaType, MaterialDetailType {
 
 
 	/***/
@@ -3744,7 +3813,7 @@ public final class Phong : ColladaType {
 }
 /**
 */
-public final class Blinn : ColladaType {
+public final class Blinn : ColladaType, MaterialDetailType {
 
 
 	/***/
@@ -5566,7 +5635,7 @@ public final class EffectType : ColladaType {
 						*/
 	public let extra: [ExtraType]
 
-
+    public let profileCommon : ProfileCommonType?
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.id = String(xmlElement.attribute(forName: "id")!.stringValue!)
@@ -5579,7 +5648,13 @@ public final class EffectType : ColladaType {
 		self.annotate = xmlElement.elements(forName: "annotate").map { FxAnnotateType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.newparam = xmlElement.elements(forName: "newparam").map { FxNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		sourcesToObjects[self.id] = self }
+        if let childElement = xmlElement.elements(forName: "profile_COMMON").first {
+            self.profileCommon = ProfileCommonType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
+        } else {
+            self.profileCommon = nil
+        }
+		sourcesToObjects[self.id] = self
+    }
 
 }
 /**

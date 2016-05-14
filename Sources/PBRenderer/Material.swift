@@ -9,19 +9,13 @@
 import Foundation
 import SGLMath
 
-protocol Material {
-    var materialID : Int { get }
-}
-
 //See p13 of Moving Frostbite to PBR course notes
-struct DisneyBaseMaterial : Material {
-
-    let materialID: Int = 0
+struct Material {
     
-    let baseColour : vec3
-    let smoothness : Float
-    let metalMask : Float
-    let reflectance : Float
+    var baseColour : vec3 = vec3(0.5)
+    var smoothness : Float = 0.5
+    var metalMask : Float = 0
+    var reflectance : Float = 0.5
     
     var f0 : Float {
         return 0.16 * reflectance * reflectance

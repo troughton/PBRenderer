@@ -20,7 +20,6 @@ class Window {
         }
     }
     
-    
     private static var glfwWindowsToWindows = [OpaquePointer : Window]()
     
     private let _glfwWindow : OpaquePointer!
@@ -71,10 +70,16 @@ class Window {
             let window = Window.glfwWindowsToWindows[glfwWindow!]!
             window.keyAction(key: key, scanCode: scanCode, action: action, modifiers: modifiers)
         }
+        
+        glfwSetFramebufferSizeCallback(_glfwWindow) { (glfwWindow, width, height) in
+            let window = Window.glfwWindowsToWindows[glfwWindow!]!
+            window.framebufferDidResize(width: width, height: height)
+        }
     }
     
     deinit {
         glfwSetWindowShouldClose(_glfwWindow, 1)
+        Window.glfwWindowsToWindows[_glfwWindow] = nil
     }
     
     final func update() {
@@ -98,6 +103,10 @@ class Window {
     }
     
     func keyAction(key: Int32, scanCode: Int32, action: Int32, modifiers: Int32) {
+        
+    }
+    
+    func framebufferDidResize(width: Int32, height: Int32) {
         
     }
 }

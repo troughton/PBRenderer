@@ -114,6 +114,27 @@ private final class GPUBufferImpl {
 
 }
 
+class GPUBufferElement<T> {
+    let buffer : GPUBuffer<T>
+    private let _bufferIndex : Int
+    
+    private init(viewOfIndex index: Int, onBuffer buffer: GPUBuffer<T>) {
+        _bufferIndex = index
+        self.buffer = buffer
+    }
+    
+    func withElement<U>(_ function: @noescape (inout T) throws -> U) rethrows -> U {
+        var element = self.buffer[_bufferIndex]
+        
+        let result = try function(&element)
+        
+        self.buffer[_bufferIndex] = element
+        self.buffer.didModifyRange(_bufferIndex..<_bufferIndex + 1)
+        
+        return result
+    }
+}
+
 public final class GPUBuffer<T> {
     
     public let capacity : Int
@@ -137,6 +158,12 @@ public final class GPUBuffer<T> {
         }
         set(newValue) {
             UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: idx).pointee = newValue
+        }
+    }
+    
+    subscript(viewForIndex index: Int) -> GPUBufferElement<T> {
+        get {
+            return GPUBufferElement(viewOfIndex: index, onBuffer: self)
         }
     }
     
