@@ -118,11 +118,11 @@ final class RenderWindow : Window {
         let normalTransform = node.transform.worldToNodeMatrix.upperLeft.transpose
         
         shader.setMatrix(transform, forProperty: BasicShaderProperty.mvp)
-        shader.setMatrix(normalTransform, forProperty: StringShaderProperty("normalModelToCameraMatrix"))
+        shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToCameraMatrix)
         
         let materialBlockIndex = 0
         
-        shader.setUniformBlockBindingPoints(forProperties: [StringShaderProperty("Material")])
+        shader.setUniformBlockBindingPoints(forProperties: [BasicShaderProperty.Material])
         
         for mesh in node.meshes {
             if let materialName = mesh.materialName, let material = node.materials[materialName] {
@@ -141,7 +141,6 @@ final class RenderWindow : Window {
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             let camera = self.scene.flattenedScene.flatMap { $0.cameras.first }.first!
-            let materialBuffer = self.scene.materialBuffer
             
             let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
             let cameraToClip = camera.projectionMatrix
@@ -153,20 +152,20 @@ final class RenderWindow : Window {
         
         self.lightingPassState.renderPass { (framebuffer, shader) in
             self.gBufferPassState.framebuffer.colourAttachments[0]?.texture!.bindToIndex(0)
-            shader.setUniform(GLint(0), forProperty: StringShaderProperty("gBuffer0"))
+            shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.GBuffer0)
             
             self.gBufferPassState.framebuffer.colourAttachments[1]?.texture!.bindToIndex(1)
-            shader.setUniform(GLint(1), forProperty: StringShaderProperty("gBuffer1"))
+            shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.GBuffer1)
             
             self.gBufferPassState.framebuffer.depthAttachment.texture!.bindToIndex(2)
-            shader.setUniform(GLint(2), forProperty: StringShaderProperty("gBufferDepth"))
+            shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.GBufferDepth)
             
             let nearPlaneSize = self.calculateNearPlaneSize(zNear: self.cameraNear, windowDimensions: self.pixelDimensions, projectionMatrix: projectionMatrix)
-            shader.setUniform(nearPlaneSize.x, nearPlaneSize.y, nearPlaneSize.z, forProperty: StringShaderProperty("nearPlane"))
+            shader.setUniform(nearPlaneSize.x, nearPlaneSize.y, nearPlaneSize.z, forProperty: LightPassShaderProperty.NearPlane)
             
-            shader.setUniform(0.0, 1.0, forProperty: StringShaderProperty("depthRange"))
+            shader.setUniform(0.0, 1.0, forProperty: LightPassShaderProperty.DepthRange)
             
-            shader.setUniform(projectionMatrix[3][2], projectionMatrix[2][3], projectionMatrix[2][2], forProperty: StringShaderProperty("matrixTerms"))
+            shader.setUniform(projectionMatrix[3][2], projectionMatrix[2][3], projectionMatrix[2][2], forProperty: LightPassShaderProperty.MatrixTerms)
             
             GLMesh.fullScreenQuad.render()
 

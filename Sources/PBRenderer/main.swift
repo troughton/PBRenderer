@@ -4,14 +4,6 @@ import SGLOpenGL
 import SGLMath
 import ColladaParser
 
-enum BasicShaderProperty : String, ShaderProperty {
-    case mvp
-    
-    var name : String {
-        return self.rawValue
-    }
-}
-
 let mainWindow : Window
 
 // The *main* function; where our program begins running

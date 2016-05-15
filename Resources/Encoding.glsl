@@ -12,3 +12,15 @@ vec3 decode(vec2 enc) {
     n.z = 1-f/2;
     return n;
 }
+
+#include "MaterialData.glsl"
+
+MaterialData decodeMaterialFromGBuffers(vec4 gBuffer0, vec4 gBuffer1, vec4 gBuffer2) {
+    MaterialData data;
+    data.smoothness = gBuffer0.b;
+    data.baseColour = gBuffer1.rgb;
+    data.metalMask = gBuffer2.g;
+    data.reflectance = gBuffer2.b;
+    
+    return data;
+}

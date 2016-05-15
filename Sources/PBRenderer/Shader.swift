@@ -19,6 +19,7 @@ struct StringShaderProperty : ShaderProperty {
     
     init(_ value: String) {
         self.name = value
+        print("Warning: using string literal for property \(value)")
     }
 }
 
@@ -83,6 +84,8 @@ extension Shader {
         
         let regex = try NSRegularExpression(pattern: "#include \"(.+)\"", options: [])
         
+        var includedFiles = Set<String>()
+        
         while let match = regex.firstMatch(in: text, options: [], range: NSMakeRange(0, text.characters.count)) {
             let includeFileNameRange = match.range(at: 1)
             
@@ -95,7 +98,9 @@ extension Shader {
             let matchStartIndex = text.index(text.startIndex, offsetBy: match.range.location)
             let matchEndIndex = text.index(matchStartIndex, offsetBy: match.range.length)
             
-            text.replaceSubrange(matchStartIndex..<matchEndIndex, with: includeFile)
+            text.replaceSubrange(matchStartIndex..<matchEndIndex, with: includedFiles.contains(includeFileName) ? "" : includeFile)
+            
+            includedFiles.insert(includeFileName)
         }
         
         return text
@@ -180,7 +185,7 @@ extension Shader {
                 case GL_FRAGMENT_SHADER: strShaderType = "fragment";
                 default: strShaderType = "";
             }
-            fatalError("Compile failure in \(strShaderType) shader:\n\(errorString)")
+            fatalError("Compile failure in \(strShaderType) shader:\n\(errorString)\nShader is:\n \(text)")
         }
         return shader;
     }

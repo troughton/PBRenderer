@@ -36,5 +36,4 @@ struct Light {
     var intensity : Candelas
     
     let falloffRadius : Float
-    
 }
