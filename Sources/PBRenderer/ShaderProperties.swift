@@ -30,9 +30,18 @@ enum LightPassShaderProperty: String, ShaderProperty {
     }
 }
 
+enum CompositionPassShaderProperty: String, ShaderProperty {
+    case LightAccumulationBuffer = "lightAccumulationBuffer"
+    
+    var name : String {
+        return self.rawValue
+    }
+}
+
 enum BasicShaderProperty : String, ShaderProperty {
     case mvp
     case NormalModelToCameraMatrix = "normalModelToCameraMatrix"
+    case ModelToCameraMatrix = "modelToCameraMatrix"
     case Material
     
     var name : String {

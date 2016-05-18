@@ -57,22 +57,42 @@ extension Scene {
                     if let diffuse = materialParams.diffuse {
                         if case let .color(_, colour) = diffuse {
                             material.baseColour = vec4(colour).xyz
+                            
+                            if _isDebugAssertConfiguration() && clamp(material.baseColour, 0, 1) != material.baseColour {
+                                print("Warning: material colour should be in the range [0, 1]")
+                                material.baseColour = clamp(material.baseColour, vec3(0), vec3(1))
+                            }
                         }
                     }
                     if let reflectivity = materialParams.reflectivity {
                         if case let .float(_, value) = reflectivity {
                             material.reflectance = value
                         }
+                        if _isDebugAssertConfiguration() && material.reflectance >= 0 && material.reflectance <= 1 {
+                            print("Warning: material reflectance should be in the range [0, 1]")
+                            material.reflectance = clamp(material.reflectance, min: 0, max: 1)
+                        }
+                        
                     }
                     if let shininess = materialParams.shininess {
                         if case let .float(_, value) = shininess {
                             material.smoothness = value
+                        }
+                        
+                        if _isDebugAssertConfiguration() && material.smoothness >= 0 && material.smoothness <= 1 {
+                            print("Warning: material smoothness should be in the range [0, 1]")
+                            material.smoothness = clamp(material.smoothness, min: 0, max: 1)
                         }
                     }
                     
                     if let specular = materialParams.specular {
                         if case let .color(_, colour) = specular {
                             material.metalMask = vec4(colour).a
+                        }
+                        
+                        if _isDebugAssertConfiguration() && material.metalMask >= 0 && material.metalMask <= 1 {
+                            print("Warning: material MetalMask should be in the range [0, 1]")
+                            material.metalMask = clamp(material.metalMask, min: 0, max: 1)
                         }
                     }
                     

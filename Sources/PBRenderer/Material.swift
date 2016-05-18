@@ -13,6 +13,7 @@ import SGLMath
 struct Material {
     
     var baseColour : vec3 = vec3(0.5)
+    
     var smoothness : Float = 0.5
     var metalMask : Float = 0
     var reflectance : Float = 0.5

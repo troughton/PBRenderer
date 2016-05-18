@@ -86,4 +86,23 @@ final class GLMesh {
         
         return GLMesh(drawCommand: drawCommand, attributes: vertexAttributes)
     }()
+    
+    static let unitBox : GLMesh = {
+        let vertices = [vec3(-0.5, -0.5, 0.5),
+            vec3(-0.5, -0.5, -0.5),
+            vec3(-0.5, 0.5, -0.5),
+            vec3(-0.5, 0.5, 0.5),
+            vec3(0.5, -0.5, 0.5),
+            vec3(0.5, -0.5, -0.5),
+            vec3(0.5, 0.5, -0.5),
+            vec3(0.5, 0.5, 0.5)]
+        let indices : [UInt8] = [ 3, 2, 1, 2, 1, 0, 1, 5, 4, 5, 4, 0, 2, 6, 5, 6, 5, 1, 7, 6, 2, 6, 2, 3, 4, 7, 3, 7, 3, 0, 5, 6, 7, 6, 7, 4]
+        let vertexBuffer = GPUBuffer(capacity: vertices.count, data: vertices, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        let indexBuffer = GPUBuffer(capacity: indices.count, data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        
+        let vertexAttributes = [AttributeType.Position : VertexAttribute(data: GPUBuffer<UInt8>(vertexBuffer), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, strideInBytes: 0, bufferOffsetInBytes: 0)]
+        let drawCommand = DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: indices.count, glElementType: GL_UNSIGNED_BYTE, bufferOffsetInBytes: 0)
+        
+        return GLMesh(drawCommand: drawCommand, attributes: vertexAttributes)
+    }()
 }

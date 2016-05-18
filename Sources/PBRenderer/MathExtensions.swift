@@ -17,6 +17,16 @@ func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
     return (numToRound + multiple - 1) & notTerm;
 }
 
+func clamp<T : ArithmeticType>(_ x: T, min: T, max: T) -> T {
+    if x < min {
+        return min
+    } else if x > max {
+        return max
+    } else {
+        return x
+    }
+}
+
 func *<T:FloatingPoint>(lhs: Quaternion<T>, rhs: Quaternion<T>) -> Quaternion<T> {
     let w = lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z
     var x = lhs.w * rhs.x + lhs.x * rhs.w

@@ -155,6 +155,10 @@ public class GPUBufferElement<T> {
         return result
     }
     
+    var readOnlyElement : T {
+        return self.buffer[_bufferIndex]
+    }
+    
     func bindToUniformBlockIndex(_ index: Int) {
         self.buffer.bindToUniformBlockIndex(index, elementOffset: _bufferIndex)
     }

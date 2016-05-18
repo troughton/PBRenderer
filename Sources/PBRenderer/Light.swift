@@ -28,12 +28,103 @@ func luminanceFromEV(_ ev: ExposureValue) -> CandelasPerMetreSq {
 
 enum LightColourMode {
     case Temperature(Kelvin)
-    case Colour(vec4)
+    case Colour(vec3)
+    
+    //Adapted from http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
+    func kelvinToRGB(_ kelvin: Kelvin) -> vec3 {
+        let temperature = kelvin / 100.0
+        
+        var colour = vec3(0)
+        
+        
+        if temperature <= 66.0 {
+            colour.r = 255.0
+        } else {
+            colour.r = temperature - 60.0
+            colour.r = 329.698727446 * pow(colour.r, -0.1332047592)
+            colour.r = clamp(colour.r, min: 0.0, max: 255.0)
+        }
+        
+        if temperature <= 66.0 {
+            colour.g = temperature
+            colour.g = 99.4708025861 * log(colour.g) - 161.1195681661
+        } else {
+            colour.g = temperature - 60.0
+            colour.g = 288.1221695283 * pow(colour.g, -0.0755148492)
+        }
+        colour.g = clamp(colour.g, min: 0.0, max: 255.0)
+        
+        
+        if temperature >= 66.0 {
+            colour.b = 255.0
+        } else {
+            if temperature <= 19.0 {
+                colour.b = 0.0
+            } else {
+                colour.b = temperature - 10.0
+                colour.b = 138.5177312231 * log(colour.b) - 305.0447927307
+                colour.b = clamp(colour.b, min: 0.0, max: 255.0)
+            }
+        }
+
+        return colour * vec3(1.0/255.0)
+    }
+    
+    var rgbColour : vec3 {
+        switch self {
+        case .Colour(let colour):
+            return colour
+        case .Temperature(let kelvin):
+            return kelvinToRGB(kelvin)
+        }
+    }
+}
+
+enum LightType {
+    case Point
+    case Spot(innerCutoff: Float, outerCutoff: Float)
+    case Directional(direction: vec3)
 }
 
 struct Light {
-    var colour : LightColourMode
-    var intensity : Candelas
+    var sceneNode : SceneNode
     
-    let falloffRadius : Float
+    let type : LightType
+    var colour : LightColourMode {
+        didSet {
+            self.backingGPULight.withElement { $0.colour = self.colour.rgbColour }
+        }
+    }
+    var intensity : Candelas {
+        get {
+            return self.backingGPULight.readOnlyElement.intensity
+        }
+        set (newValue) {
+            self.backingGPULight.withElement { gpuLight in
+                gpuLight.intensity = newValue
+            }
+        }
+    }
+    
+    var falloffRadius : Float {
+        didSet {
+            self.backingGPULight.withElement { gpuLight in
+                let radiusSquared = self.falloffRadius * self.falloffRadius
+                let inverseRadiusSquared = 1.0 / radiusSquared
+                gpuLight.inverseSquareAttenuationRadius = inverseRadiusSquared
+            }
+        }
+    }
+    
+    var backingGPULight : GPUBufferElement<GPULight>
+}
+
+
+struct GPULight {
+    var lightTypeFlag : UInt8
+    var colour : vec3
+    var intensity : Candelas
+    var inverseSquareAttenuationRadius : Float
+    var worldSpacePosition : vec4
+    
 }

@@ -1,4 +1,4 @@
-float computeEV100(float aperture , float shutterTime , float ISO) {
+float computeEV100(float aperture, float shutterTime , float ISO) {
     // EV number is defined as:
     // 2^ EV_s = N^2 / t and EV_s = EV_100 + log2(S/100)
     // This gives
@@ -61,6 +61,6 @@ vec3 accurateLinearToSRGB(in vec3 linearCol) {
 }
 
 //Should be applied in every lighting shader before writing the colour
-vec3 epilogueLighting(float3 color , float exposureMultiplier) {
+vec3 epilogueLighting(vec3 color, float exposureMultiplier) {
     return color * exposureMultiplier;
 }

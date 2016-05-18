@@ -185,7 +185,14 @@ extension Shader {
                 case GL_FRAGMENT_SHADER: strShaderType = "fragment";
                 default: strShaderType = "";
             }
-            fatalError("Compile failure in \(strShaderType) shader:\n\(errorString)\nShader is:\n \(text)")
+            
+            let splitText = text.components(separatedBy: .newlines())
+            
+            let numberedText = splitText.enumerated().reduce("", combine: { (text, line) -> String in
+                return text + String(line.offset) + ":\t" + line.element + "\n"
+            })
+            
+            fatalError("Compile failure in \(strShaderType) shader:\n\(errorString)\nShader is:\n\(numberedText)")
         }
         return shader;
     }
