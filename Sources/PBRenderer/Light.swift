@@ -82,7 +82,7 @@ enum LightColourMode {
 
 enum LightType {
     case Point
-    case Spot(innerCutoff: Float, outerCutoff: Float)
+    case Spot(direction: vec3, innerCutoff: Float, outerCutoff: Float)
     case Directional(direction: vec3)
 }
 
@@ -95,6 +95,7 @@ struct Light {
             self.backingGPULight.withElement { $0.colour = self.colour.rgbColour }
         }
     }
+    
     var intensity : Candelas {
         get {
             return self.backingGPULight.readOnlyElement.intensity
@@ -119,12 +120,36 @@ struct Light {
     var backingGPULight : GPUBufferElement<GPULight>
 }
 
+@objc enum LightTypeFlag : UInt8 {
+    case Point = 0
+    case Directional = 1
+    case Spot = 2
+}
+
 
 struct GPULight {
-    var lightTypeFlag : UInt8
-    var colour : vec3
-    var intensity : Candelas
+    var lightTypeFlag : LightTypeFlag
     var inverseSquareAttenuationRadius : Float
+    var colourAndIntensity : vec4
     var worldSpacePosition : vec4
+    var direction : vec3
+    var extraData = vec4(0)
     
+    var colour : vec3 {
+        get {
+            return self.colourAndIntensity.rgb
+        }
+        set (newColour) {
+            self.colourAndIntensity.rgb = newColour
+        }
+    }
+    
+    var intensity : Candelas {
+        get {
+            return self.colourAndIntensity.a
+        }
+        set (newIntensity) {
+            self.colourAndIntensity.a = newIntensity
+        }
+    }
 }

@@ -2,8 +2,7 @@
  ************* BRDF *****************
  ***********************************/
 
-const float PI = 3.141592653589793;
-const float INV_PI = 0.3183098862;
+#include "Utilities.glsl"
 
 vec3 F_Schlick(vec3 f0, float f90, float u) {
     return f0 + (f90 - f0) * pow(1.f - u, 5.f);

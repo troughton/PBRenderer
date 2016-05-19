@@ -39,11 +39,11 @@ vec3 computeBloomLuminance(vec3 bloomColor, float bloomEC, float currentEV) {
 }
 
 vec3 approximationSRGBToLinear(in vec3 sRGBCol) {
-    return pow(sRGBCol , 2.2);
+    return pow(sRGBCol , vec3(2.2));
 }
 
 vec3 approximationLinearToSRGB(in vec3 linearCol) {
-    return pow(linearCol , 1 / 2.2);
+    return pow(linearCol , vec3(1 / 2.2));
 }
 
 vec3 accurateSRGBToLinear(in vec3 sRGBCol) {
