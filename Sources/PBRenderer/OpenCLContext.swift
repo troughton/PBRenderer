@@ -42,21 +42,21 @@ func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
         
         // Create CL context properties, add GLX context & handle to DC
     let properties : [cl_context_properties] = [
-            cl_context_properties(CL_GL_CONTEXT_KHR), cl_context_properties(glfwGetGLXContext()), // GLX Context
-            cl_context_properties(CL_GLX_DISPLAY_KHR), cl_context_properties(glfwGetX11Display()), // GLX Display
-            cl_context_properties(CL_CONTEXT_PLATFORM), cl_context_properties(platform),
+            cl_context_properties(CL_GL_CONTEXT_KHR), unsafeBitCast(glfwGetGLXContext(glfwWindow), to: cl_context_properties.self), // GLX Context
+            cl_context_properties(CL_GLX_DISPLAY_KHR), unsafeBitCast(glfwGetX11Display(), to: cl_context_properties.self), // GLX Display
+            cl_context_properties(CL_CONTEXT_PLATFORM), cl_context_properties(0),
             0
             ];
             // Find CL capable devices in the current GL context
             var devices = [cl_device_id?](repeating: nil, count: 32)
             var size = size_t(0);
-            clGetGLContextInfoKHR(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR, 32 * sizeof(cl_device_id), devices, &size);
+            clGetGLContextInfoKHR(properties, cl_gl_context_info(CL_DEVICES_FOR_GL_CONTEXT_KHR), 32 * sizeof(cl_device_id), &devices, &size);
             // OpenCL platform
             // Create a context using the supported devices
             let count = size / sizeof(cl_device_id);
             var error = cl_int(0)
             
-            let context = clCreateContext(properties, devices, UnsafePointer<Void>(bitPattern: count), nil, 0, &error);
+            let context = clCreateContext(properties, cl_uint(count), devices, nil, nil, &error);
             
             if error != 0 {
                 assertionFailure("Error creating context: \(error)")
