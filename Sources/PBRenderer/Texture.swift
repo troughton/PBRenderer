@@ -165,14 +165,6 @@ class Texture {
     let buffer : GPUBuffer<UInt8>?
     
     //Note: data is assumed to be for the first mipmap level.
-    convenience init<T>(textureWithDescriptor descriptor: TextureDescriptor, type: GLenum? = nil, format: GLenum? = nil, data: [T]? = nil) {
-        let dataPointer = data?.withUnsafeBufferPointer({ (data) -> UnsafePointer<T>? in
-            return data.baseAddress
-        })
-        self.init(textureWithDescriptor: descriptor, type: type, format: format, data: dataPointer)
-    }
-    
-    //Note: data is assumed to be for the first mipmap level.
     init<T>(textureWithDescriptor descriptor: TextureDescriptor, type: GLenum? = nil, format: GLenum? = nil, data: UnsafePointer<T>? = nil) {
         
         self.descriptor = descriptor

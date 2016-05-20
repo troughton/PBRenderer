@@ -25,11 +25,54 @@ extension Scene {
         return meshes
     }
     
+    static func parseLightsFromCollada(_ root: Collada) -> (elementsInBuffer: [String : Light], buffer: GPUBuffer<GPULight>) {
+        var elementsInBuffer = [String : Light]()
+        
+        let lightCount = root.libraryLights.reduce(0) { (count, lightLibrary) -> Int in
+            return count + lightLibrary.light.count
+        }
+        
+        let lightBuffer = GPUBuffer<GPULight>(capacity: lightCount, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+        
+        var i = 0
+        for lightLibrary in root.libraryLights {
+            for light in lightLibrary.light {
+                let colourAndIntensity : vec3
+                let type : LightType
+                
+                switch light.techniqueCommon.lightType {
+                case let .Directional(colour):
+                    colourAndIntensity = vec3(colour)
+                    type = .Directional
+                case let .Point(colour):
+                    type = .Point
+                    colourAndIntensity = vec3(colour)
+                case let .Spot(colour, falloffDegrees, falloffExponent):
+                    type = .Spot(innerCutoff: radians(degrees: falloffDegrees), outerCutoff: radians(degrees: falloffDegrees))
+                    colourAndIntensity = vec3(colour)
+                case .Ambient(_):
+                    continue
+                }
+                
+                let intensity = length(colourAndIntensity)
+                let colour = colourAndIntensity / intensity
+                
+                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensity, falloffRadius: 100.0, backingGPULight: lightBuffer[viewForIndex: i])
+                elementsInBuffer[light.id!] = pbLight
+                    i += 1
+                }
+            }
+        
+        lightBuffer.didModifyRange(0..<i)
+        return (elementsInBuffer, lightBuffer)
+        
+    }
+    
     
     static func parseMaterialsFromCollada(_ root: Collada) -> (elementsInBuffer: [String : GPUBufferElement<Material>], buffer: GPUBuffer<Material>) {
         var elementsInBuffer = [String : GPUBufferElement<Material>]()
         
-        var materialCount = root.libraryMaterials.reduce(0) { (count, materialLibrary) -> Int in
+        let materialCount = root.libraryMaterials.reduce(0) { (count, materialLibrary) -> Int in
             return count + materialLibrary.material.count
         }
         
@@ -74,6 +117,16 @@ extension Scene {
                         }
                         
                     }
+                    
+                    chromeMaterial {
+                        reflectance: 0.16
+                        baseColour: 0.2, 0.5, 0.7
+                    }
+                    
+                    floorLight {
+                        type: areaRect
+                    }
+                    
                     if let shininess = materialParams.shininess {
                         if case let .float(_, value) = shininess {
                             material.smoothness = value
@@ -87,7 +140,7 @@ extension Scene {
                     
                     if let specular = materialParams.specular {
                         if case let .color(_, colour) = specular {
-                            material.metalMask = vec4(colour).a
+                            material.metalMask = vec4(colour).r
                         }
                         
                         if _isDebugAssertConfiguration() && material.metalMask >= 0 && material.metalMask <= 1 {
@@ -114,22 +167,23 @@ extension Scene {
         
         guard let visualScene = root[scene.url] as? VisualSceneType else { fatalError() }
         
-        
         let (materialIdsToElements, materialBuffer) = Scene.parseMaterialsFromCollada(root)
+        
+        let (lightIdsToLights, lightBuffer) = Scene.parseLightsFromCollada(root)
         
         let sourcesToMeshes = Scene.parseMeshesFromCollada(root)
         
         var nodes = [SceneNode]()
         for node in visualScene.nodes {
-            nodes.append(SceneNode(colladaNode: node, root: root, sourcesToMeshes: sourcesToMeshes, materials: materialIdsToElements, parentTransform: nil))
+            nodes.append(SceneNode(colladaNode: node, root: root, sourcesToMeshes: sourcesToMeshes, materials: materialIdsToElements, lights: lightIdsToLights, parentTransform: nil))
         }
         
-        self.init(nodes: nodes, meshes: [[GLMesh]](sourcesToMeshes.values), materials: materialBuffer)
+        self.init(nodes: nodes, meshes: [[GLMesh]](sourcesToMeshes.values), materials: materialBuffer, lights: lightBuffer)
     }
 }
 
 extension SceneNode {
-    convenience init(colladaNode node: NodeType, root: Collada, sourcesToMeshes: [String : [GLMesh]], materials: [String: GPUBufferElement<Material>], parentTransform: Transform? = nil) {
+    convenience init(colladaNode node: NodeType, root: Collada, sourcesToMeshes: [String : [GLMesh]], materials: [String: GPUBufferElement<Material>], lights: [String: Light], parentTransform: Transform? = nil) {
         var currentTransform = mat4(1)
         
         for transform in node.transforms {
@@ -180,7 +234,7 @@ extension SceneNode {
             }
         }
         
-        let children = node.nodes.map { SceneNode(colladaNode: $0, root: root, sourcesToMeshes: sourcesToMeshes, materials: materials, parentTransform: transform) }
+        let children = node.nodes.map { SceneNode(colladaNode: $0, root: root, sourcesToMeshes: sourcesToMeshes, materials: materials, lights: lights, parentTransform: transform) }
         
         let cameras : [Camera] = node.instanceCamera.map { root[$0.url] as! CameraType }.map { camera in
             let projectionMatrix : mat4
@@ -210,7 +264,9 @@ extension SceneNode {
             }
         }
         
-        self.init(id: node.id, name: node.name, transform: transform, meshes: meshes, children: children, cameras: cameras, materials: instanceMaterialNamesToMaterials)
+        let lightObjects : [Light] = node.instanceLight.map { lights[$0.url.substring(from: $0.url.index(after: $0.url.startIndex))]! }
+        
+        self.init(id: node.id, name: node.name, transform: transform, meshes: meshes, children: children, cameras: cameras, lights: lightObjects, materials: instanceMaterialNamesToMaterials)
     }
 
 }

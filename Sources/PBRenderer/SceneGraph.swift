@@ -25,12 +25,13 @@ final class Scene {
     let nodes : [SceneNode]
     let meshes : [[GLMesh]]
     let materialBuffer : GPUBuffer<Material>
-    
+    let lightBuffer : GPUBuffer<GPULight>
 
-    init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>) {
+    init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>) {
         self.nodes = nodes
         self.meshes = meshes
         self.materialBuffer = materials
+        self.lightBuffer = lights
     }
 
     var flattenedScene : [SceneNode] {
@@ -56,14 +57,16 @@ final class SceneNode {
     let meshes : [GLMesh]
     let children : [SceneNode]
     let cameras : [Camera]
+    let lights : [Light]
     let materials : [String : GPUBufferElement<Material>]
     
     func initialiseComponents() {
         self.transform.sceneNode = self
         self.cameras.forEach { $0.sceneNode = self }
+        self.lights.forEach { $0.sceneNode = self }
     }
     
-    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = [], materials: [String: GPUBufferElement<Material>] = [:]) {
+    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:]) {
         self.id = id
         self.name = name;
         self.transform = transform
@@ -71,8 +74,13 @@ final class SceneNode {
         self.children = children
         self.cameras = cameras
         self.materials = materials
+        self.lights = lights
         
         self.initialiseComponents()
+    }
+    
+    func transformDidChange() {
+        
     }
 }
 
@@ -100,9 +108,22 @@ final class Transform {
     
     var parent : Transform? = nil
     
-    var translation : vec3
-    var rotation : quat
-    var scale : vec3
+    var translation : vec3 {
+        didSet {
+            self.sceneNode?.transformDidChange()
+        }
+    }
+    var rotation : quat {
+        didSet {
+            self.sceneNode?.transformDidChange()
+        }
+    }
+    
+    var scale : vec3 {
+        didSet {
+            self.sceneNode?.transformDidChange()
+        }
+    }
     
     private var _nodeToWorldMatrix : mat4? = nil
     private var _worldToNodeMatrix : mat4? = nil

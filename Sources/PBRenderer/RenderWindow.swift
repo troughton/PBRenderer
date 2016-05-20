@@ -12,6 +12,7 @@ import SGLMath
 import CGLFW3
 import ColladaParser
 import CPBRendererLibs
+import OpenCL
 
 final class RenderWindow : Window {
     
@@ -83,8 +84,6 @@ final class RenderWindow : Window {
         
         let materialBlockIndex = 0
         
-        shader.setUniformBlockBindingPoints(forProperties: [BasicShaderProperty.Material])
-        
         for mesh in node.meshes {
             if let materialName = mesh.materialName, let material = node.materials[materialName] {
                 material.bindToUniformBlockIndex(materialBlockIndex)
@@ -106,8 +105,12 @@ final class RenderWindow : Window {
             let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
             let cameraToClip = camera.projectionMatrix
             
-            envMapTexture.bindToIndex(0)
-            shader.setUniform(GLint(0), forProperty: StringShaderProperty("dfgTexture"))
+            shader.setUniform(GLint(1), forProperty: StringShaderProperty("lightCount"))
+            scene.lightBuffer.bindToUniformBlockIndex(1)
+            shader.setMatrix(worldToCamera, forProperty: StringShaderProperty("worldToCameraMatrix"))
+            
+            
+            shader.setUniformBlockBindingPoints(forProperties: [BasicShaderProperty.Material, StringShaderProperty("Light")])
             
             for node in scene.nodes {
                 self.renderNode(node, worldToCameraMatrix: worldToCamera, cameraToClipMatrix: cameraToClip, shader: shader)

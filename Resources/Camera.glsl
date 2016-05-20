@@ -35,7 +35,7 @@ vec3 computeBloomLuminance(vec3 bloomColor, float bloomEC, float currentEV) {
     float bloomEV = currentEV + bloomEC;
     // convert to luminance
     // See equation (12) for explanation about converting EV to luminance
-    return bloomColor * pow(2, bloomEV -3);
+    return bloomColor * pow(2.0f, bloomEV -3);
 }
 
 vec3 approximationSRGBToLinear(in vec3 sRGBCol) {
@@ -49,14 +49,14 @@ vec3 approximationLinearToSRGB(in vec3 linearCol) {
 vec3 accurateSRGBToLinear(in vec3 sRGBCol) {
     vec3 linearRGBLo = sRGBCol / 12.92;
     vec3 linearRGBHi = pow(( sRGBCol + 0.055) / 1.055 , 2.4);
-    vec3 linearRGB = (sRGBCol <= 0.04045) ? linearRGBLo : linearRGBHi;
+    vec3 linearRGB = (sRGBCol.x <= 0.04045 && sRGBCol.y <= 0.04045 && sRGBCol.z <= 0.04045) ? linearRGBLo : linearRGBHi;
     return linearRGB;
 }
 
 vec3 accurateLinearToSRGB(in vec3 linearCol) {
     vec3 sRGBLo = linearCol * 12.92;
     vec3 sRGBHi = (pow(abs(linearCol), 1.0/2.4) * 1.055) - 0.055;
-    vec3 sRGB = (linearCol <= 0.0031308) ? sRGBLo : sRGBHi;
+    vec3 sRGB = (linearCol.x <= 0.0031308 && linearCol.y <= 0.0031308 && linearCol.z <= 0.0031308) ? sRGBLo : sRGBHi;
     return sRGB;
 }
 

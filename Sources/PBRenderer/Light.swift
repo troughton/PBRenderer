@@ -82,14 +82,39 @@ enum LightColourMode {
 
 enum LightType {
     case Point
-    case Spot(direction: vec3, innerCutoff: Float, outerCutoff: Float)
-    case Directional(direction: vec3)
+    case Spot(innerCutoff: Float, outerCutoff: Float)
+    case Directional
+    
+    private var lightTypeFlag : LightTypeFlag {
+        switch self {
+        case .Point:
+            return .Point
+        case .Spot(_, _):
+            return .Spot
+        case .Directional(_):
+            return .Directional
+        }
+    }
+    
+    func fillGPULight(gpuLight: inout GPULight) {
+        gpuLight.lightTypeFlag = self.lightTypeFlag
+        
+    }
 }
 
-struct Light {
-    var sceneNode : SceneNode
+final class Light {
+    var sceneNode : SceneNode! = nil {
+        didSet {
+            self.transformDidChange()
+        }
+    }
     
-    let type : LightType
+    var type : LightType {
+        didSet {
+            self.backingGPULight.withElement { self.type.fillGPULight(gpuLight: &$0) }
+        }
+    }
+    
     var colour : LightColourMode {
         didSet {
             self.backingGPULight.withElement { $0.colour = self.colour.rgbColour }
@@ -118,9 +143,33 @@ struct Light {
     }
     
     var backingGPULight : GPUBufferElement<GPULight>
+    
+    init(type: LightType, colour: LightColourMode, intensity: Candelas, falloffRadius: Float, backingGPULight: GPUBufferElement<GPULight>) {
+        self.type = type
+        self.backingGPULight = backingGPULight
+        self.colour = colour
+        self.falloffRadius = falloffRadius
+        self.intensity = intensity
+        
+        self.backingGPULight.withElement { gpuLight in
+            let radiusSquared = self.falloffRadius * self.falloffRadius
+            let inverseRadiusSquared = 1.0 / radiusSquared
+            gpuLight.inverseSquareAttenuationRadius = inverseRadiusSquared
+            
+            gpuLight.colour = self.colour.rgbColour
+            
+            self.type.fillGPULight(gpuLight: &gpuLight)
+        }
+    }
+    
+    func transformDidChange() {
+        if let sceneNode = self.sceneNode {
+            self.backingGPULight.withElement { $0.lightToWorld = sceneNode.transform.nodeToWorldMatrix }
+        }
+    }
 }
 
-@objc enum LightTypeFlag : UInt8 {
+enum LightTypeFlag : UInt32 {
     case Point = 0
     case Directional = 1
     case Spot = 2
@@ -128,11 +177,10 @@ struct Light {
 
 
 struct GPULight {
+    var colourAndIntensity : vec4
+    var lightToWorld : mat4
     var lightTypeFlag : LightTypeFlag
     var inverseSquareAttenuationRadius : Float
-    var colourAndIntensity : vec4
-    var worldSpacePosition : vec4
-    var direction : vec3
     var extraData = vec4(0)
     
     var colour : vec3 {

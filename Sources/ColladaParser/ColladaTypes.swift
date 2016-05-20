@@ -2196,10 +2196,35 @@ public final class LightType : ColladaType {
 public final class TechniqueCommon : ColladaType {
 
 
+    public enum LightTypeEnum {
+        case Ambient(colour: Float3Type)
+        case Point(colour: Float3Type)
+        case Directional(colour: Float3Type)
+        case Spot(colour: Float3Type, falloffAngle : Float, falloffExponent: Float)
+        
+        init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+            let colour = Float3Type(xmlElement.childElements.first!.elements(forName: "color").first!.stringValue!)!
+            if let _ = xmlElement.elements(forName: "directional").first {
+                self = .Directional(colour: colour)
+            } else if let _ = xmlElement.elements(forName: "point").first {
+                self = .Point(colour: colour)
+            } else if let _ = xmlElement.elements(forName: "spot").first {
+                let falloffAngle = Float(xmlElement.childElements.first!.elements(forName: "falloff_angle").first!.stringValue!)!
+                let falloffExponent = Float(xmlElement.childElements.first!.elements(forName: "falloff_exponent").first!.stringValue!)!
+                self = .Spot(colour: colour, falloffAngle: falloffAngle, falloffExponent: falloffExponent)
+            } else if let _ = xmlElement.elements(forName: "ambient").first {
+                self = .Ambient(colour: colour)
+            } else {
+                fatalError()
+            }
+        }
+    }
 
+    public let lightType : LightTypeEnum
 
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+        self.lightType = LightTypeEnum(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)
 	}
 
 }
