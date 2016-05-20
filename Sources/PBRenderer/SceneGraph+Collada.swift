@@ -118,15 +118,6 @@ extension Scene {
                         
                     }
                     
-                    chromeMaterial {
-                        reflectance: 0.16
-                        baseColour: 0.2, 0.5, 0.7
-                    }
-                    
-                    floorLight {
-                        type: areaRect
-                    }
-                    
                     if let shininess = materialParams.shininess {
                         if case let .float(_, value) = shininess {
                             material.smoothness = value
