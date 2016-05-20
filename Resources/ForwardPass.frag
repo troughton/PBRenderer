@@ -8,7 +8,7 @@
 
 layout(location = 0) out vec4 outColour;
 
-uniform sampler2D dfgTexture;
+uniform sampler2D clTexture;
 uniform int lightCount;
 uniform mat4 worldToCameraMatrix;
 
@@ -61,5 +61,7 @@ void main() {
     
     vec3 epilogue = epilogueLighting(lightAccumulation, 1.0);
     
-    outColour = vec4(accurateLinearToSRGB(epilogue), 1);
+    vec3 textureColour = texture(clTexture, uv).rgb;
+    
+    outColour = vec4(textureColour, 1);//vec4(accurateLinearToSRGB(epilogue), 1);
 }

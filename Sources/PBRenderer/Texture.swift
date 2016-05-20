@@ -302,10 +302,10 @@ class Texture {
         }
     }
     
-    func openCLMemory(clContext: cl_context, flags: cl_mem_flags, mipLevel: GLint, cubeMapFace: SGLOpenGL.GLenum?) -> OpenCLMemory {
+    func openCLMemory(clContext: cl_context, flags: cl_mem_flags, mipLevel: GLint, cubeMapFace: SGLOpenGL.GLenum? = nil) -> OpenCLMemory {
         var error = cl_int(0)
         let mem = clCreateFromGLTexture(clContext, flags, cl_GLenum(cubeMapFace ?? self.descriptor.textureType), mipLevel, _glTexture, &error)
-        if error != 0 {
+        if error != CL_SUCCESS {
             assertionFailure("Error creating OpenCL texture: \(error).")
         }
         return OpenCLMemory(memory: mem!)
