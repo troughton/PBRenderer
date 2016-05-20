@@ -39,23 +39,38 @@ func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
 
 #else
     
+    var devices = [cl_device_id?](repeating: nil, count: 32) //Here be dragons if you put these lines inside the context retrieval method.
+    
+  var platforms = [cl_platform_id?](repeating: nil, count: 32)
 func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
-        
-        // Create CL context properties, add GLX context & handle to DC
-    let properties : [cl_context_properties] = [
+  
+    var platformsSize = cl_uint(0);
+    clGetPlatformIDs(UInt32(32 * sizeof(cl_platform_id)), &platforms, &platformsSize);
+  
+	    
+	    typealias GLContextInfoFunc = @convention(c) (UnsafePointer<cl_context_properties>!, cl_gl_context_info, size_t, UnsafeMutablePointer<Void>!, UnsafeMutablePointer<size_t>!) -> cl_int
+	    
+	    let clGetGLContextInfo = unsafeBitCast(clGetExtensionFunctionAddressForPlatform(platforms[0], "clGetGLContextInfoKHR"), to: GLContextInfoFunc.self)
+	    
+	        let properties : [cl_context_properties] = [
             cl_context_properties(CL_GL_CONTEXT_KHR), unsafeBitCast(glfwGetGLXContext(glfwWindow), to: cl_context_properties.self), // GLX Context
             cl_context_properties(CL_GLX_DISPLAY_KHR), unsafeBitCast(glfwGetX11Display(), to: cl_context_properties.self), // GLX Display
-            cl_context_properties(CL_CONTEXT_PLATFORM), cl_context_properties(0),
+            cl_context_properties(CL_CONTEXT_PLATFORM), unsafeBitCast(platforms[0]!, to: cl_context_properties.self),
             0
             ];
-            // Find CL capable devices in the current GL context
-            var devices = [cl_device_id?](repeating: nil, count: 32)
+	    
+	    // Find CL capable devices in the current GL context
+            
             var size = size_t(0);
-            clGetGLContextInfoKHR(properties, cl_gl_context_info(CL_DEVICES_FOR_GL_CONTEXT_KHR), 32 * sizeof(cl_device_id), &devices, &size);
-            // OpenCL platform
+	    
+            var error = clGetGLContextInfo(properties, cl_gl_context_info(CL_DEVICES_FOR_GL_CONTEXT_KHR), 32 * sizeof(cl_device_id), &devices, &size);
+          
+	  
+	    // OpenCL platform
             // Create a context using the supported devices
             let count = size / sizeof(cl_device_id);
-            var error = cl_int(0)
+	    
+	      print("There are \(count) devices")
             
             let context = clCreateContext(properties, cl_uint(count), devices, nil, nil, &error);
             
@@ -63,13 +78,6 @@ func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
                 assertionFailure("Error creating context: \(error)")
             }
     
-    // Get string containing supported device extensions
-    var ext_size = 1024;
-    let ext_string = malloc(ext_size);
-    let err = clGetDeviceInfo(devices[0]!, cl_device_info(CL_DEVICE_EXTENSIONS), ext_size, ext_string, &ext_size);
-    // Search for GL support in extension string (space delimited)
-    print("Supported extensions: " + String(cString: UnsafePointer<CChar>(ext_string!)!, encoding: NSUTF8StringEncoding))
-    
-            return (context!, devices[0]!)
+    return (context!, devices[0]!)
 }
     #endif
