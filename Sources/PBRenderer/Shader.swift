@@ -79,7 +79,7 @@ class Shader {
 
 extension Shader {
     static func shaderTextByExpandingIncludes(fromFile filePath: String) throws -> String {
-        var text = try String(contentsOfFile: filePath)
+        var text = try String(contentsOfFile: filePath, encoding: NSUTF8StringEncoding)
         let directory = filePath.components(separatedBy: "/").dropLast().joined(separator: "/")
         
         let regex = try NSRegularExpression(pattern: "#include \"(.+)\"", options: [])
@@ -93,7 +93,7 @@ extension Shader {
             let endIndex = text.index(startIndex, offsetBy: includeFileNameRange.length)
             
             let includeFileName = text[startIndex..<endIndex]
-            let includeFile = try String(contentsOfFile: (directory.isEmpty ? "" : directory + "/") + includeFileName)
+            let includeFile = try String(contentsOfFile: (directory.isEmpty ? "" : directory + "/") + includeFileName, encoding: NSUTF8StringEncoding)
             
             let matchStartIndex = text.index(text.startIndex, offsetBy: match.range.location)
             let matchEndIndex = text.index(matchStartIndex, offsetBy: match.range.length)

@@ -12,7 +12,6 @@ import SGLMath
 import CGLFW3
 import ColladaParser
 import CPBRendererLibs
-import OpenCL
 
 final class RenderWindow : Window {
     
