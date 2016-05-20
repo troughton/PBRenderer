@@ -8,9 +8,35 @@
 
 import Foundation
 import OpenCL
+import SGLOpenGL
 import CGLFW3
 
 private var _implicitCLSyncSupported = false
+
+func OpenCLSyncContexts(commandQueue: cl_command_queue) {
+    if !_implicitCLSyncSupported {
+        glFinish()
+        clFinish(commandQueue)
+    }
+}
+
+extension cl_mem {
+    var managed : OpenCLMemory {
+        return OpenCLMemory(memory: self)
+    }
+}
+
+final class OpenCLMemory {
+    var memory : cl_mem
+    
+    init(memory: cl_mem) {
+        self.memory = memory
+    }
+    
+    deinit {
+        clReleaseMemObject(self.memory)
+    }
+}
 
 #if os(OSX)
     func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {

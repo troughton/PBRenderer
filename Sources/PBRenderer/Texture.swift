@@ -8,6 +8,7 @@
 
 import Foundation
 import SGLOpenGL
+import OpenCL
 
 struct TextureUsage : OptionSet {
     let rawValue : UInt
@@ -23,10 +24,10 @@ struct TextureUsage : OptionSet {
 struct TextureDescriptor {
     
     ///The dimension and arrangement of the texture image data.
-    let textureType : GLenum
+    let textureType : SGLOpenGL.GLenum
     
     ///Format that determines how a pixel is written to, stored as, and read from the storage allocation of the texture.
-    let pixelFormat : GLenum
+    let pixelFormat : SGLOpenGL.GLenum
     
     ///The width of the texture image for the base level mipmap, in pixels.
     let width : Int
@@ -51,7 +52,7 @@ struct TextureDescriptor {
      For example, set the descriptor’s usage value to .RenderTarget if you already know that you intend to use the resulting texture as a render target. This may significantly improve your app’s performance (with certain hardware). */
     let usage : TextureUsage
     
-    init(textureType: GLenum, pixelFormat: GLenum, width: Int, height: Int, depth: Int = 1, mipmapLevelCount: UInt = 1, arrayLength: Int = 1, multisampleCount: Int = 1, usage : TextureUsage = .ShaderRead) {
+    init(textureType: SGLOpenGL.GLenum, pixelFormat: SGLOpenGL.GLenum, width: Int, height: Int, depth: Int = 1, mipmapLevelCount: UInt = 1, arrayLength: Int = 1, multisampleCount: Int = 1, usage : TextureUsage = .ShaderRead) {
         self.textureType = textureType
         self.pixelFormat = pixelFormat
         self.width = width
@@ -63,12 +64,12 @@ struct TextureDescriptor {
         self.usage = usage
     }
     
-    init(texture2DWithPixelFormat pixelFormat: GLenum, width: Int, height: Int, mipmapped: Bool) {
+    init(texture2DWithPixelFormat pixelFormat: SGLOpenGL.GLenum, width: Int, height: Int, mipmapped: Bool) {
         let mipmapLevels = mipmapped ? UInt(log2(Double(max(width, height)))) : 1
         self.init(textureType: GL_TEXTURE_2D, pixelFormat: pixelFormat, width: width, height: height, depth: 1, mipmapLevelCount: mipmapLevels, arrayLength: 1, multisampleCount: 1)
     }
     
-    init(textureCubeWithPixelFormat pixelFormat: GLenum, width: Int, height: Int, mipmapped: Bool) {
+    init(textureCubeWithPixelFormat pixelFormat: SGLOpenGL.GLenum, width: Int, height: Int, mipmapped: Bool) {
         let mipmapLevels = mipmapped ? UInt(log2(Double(max(width, height)))) : 1
         self.init(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: pixelFormat, width: width, height: height, depth: 1, mipmapLevelCount: mipmapLevels, arrayLength: 1, multisampleCount: 1)
     }
@@ -76,7 +77,7 @@ struct TextureDescriptor {
 
 class Texture {
     
-    static func formatForInternalFormat(_ pixelFormat: GLenum) -> GLenum {
+    static func formatForInternalFormat(_ pixelFormat: SGLOpenGL.GLenum) -> SGLOpenGL.GLenum {
         switch pixelFormat {
         case GL_R8:	return GL_RED
         case GL_R8_SNORM: return GL_RED
@@ -165,7 +166,7 @@ class Texture {
     let buffer : GPUBuffer<UInt8>?
     
     //Note: data is assumed to be for the first mipmap level.
-    init<T>(textureWithDescriptor descriptor: TextureDescriptor, type: GLenum? = nil, format: GLenum? = nil, data: UnsafePointer<T>? = nil) {
+    init<T>(textureWithDescriptor descriptor: TextureDescriptor, type: SGLOpenGL.GLenum? = nil, format: SGLOpenGL.GLenum? = nil, data: UnsafePointer<T>? = nil) {
         
         self.descriptor = descriptor
         self.buffer = nil
@@ -192,7 +193,7 @@ class Texture {
         
         glBindTexture(descriptor.textureType, _glTexture)
         
-        let texCreationFunction : (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, type: GLenum, pixels: UnsafePointer<Void>?) -> ()
+        let texCreationFunction : (target: SGLOpenGL.GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: SGLOpenGL.GLenum, type: SGLOpenGL.GLenum, pixels: UnsafePointer<Void>?) -> ()
         
         switch descriptor.textureType {
         case GL_TEXTURE_1D:
@@ -244,10 +245,15 @@ class Texture {
         glTexParameteri(descriptor.textureType, GL_TEXTURE_BASE_LEVEL, 0)
         glTexParameteri(descriptor.textureType, GL_TEXTURE_MAX_LEVEL, Int32(descriptor.mipmapLevelCount - 1))
         
+        glTexParameteri(descriptor.textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(descriptor.textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+        glTexParameteri(descriptor.textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameteri(descriptor.textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        
         glBindTexture(descriptor.textureType, 0)
     }
     
-    init<T>(buffer: GPUBuffer<T>, internalFormat: GLenum) {
+    init<T>(buffer: GPUBuffer<T>, internalFormat: SGLOpenGL.GLenum) {
         var texture : GLuint = 0
         glGenTextures(1, &texture)
         _glTexture = texture
@@ -274,7 +280,7 @@ class Texture {
         glBindTexture(descriptor.textureType, _glTexture)
     }
     
-    func bindToFramebuffer(_ framebuffer: GLenum, attachment: GLenum, mipmapLevel: Int, textureSlice: Int, depthPlane: Int) {
+    func bindToFramebuffer(_ framebuffer: SGLOpenGL.GLenum, attachment: SGLOpenGL.GLenum, mipmapLevel: Int, textureSlice: Int, depthPlane: Int) {
         
         if let glTexture = _glTexture {
             
@@ -294,8 +300,17 @@ class Texture {
         } else if let renderBuffer = _renderBuffer {
             glFramebufferRenderbuffer(framebuffer, attachment, GL_RENDERBUFFER, renderBuffer)
         }
-        
     }
+    
+    func openCLMemory(clContext: cl_context, flags: cl_mem_flags, mipLevel: GLint, cubeMapFace: SGLOpenGL.GLenum?) -> OpenCLMemory {
+        var error = cl_int(0)
+        let mem = clCreateFromGLTexture(clContext, flags, cl_GLenum(cubeMapFace ?? self.descriptor.textureType), mipLevel, _glTexture, &error)
+        if error != 0 {
+            assertionFailure("Error creating OpenCL texture: \(error).")
+        }
+        return OpenCLMemory(memory: mem!)
+    }
+    
     
     deinit {
         if var glTexture = _glTexture {

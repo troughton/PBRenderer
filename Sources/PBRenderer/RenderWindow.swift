@@ -139,6 +139,9 @@ final class RenderWindow : Window {
     "\n";
     
     func clTest(context: cl_context, device_id: cl_device_id) {
+        
+        do {
+            
         var err = Int32(0);                            // error code returned from api calls
         
         var data = [Float](repeating: 0, count: DATA_SIZE);              // original data set given to device
@@ -146,14 +149,9 @@ final class RenderWindow : Window {
         var correct = UInt32(0);               // number of correct results returned
         
         var global = size_t(0);                      // global domain size for our calculation
-        var local = size_t(0);                       // local domain size for our calculation
         
         var commands : cl_command_queue! = nil          // compute command queue
-        var program : cl_program! = nil;                 // compute program
-        var kernel : cl_kernel! = nil;                   // compute kernel
         
-        var input : cl_mem! = nil;                       // device memory used for the input array
-        var output : cl_mem! = nil;                      // device memory used for the output array
         
         // Fill our data set with random float values
         //
@@ -174,54 +172,21 @@ final class RenderWindow : Window {
         // Create the compute program from the source buffer
         //
         
-        KernelSource.withCString { (cString) -> Void in
-            var string : UnsafePointer<Int8>? = cString
-            program = clCreateProgramWithSource(context, 1, &string, nil, &err);
-        }
+            let program = try OpenCLProgram(withText: KernelSource, clContext: context, deviceID: device_id)
         
-        if program == nil
-        {
-            print("Error: Failed to create compute program!\n");
-            exit(EXIT_FAILURE);
-        }
         
-        // Build the program executable
-        //
-        err = clBuildProgram(program, 0, nil, nil, nil, nil);
-        if (err != CL_SUCCESS)
-        {
-            var len = size_t(0);
-            var buffer = [CChar](repeating: 0, count: 2048);
-            
-            print("Error: Failed to build program executable!\n");
-            clGetProgramBuildInfo(program, device_id, cl_program_build_info(CL_PROGRAM_BUILD_LOG), buffer.count, &buffer, &len);
-            print("%s\n", buffer);
-            exit(1);
-        }
+        let kernel = program.kernelNamed("square")!
         
-        // Create the compute kernel in the program we wish to run
-        //
-        kernel = clCreateKernel(program, "square", &err);
-        if (kernel == nil || err != CL_SUCCESS)
-        {
-            print("Error: Failed to create compute kernel!\n");
-            exit(1);
-        }
         
         var count = DATA_SIZE
         // Create the input and output arrays in device memory for our calculation
         //
-        input = clCreateBuffer(context, cl_mem_flags(CL_MEM_READ_ONLY),  sizeof(Float) * count, nil, nil);
-        output = clCreateBuffer(context, cl_mem_flags(CL_MEM_WRITE_ONLY), sizeof(Float) * count, nil, nil);
-        if (input == nil || output == nil)
-        {
-            print("Error: Failed to allocate device memory!\n");
-            exit(1);
-        }
+        let input = clCreateBuffer(context, cl_mem_flags(CL_MEM_READ_ONLY),  sizeof(Float) * count, nil, nil).managed;
+        let output = clCreateBuffer(context, cl_mem_flags(CL_MEM_WRITE_ONLY), sizeof(Float) * count, nil, nil).managed;
         
         // Write our data set into the input array in device memory
         //
-        err = clEnqueueWriteBuffer(commands, input, cl_bool(CL_TRUE), 0, sizeof(Float) * count, data, 0, nil, nil);
+        err = clEnqueueWriteBuffer(commands, input.memory, cl_bool(CL_TRUE), 0, sizeof(Float) * count, data, 0, nil, nil);
         if (err != CL_SUCCESS)
         {
             print("Error: Failed to write to source array!\n");
@@ -230,32 +195,19 @@ final class RenderWindow : Window {
         
         var count32 = UInt32(count)
         
-        // Set the arguments to our compute kernel
-        //
-        err = 0;
-        err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
-        err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
-        err |= clSetKernelArg(kernel, 2, sizeof(UInt32), &count32);
-        if (err != CL_SUCCESS)
-        {
-            print("Error: Failed to set kernel arguments! %d\n", err);
-            exit(1);
-        }
+        kernel.setArgument(&input.memory, index: 0)
+        kernel.setArgument(&output.memory, index: 1)
+        kernel.setArgument(&count32, index: 2)
         
         // Get the maximum work group size for executing the kernel on the device
         //
-        err = clGetKernelWorkGroupInfo(kernel, device_id, cl_kernel_work_group_info(CL_KERNEL_WORK_GROUP_SIZE), sizeofValue(local), &local, nil);
-        if (err != CL_SUCCESS)
-        {
-            print("Error: Failed to retrieve kernel work group info! %d\n", err);
-            exit(1);
-        }
+        var local = kernel.maxWorkGroupSize(onDevice: device_id)
         
         // Execute the kernel over the entire range of our 1d input data set
         // using the maximum number of work group items for this device
         //
         global = count;
-        err = clEnqueueNDRangeKernel(commands, kernel, 1, nil, &global, &local, 0, nil, nil);
+        err = clEnqueueNDRangeKernel(commands, kernel.clKernel, 1, nil, &global, &local, 0, nil, nil);
         if (err != 0)
         {
             print("Error: Failed to execute kernel!\n");
@@ -271,7 +223,7 @@ final class RenderWindow : Window {
         results.withUnsafeBufferPointer { (bufferPtr) -> Void in
             let pointer = UnsafeMutablePointer<Void>(bufferPtr.baseAddress)!
             
-            err = clEnqueueReadBuffer( commands, output, cl_bool(CL_TRUE), 0, sizeof(Float) * count, pointer, 0, nil, nil );
+            err = clEnqueueReadBuffer(commands, output.memory, cl_bool(CL_TRUE), 0, sizeof(Float) * count, pointer, 0, nil, nil );
         }
         if (err != CL_SUCCESS)
         {
@@ -294,12 +246,12 @@ final class RenderWindow : Window {
         
         // Shutdown and cleanup
         //
-        clReleaseMemObject(input);
-        clReleaseMemObject(output);
-        clReleaseProgram(program);
-        clReleaseKernel(kernel);
         clReleaseCommandQueue(commands);
         clReleaseContext(context);
+            
+        } catch let error {
+            fatalError(String(error))
+        }
     }
 
     
