@@ -13,6 +13,7 @@ import CGLFW3
 #if os(OSX)
 func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
     
+    
         // Get current CGL Context and CGL Share group
         let kCGLContext = CGLGetCurrentContext();
         let kCGLShareGroup = CGLGetShareGroup(kCGLContext!);
@@ -61,7 +62,14 @@ func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
             if error != 0 {
                 assertionFailure("Error creating context: \(error)")
             }
-            
+    
+    // Get string containing supported device extensions
+    var ext_size = 1024;
+    let ext_string = malloc(ext_size);
+    let err = clGetDeviceInfo(devices[0]!, cl_device_info(CL_DEVICE_EXTENSIONS), ext_size, ext_string, &ext_size);
+    // Search for GL support in extension string (space delimited)
+    print("Supported extensions: " + String(cString: UnsafePointer<CChar>(ext_string!)!, encoding: NSUTF8StringEncoding))
+    
             return (context!, devices[0]!)
 }
     #endif
