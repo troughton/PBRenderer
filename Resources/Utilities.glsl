@@ -6,10 +6,6 @@ float sqr(float value) {
     return value * value;
 }
 
-vec3 pow(vec3 value, float exponent) {
-    return pow(value, vec3(exponent));
-}
-
 const float PI = 3.141592653589793;
 const float INV_PI = 0.3183098862;
 
