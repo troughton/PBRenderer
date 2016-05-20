@@ -41,8 +41,8 @@ final class RenderWindow : Window {
         lightAccumulationBuffer.depthAttachment.clearDepth = 1.0
         lightAccumulationBuffer.depthAttachment.loadAction = .Clear
         
-        let lightPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: "ForwardPass.vert")
-        let lightPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: "ForwardPass.frag")
+        let lightPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "ForwardPass.vert"))
+        let lightPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "ForwardPass.frag"))
         
         let forwardPassShader = Shader(withVertexShader: lightPassVertex, fragmentShader: lightPassFragment)
         
