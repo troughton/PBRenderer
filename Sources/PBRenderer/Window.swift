@@ -22,7 +22,7 @@ class Window {
     
     private static var glfwWindowsToWindows = [OpaquePointer : Window]()
     
-    private let _glfwWindow : OpaquePointer!
+    let _glfwWindow : OpaquePointer!
     
     struct Size {
         let width: GLint
