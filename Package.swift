@@ -21,7 +21,7 @@ package.dependencies.append(
     // If your distro renamed the library to "glfw" (no 3) use this instead:
     // Package.Dependency.Package(url: "https://github.com/SwiftGL/CGLFWLinux.git", majorVersion: 1)
 )
-Package.dependencies.append(Package.Dependency.Package(url: "https://github.com/troughton/OpenCL-Linux", majorVersion: 1))
+package.dependencies.append(Package.Dependency.Package(url: "https://github.com/troughton/OpenCL-Linux", majorVersion: 1))
 #else
 package.dependencies.append(
     Package.Dependency.Package(url: "https://github.com/SwiftGL/CGLFW3.git", majorVersion: 1)
