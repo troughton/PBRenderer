@@ -125,7 +125,7 @@ final class RenderWindow : Window {
         super.postRender()
     }
     
-    let DATA_SIZE = 1024
+    let DATA_SIZE = 1024000
     let KernelSource = "\n" +
         "__kernel void square(                                                       \n" +
         "   __global float* input,                                              \n" +
@@ -167,7 +167,7 @@ final class RenderWindow : Window {
         commands = clCreateCommandQueue(context, device_id, 0, &err);
         if (commands == nil) {
             print("Error: Failed to create a command commands! \(err)\n");
-            return exit(EXIT_FAILURE)
+            exit(EXIT_FAILURE)
         }
         
         
