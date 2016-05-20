@@ -48,7 +48,7 @@ enum OpenCLProgramError : ErrorProtocol {
 final class OpenCLProgram {
     let clProgram : cl_program
     
-    init(withText text: String, clContext: cl_context, deviceID: cl_device_id) throws {
+    init(withText text: String, path: String, clContext: cl_context, deviceID: cl_device_id) throws {
         
         var err = cl_int(0)
         
@@ -63,7 +63,14 @@ final class OpenCLProgram {
         
         // Build the program executable
         //
-        err = clBuildProgram(self.clProgram, 0, nil, nil, nil, nil);
+        
+        var path = path
+        if path.isEmpty {
+            path = "."
+        }
+        
+        let includeArg = "-I " + path
+        err = clBuildProgram(self.clProgram, 0, nil, includeArg, nil, nil);
         if (err != CL_SUCCESS) {
             
             var len = size_t(0);
@@ -80,9 +87,10 @@ final class OpenCLProgram {
     
     convenience init(contentsOfFile filePath: String, clContext: cl_context, deviceID: cl_device_id) throws {
         
+        let directory = filePath.components(separatedBy: "/").dropLast().joined(separator: "/")
         let contents = try String(contentsOfFile: filePath, encoding: NSUTF8StringEncoding)
         
-        try self.init(withText: contents, clContext: clContext, deviceID: deviceID)
+        try self.init(withText: contents, path: directory, clContext: clContext, deviceID: deviceID)
     }
     
     func kernelNamed(_ name: String) -> OpenCLKernel? {

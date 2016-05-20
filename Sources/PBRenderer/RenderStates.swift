@@ -195,6 +195,8 @@ struct PipelineState {
     var shader : Shader
     var depthStencilState : DepthStencilState
     
+    var sRGBConversionEnabled : Bool = false
+    
     init(viewport: Rectangle, framebuffer: Framebuffer, shader: Shader, depthStencilState: DepthStencilState) {
         self.viewport = viewport
         self.framebuffer = framebuffer
@@ -254,6 +256,12 @@ struct PipelineState {
             glDisable(GL_RASTERIZER_DISCARD)
         } else {
             glEnable(GL_RASTERIZER_DISCARD)
+        }
+        
+        if sRGBConversionEnabled {
+            glEnable(GL_FRAMEBUFFER_SRGB)
+        } else {
+            glDisable(GL_FRAMEBUFFER_SRGB)
         }
         
         self.depthStencilState.applyState()

@@ -14,71 +14,58 @@ import ColladaParser
 import CPBRendererLibs
 import OpenCL
 
-final class RenderWindow : Window {
+final class GBufferPass {
     
-    var forwardPassState : PipelineState! = nil
+    var gBufferPassState : PipelineState
     
-    var scene : Scene! = nil
-    
-    var projectionMatrix: mat4 = SGLMath.perspectiveFov(Float(M_PI_4), 600, 800, 0.1, 100.0)
-    var cameraNear: Float = 0.1
-    
-    var envMapTexture : Texture! = nil
-    var clTexture : Texture! = nil
-    
-    override init(name: String, width: Int, height: Int) {
-        
-        super.init(name: name, width: width, height: height)
+    init(pixelDimensions: Window.Size) {
         
         var depthState = DepthStencilState()
         depthState.depthCompareFunction = GL_LESS
         depthState.isDepthWriteEnabled = true
         
-        let pixelDimensions = self.pixelDimensions
+        let gBuffer = GBufferPass.gBufferFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
         
-        let lightAccumulationBuffer = Framebuffer.defaultFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
+        let geometryPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "GeometryPass.vert"))
+        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: "GeometryPass.frag")
         
-        lightAccumulationBuffer.colourAttachments[0]?.clearColour = vec4(0, 0, 0, 0)
-        lightAccumulationBuffer.colourAttachments[0]?.loadAction = .Clear
-        lightAccumulationBuffer.depthAttachment.clearDepth = 1.0
-        lightAccumulationBuffer.depthAttachment.loadAction = .Clear
+        let geometryShader = Shader(withVertexShader: geometryPassVertex, fragmentShader: geometryPassFragment)
         
-        let lightPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "ForwardPass.vert"))
-        let lightPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "ForwardPass.frag"))
+        let pipelineState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height), framebuffer: gBuffer, shader: geometryShader, depthStencilState: depthState)
         
-        let forwardPassShader = Shader(withVertexShader: lightPassVertex, fragmentShader: lightPassFragment)
-        
-        self.forwardPassState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height), framebuffer: lightAccumulationBuffer, shader: forwardPassShader, depthStencilState: depthState)
-        
-        guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
-        
-        self.scene = Scene(fromCollada: collada)
-        
-        var imageX = Int32(0)
-        var imageY = Int32(0)
-        var numComponents = Int32(0)
-        let hdrEnvMap = stbi_loadf("stpeters_probe.hdr", &imageX, &imageY, &numComponents, 0)
-        
-        let envMapTextureDescriptor = TextureDescriptor(texture2DWithPixelFormat: numComponents == 3 ? GL_RGB16F : GL_RGBA16F, width: Int(imageX), height: Int(imageY), mipmapped: false)
-        self.envMapTexture = Texture(textureWithDescriptor: envMapTextureDescriptor, type: GL_FLOAT, format: numComponents == 3 ? GL_RGB : GL_RGBA, data: hdrEnvMap)
-        self.envMapTexture.generateMipmaps()
-        
-        stbi_image_free(hdrEnvMap)
-        
-        let clTextureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: 512, height: 512, mipmapped: false)
-        self.clTexture = Texture(textureWithDescriptor: clTextureDescriptor, format: GL_RGBA, type: GL_UNSIGNED_BYTE, data: nil as [Void]?)
-        
-        let (context, deviceId) = OpenCLGetContext(glfwWindow: _glfwWindow)
-        
-        self.clTest(context: context, device_id: deviceId, texture: self.clTexture)
+        self.gBufferPassState = pipelineState
     }
     
-    override func framebufferDidResize(width: Int32, height: Int32) {
-        self.forwardPassState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
+    func resize(newPixelDimensions width: GLint, _ height: GLint) {
+        self.gBufferPassState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
+        self.gBufferPassState.framebuffer = GBufferPass.gBufferFramebuffer(width: width, height: height)
     }
     
-    override func preRender() {
-        super.preRender()
+    class func gBufferFramebuffer(width: GLint, height: GLint) -> Framebuffer {
+        
+        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: Int(width), height: Int(height), mipmapped: false)
+        
+        let colourTexture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        
+        var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+        colourAttachment.texture = colourTexture
+        colourAttachment.loadAction = .Clear
+        colourAttachment.storeAction = .Store
+        
+        let normalTexture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        
+        var normalAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+        normalAttachment.texture = normalTexture
+        normalAttachment.loadAction = .Clear
+        colourAttachment.storeAction = .Store
+        
+        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: Int(width), height: Int(height), mipmapped: false)
+        let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_STENCIL, type: GL_UNSIGNED_INT_24_8, data: nil as [Void]?)
+        var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
+        depthAttachment.loadAction = .Clear
+        depthAttachment.texture = depthTexture
+        
+        return Framebuffer(width: width, height: height, colourAttachments: [colourAttachment, normalAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     func renderNode(_ node: SceneNode, worldToCameraMatrix: mat4, cameraToClipMatrix: mat4, shader: Shader) {
@@ -86,8 +73,7 @@ final class RenderWindow : Window {
         let modelToClip = cameraToClipMatrix * modelToCamera
         let normalTransform = node.transform.worldToNodeMatrix.upperLeft.transpose
         
-        shader.setMatrix(modelToCamera, forProperty: BasicShaderProperty.ModelToCameraMatrix)
-        shader.setMatrix(modelToClip, forProperty: BasicShaderProperty.mvp)
+        shader.setMatrix(modelToClip, forProperty: BasicShaderProperty.ModelToClipMatrix)
         shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToCameraMatrix)
         
         let materialBlockIndex = 0
@@ -105,90 +91,185 @@ final class RenderWindow : Window {
         }
     }
     
-    override func render() {
+    func renderScene(_ scene: Scene, camera: Camera) -> (colourTextures: [Texture], depthTexture: Texture) {
         
-        self.forwardPassState.renderPass { (framebuffer, shader) in
-            let camera = self.scene.flattenedScene.flatMap { $0.cameras.first }.first!
+        self.gBufferPassState.renderPass { (framebuffer, shader) in
             
             let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
             let cameraToClip = camera.projectionMatrix
-            
-            shader.setUniform(GLint(1), forProperty: StringShaderProperty("lightCount"))
-            scene.lightBuffer.bindToUniformBlockIndex(1)
-            shader.setMatrix(worldToCamera, forProperty: StringShaderProperty("worldToCameraMatrix"))
-            shader.setUniform(GLint(0), forProperty: StringShaderProperty("clTexture"))
-            self.clTexture.bindToIndex(0)
-            
-            shader.setUniformBlockBindingPoints(forProperties: [BasicShaderProperty.Material, StringShaderProperty("Light")])
             
             for node in scene.nodes {
                 self.renderNode(node, worldToCameraMatrix: worldToCamera, cameraToClipMatrix: cameraToClip, shader: shader)
             }
         }
+        
+        return (colourTextures: self.gBufferPassState.framebuffer.colourAttachments.flatMap { $0?.texture! }, depthTexture: self.gBufferPassState.framebuffer.depthAttachment.texture!)
     }
+}
+
+final class LightAccumulationPass {
     
-    override func postRender() {
-        super.postRender()
-    }
+    var lightAccumulationTexture : Texture
+    var lightAccumulationTextureCL : OpenCLMemory
+    let clContext : cl_context
+    let commandQueue : cl_command_queue
+    let kernel : OpenCLKernel
     
-    func clTest(context: cl_context, device_id: cl_device_id, texture: Texture) {
+    init(pixelDimensions: Window.Size, openCLContext: cl_context, openCLDevice: cl_device_id) {
+        
+        self.clContext = openCLContext
+        
+        self.lightAccumulationTexture = LightAccumulationPass.generateLightAccumulationTexture(width: pixelDimensions.width, height: pixelDimensions.height)
+        self.lightAccumulationTextureCL = self.lightAccumulationTexture.openCLMemory(clContext: openCLContext, flags: cl_mem_flags(CL_MEM_WRITE_ONLY), mipLevel: 0)
+        
+        var err = Int32(0); // error code returned from api calls
+        
+        // Create a command commands
+        //
+        self.commandQueue = clCreateCommandQueue(openCLContext, openCLDevice, 0, &err);
+        if err != CL_SUCCESS {
+            fatalError("Error: Failed to create a command queue. \(OpenCLError(rawValue: err)!)\n");
+        }
         
         do {
-            
-            var err = Int32(0);                            // error code returned from api calls
-            
-            var correct = UInt32(0);               // number of correct results returned
-            
-            var global = size_t(0);                      // global domain size for our calculation
-            
-            var commands : cl_command_queue! = nil          // compute command queue
-            
-            
-            // Fill our data set with random float values
-            //
-            
-            // Create a command commands
-            //
-            commands = clCreateCommandQueue(context, device_id, 0, &err);
-            if (commands == nil) {
-                print("Error: Failed to create a command commands! \(err)\n");
-                exit(EXIT_FAILURE)
-            }
-            
-            
             // Create the compute program from the source buffer
             //
             
-            let program = try OpenCLProgram(contentsOfFile: Resources.pathForResource(named: "kernel.cl"), clContext: context, deviceID: device_id)
+            let program = try OpenCLProgram(contentsOfFile: Resources.pathForResource(named: "LightAccumulationPass.cl"), clContext: openCLContext, deviceID: openCLDevice)
             
-            
-            let kernel = program.kernelNamed("imageColourChange")!
-            
-            let image = texture.openCLMemory(clContext: context, flags: cl_mem_flags(CL_MEM_WRITE_ONLY), mipLevel: 0)
-            kernel.setArgument(&image.memory, index: 0)
-            
-            var imageMemory : cl_mem? = image.memory
-
-            clEnqueueAcquireGLObjects(commands, 1, &imageMemory, 0, nil, nil);
-            
-            err = clEnqueueNDRangeKernel(commands, kernel.clKernel, 2, nil, [texture.descriptor.width, texture.descriptor.height], nil, 0, nil, nil);
-            if (err != 0)
-            {
-                print("Error: Failed to execute kernel!\n");
-                exit(EXIT_FAILURE)
-            }
-            
-            clEnqueueReleaseGLObjects(commands, 1, &imageMemory, 0, nil, nil);
-            
-            // Shutdown and cleanup
-            //
-            clReleaseCommandQueue(commands);
-            clReleaseContext(context);
+            self.kernel = program.kernelNamed("lightAccumulationPass")!
             
         } catch let error {
             fatalError(String(error))
         }
     }
     
+    deinit {
+        clReleaseCommandQueue(self.commandQueue)
+    }
+    
+    class func generateLightAccumulationTexture(width: GLint, height: GLint) -> Texture {
+        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
+        return Texture(textureWithDescriptor: descriptor, format: GL_RGBA, type: GL_HALF_FLOAT, data: nil as [Void]?)
+    }
+    
+    func resize(newPixelDimensions width: GLint, _ height: GLint) {
+        self.lightAccumulationTexture = LightAccumulationPass.generateLightAccumulationTexture(width: width, height: height)
+        self.lightAccumulationTextureCL = self.lightAccumulationTexture.openCLMemory(clContext: self.clContext, flags: cl_mem_flags(CL_MEM_WRITE_ONLY), mipLevel: 0)
+    }
+    
+    func performPass(gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
+        
+        var glObjects = [cl_mem?]()
+        
+        
+        self.kernel.setArgument(&lightAccumulationTextureCL.memory, index: 0)
+        glObjects.append(lightAccumulationTextureCL.memory)
+        clRetainMemObject(lightAccumulationTextureCL.memory)
+        
+        var kernelIndex = 1
+        for buffer in gBufferColours {
+            let clTexture = buffer.openCLMemory(clContext: self.clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY), mipLevel: 0)
+            
+            clRetainMemObject(clTexture.memory)
+            glObjects.append(clTexture.memory)
+            
+            self.kernel.setArgument(&clTexture.memory, index: kernelIndex)
+            
+            kernelIndex += 1
+        }
+        
+        let depthTexture = gBufferDepth.openCLMemory(clContext: self.clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY), mipLevel: 0)
+        
+        clRetainMemObject(depthTexture.memory)
+        glObjects.append(depthTexture.memory)
+        
+        self.kernel.setArgument(&depthTexture.memory, index: kernelIndex)
+        
+        
+        clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
+        
+        let err = clEnqueueNDRangeKernel(self.commandQueue, kernel.clKernel, 2, nil, [lightAccumulationTexture.descriptor.width, lightAccumulationTexture.descriptor.height], nil, 0, nil, nil);
+        if err != CL_SUCCESS {
+            print("Error: Failed to execute kernel. \(OpenCLError(rawValue: err)!)");
+        }
+        
+        clEnqueueReleaseGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
+        
+        for object in glObjects {
+            clReleaseMemObject(object)
+        }
+        
+        return self.lightAccumulationTexture
+    }
+}
+
+final class FinalPass {
+    
+    var finalPassState : PipelineState
+    
+    init(pixelDimensions: Window.Size) {
+        let finalBuffer = Framebuffer.defaultFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
+        
+        var depthState = DepthStencilState()
+        depthState.depthCompareFunction = GL_ALWAYS
+        depthState.isDepthWriteEnabled = false
+        
+        let finalPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
+        let finalPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "FinalPass.frag"))
+        
+        let finalPassShader = Shader(withVertexShader: finalPassVertex, fragmentShader: finalPassFragment)
+        
+        self.finalPassState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height), framebuffer: finalBuffer, shader: finalPassShader, depthStencilState: depthState)
+        
+        self.finalPassState.sRGBConversionEnabled = true
+    }
+    
+    func performPass(lightAccumulationTexture: Texture) {
+        
+        self.finalPassState.renderPass { (framebuffer, shader) in
+            shader.setUniform(GLint(0), forProperty: CompositionPassShaderProperty.LightAccumulationBuffer)
+            lightAccumulationTexture.bindToIndex(0)
+            
+            GLMesh.fullScreenQuad.render()
+        }
+    }
+    
+    func resize(newPixelDimensions width: GLint, _ height: GLint) {
+        self.finalPassState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
+    }
+}
+
+final class RenderWindow : Window {
+    
+    var gBufferPass : GBufferPass! = nil
+    var lightAccumulationPass : LightAccumulationPass! = nil
+    var finalPass : FinalPass! = nil
+    
+    override init(name: String, width: Int, height: Int) {
+        
+        super.init(name: name, width: width, height: height)
+        
+        let (clContext, clDeviceID) = OpenCLGetContext(glfwWindow: _glfwWindow)
+        
+        let pixelDimensions = self.pixelDimensions
+        
+        self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions)
+        self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, openCLContext: clContext, openCLDevice: clDeviceID)
+        self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
+    }
+    
+    override func framebufferDidResize(width: Int32, height: Int32) {
+        self.gBufferPass.resize(newPixelDimensions: width, height)
+        self.lightAccumulationPass.resize(newPixelDimensions: width, height)
+        self.finalPass.resize(newPixelDimensions: width, height)
+    }
+    
+    func renderScene(_ scene: Scene, camera: Camera) {
+        
+        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
+        let lightAccumulationTexture = self.lightAccumulationPass.performPass(gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+        self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
+    }
     
 }

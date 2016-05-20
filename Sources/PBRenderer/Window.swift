@@ -54,6 +54,12 @@ class Window {
         return glfwWindowShouldClose(_glfwWindow) != 0
     }
     
+    typealias OnUpdate = (window: Window, deltaTime: Double) -> ()
+    
+    private var onUpdateClosures = [OnUpdate]()
+    
+    private var _timeLastFrame = 0.0
+    
     init(name: String, width: Int, height: Int) {
         // Create a GLFWwindow object that we can use for GLFW's functions
         _glfwWindow = glfwCreateWindow(GLint(width), GLint(height), name, nil, nil)
@@ -83,23 +89,17 @@ class Window {
     }
     
     final func update() {
-        self.preRender()
-        self.render()
-        self.postRender()
+        
+        let currentTime = glfwGetTime()
+        let elapsedTime = currentTime - _timeLastFrame
+        
+        for closure in self.onUpdateClosures {
+            closure(window: self, deltaTime: elapsedTime)
+        }
+        
+        _timeLastFrame = currentTime
         
         glfwSwapBuffers(_glfwWindow)
-    }
-    
-    func preRender() {
-        
-    }
-    
-    func postRender() {
-        
-    }
-    
-    func render() {
-        
     }
     
     func keyAction(key: Int32, scanCode: Int32, action: Int32, modifiers: Int32) {
@@ -108,5 +108,9 @@ class Window {
     
     func framebufferDidResize(width: Int32, height: Int32) {
         
+    }
+    
+    func registerForUpdate(onUpdate: OnUpdate) {
+        self.onUpdateClosures.append(onUpdate)
     }
 }
