@@ -93,13 +93,15 @@ final class Camera {
     let projectionMatrix: mat4
     let zNear: Float
     let zFar: Float
+    let aspectRatio : Float
     
-    init(id: String?, name: String?, projectionMatrix: mat4, zNear: Float, zFar: Float) {
+    init(id: String?, name: String?, projectionMatrix: mat4, zNear: Float, zFar: Float, aspectRatio: Float) {
         self.id = id
         self.name = name
         self.projectionMatrix = projectionMatrix
         self.zNear = zNear
         self.zFar = zFar
+        self.aspectRatio = aspectRatio
     }
 }
 

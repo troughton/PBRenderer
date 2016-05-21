@@ -177,11 +177,11 @@ enum LightTypeFlag : UInt32 {
 
 
 struct GPULight {
-    var colourAndIntensity : vec4
     var lightToWorld : mat4
+    var colourAndIntensity : vec4
+    var extraData = vec4(0)
     var lightTypeFlag : LightTypeFlag
     var inverseSquareAttenuationRadius : Float
-    var extraData = vec4(0)
     
     var colour : vec3 {
         get {

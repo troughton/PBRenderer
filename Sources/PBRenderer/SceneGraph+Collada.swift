@@ -240,7 +240,7 @@ extension SceneNode {
                 } else {
                     fatalError("Unsupported field of view combination.")
                 }
-                return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar)
+                return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar, aspectRatio: aspectRatio ?? (xFov! / yFov!))
             case let .Orthographic(xMag, yMag, aspectRatio, zNear, zFar):
                 if let xMag = xMag, yMag = yMag {
                     projectionMatrix = SGLMath.ortho(0, xMag, 0, yMag, zNear, zFar)
@@ -251,7 +251,7 @@ extension SceneNode {
                 } else {
                     fatalError("Invalid orthographic matrix terms.")
                 }
-                return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar)
+                return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar, aspectRatio: aspectRatio ?? (xMag! / yMag!))
             }
         }
         

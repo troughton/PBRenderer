@@ -49,10 +49,10 @@ float3 BRDF(float3 V, float3 L, float3 N, float NdotV, float NdotL, float3 albed
     float3 F = F_Schlick(f0, f90, LdotH);
     float Vis = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
     float D = D_GGX(NdotH, roughness);
-    float3 Fr = D * F * Vis / PI;
+    float3 Fr = D * F * Vis * INV_PI;
     
     //Diffuse
-    float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, linearRoughness) / PI;
+    float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, linearRoughness) * INV_PI;
     
     return Fd * albedo + Fr;
 }

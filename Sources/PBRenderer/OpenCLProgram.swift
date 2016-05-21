@@ -69,8 +69,8 @@ final class OpenCLProgram {
             path = "."
         }
         
-        let includeArg = "-I " + path
-        err = clBuildProgram(self.clProgram, 0, nil, includeArg, nil, nil);
+        let args = "-cl-fast-relaxed-math -cl-mad-enable -I " + path
+        err = clBuildProgram(self.clProgram, 0, nil, args, nil, nil);
         if (err != CL_SUCCESS) {
             
             var len = size_t(0);

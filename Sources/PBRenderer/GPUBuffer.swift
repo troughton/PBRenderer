@@ -8,6 +8,7 @@
 
 import Foundation
 import SGLOpenGL
+import OpenCL
 
 public enum GPUBufferAccessFrequency {
     /// The data store contents will be modified once and used at most a few times.
@@ -33,7 +34,7 @@ private let glOffsetAlignment : GLint = {
     return offsetAlignment
 }()
 
-private func typeSize<U>(_ type: U.Type, bufferType: GLenum) -> Int {
+private func typeSize<U>(_ type: U.Type, bufferType: SGLOpenGL.GLenum) -> Int {
     var typeSize = sizeof(U)
     if bufferType == GL_UNIFORM_BUFFER {
         typeSize = roundUpToNearestMultiple(numToRound: typeSize, of: Int(glOffsetAlignment))
@@ -44,14 +45,14 @@ private func typeSize<U>(_ type: U.Type, bufferType: GLenum) -> Int {
 }
 
 private final class GPUBufferImpl {
-    let bufferBinding : GLenum
+    let bufferBinding : SGLOpenGL.GLenum
     
     let capacityInBytes : Int
     
     private var _contents : UnsafeMutablePointer<UInt8>
     private let _glBuffer : GLuint
     
-    init<T>(capacityInBytes: Int, data: [T]? = nil, bufferBinding : GLenum, accessFrequency: GPUBufferAccessFrequency, accessType: GPUBufferAccessType) {
+    init<T>(capacityInBytes: Int, data: [T]? = nil, bufferBinding : SGLOpenGL.GLenum, accessFrequency: GPUBufferAccessFrequency, accessType: GPUBufferAccessType) {
         self.capacityInBytes = capacityInBytes
         self.bufferBinding = bufferBinding
         
@@ -125,7 +126,7 @@ private final class GPUBufferImpl {
         glBindBuffer(bufferBinding, 0)
     }
     
-    func bindToGL(buffer: GLenum) {
+    func bindToGL(buffer: SGLOpenGL.GLenum) {
         glBindBuffer(buffer, _glBuffer)
     }
     
@@ -175,7 +176,7 @@ public final class GPUBuffer<T> {
         self._internalBuffer = buffer._internalBuffer
     }
     
-    init(capacity: Int, data: [T]? = nil, bufferBinding : GLenum, accessFrequency: GPUBufferAccessFrequency, accessType: GPUBufferAccessType) {
+    init(capacity: Int, data: [T]? = nil, bufferBinding : SGLOpenGL.GLenum, accessFrequency: GPUBufferAccessFrequency, accessType: GPUBufferAccessType) {
         self.capacity = capacity
         
         _internalBuffer = GPUBufferImpl(capacityInBytes: typeSize(T.self, bufferType: bufferBinding) * capacity, data: data, bufferBinding: bufferBinding, accessFrequency: accessFrequency, accessType: accessType)
@@ -263,8 +264,17 @@ public final class GPUBuffer<T> {
         glTexBuffer(GL_TEXTURE_BUFFER, internalFormat, _internalBuffer._glBuffer)
     }
     
-    func bindToGL(buffer: GLenum) {
+    func bindToGL(buffer: SGLOpenGL.GLenum) {
         _internalBuffer.bindToGL(buffer: buffer)
+    }
+    
+    func openCLMemory(clContext: cl_context, flags: cl_mem_flags) -> OpenCLMemory {
+        var error = cl_int(0)
+        let mem = clCreateFromGLBuffer(clContext, flags, self._internalBuffer._glBuffer, &error)
+        if error != CL_SUCCESS {
+            assertionFailure("Error creating OpenCL buffer: \(OpenCLError(rawValue: error)!).")
+        }
+        return OpenCLMemory(memory: mem!)
     }
     
     public func bindToUniformBlockIndex(_ index: Int, elementOffset: Int = 0) {
