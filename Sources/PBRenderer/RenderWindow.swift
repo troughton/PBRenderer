@@ -70,6 +70,7 @@ final class GBufferPass {
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_STENCIL, type: GL_UNSIGNED_INT_24_8, data: nil as [Void]?)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.loadAction = .Clear
+        depthAttachment.storeAction = .Store
         depthAttachment.texture = depthTexture
         
         return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3], depthAttachment: depthAttachment, stencilAttachment: nil)
@@ -146,6 +147,8 @@ final class LightAccumulationPass {
             
             self.kernel = program.kernelNamed("lightAccumulationPass")!
             
+        } catch let OpenCLProgramError.FailedProgramBuild(text, clError) {
+            fatalError(text + String(clError))
         } catch let error {
             fatalError(String(error))
         }
@@ -173,7 +176,7 @@ final class LightAccumulationPass {
     }
     
     func performPass(lights: GPUBuffer<GPULight>, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
-        
+
         var glObjects = [cl_mem?]()
         var kernelIndex = 0
         
@@ -183,14 +186,14 @@ final class LightAccumulationPass {
         
         kernelIndex += 1
         
-        var inverseImageDimensions = vec2(1.0 / Float(self.lightAccumulationTexture.descriptor.width), 1.0 / Float(self.lightAccumulationTexture.descriptor.height))
+        let inverseImageDimensions = vec2(1.0 / Float(self.lightAccumulationTexture.descriptor.width), 1.0 / Float(self.lightAccumulationTexture.descriptor.height))
         self.kernel.setArgument(inverseImageDimensions, index: kernelIndex)
         
         kernelIndex += 1
         
-        var nearPlane = self.calculateNearPlaneSize(zNear: camera.zNear, cameraAspect: camera.aspectRatio, projectionMatrix: camera.projectionMatrix)
-        var depthRange = vec2(0, 1)
-        var matrixTerms = vec3(camera.projectionMatrix[3][2], camera.projectionMatrix[2][3], camera.projectionMatrix[2][2])
+        let nearPlane = self.calculateNearPlaneSize(zNear: camera.zNear, cameraAspect: camera.aspectRatio, projectionMatrix: camera.projectionMatrix)
+        let depthRange = vec2(0, 1)
+        let matrixTerms = vec3(camera.projectionMatrix[3][2], camera.projectionMatrix[2][3], camera.projectionMatrix[2][2])
         
         self.kernel.setArgument(nearPlane, index: kernelIndex)
         kernelIndex += 1
@@ -201,7 +204,7 @@ final class LightAccumulationPass {
         self.kernel.setArgument(matrixTerms, index: kernelIndex)
         kernelIndex += 1
         
-        var worldToCameraMatrix = camera.sceneNode.transform.worldToNodeMatrix
+        let worldToCameraMatrix = camera.sceneNode.transform.worldToNodeMatrix
         self.kernel.setArgument(worldToCameraMatrix, index: kernelIndex)
         kernelIndex += 1
         
@@ -236,14 +239,21 @@ final class LightAccumulationPass {
         let lightCount = lights.capacity
         self.kernel.setArgument(lightCount, index: kernelIndex)
         
-        clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
+        var err = clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
         
-        let err = clEnqueueNDRangeKernel(self.commandQueue, kernel.clKernel, 2, nil, [lightAccumulationTexture.descriptor.width, lightAccumulationTexture.descriptor.height], nil, 0, nil, nil);
+        if err != CL_SUCCESS {
+            print("Error: Error acquiring GL Objects. \(OpenCLError(rawValue: err)!)");
+        }
+        
+        err = clEnqueueNDRangeKernel(self.commandQueue, kernel.clKernel, 2, nil, [lightAccumulationTexture.descriptor.width, lightAccumulationTexture.descriptor.height], nil, 0, nil, nil);
         if err != CL_SUCCESS {
             print("Error: Failed to execute kernel. \(OpenCLError(rawValue: err)!)");
         }
         
-        clEnqueueReleaseGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
+        err = clEnqueueReleaseGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
+        if err != CL_SUCCESS {
+            print("Error: Error releasing GL Objects. \(OpenCLError(rawValue: err)!)");
+        }
         
         for object in glObjects {
             clReleaseMemObject(object)

@@ -4,6 +4,7 @@
 
 #include "Utilities.cl"
 
+float3 F_Schlick(float3 f0, float f90, float u);
 float3 F_Schlick(float3 f0, float f90, float u) {
     return f0 + (f90 - f0) * pow(1.f - u, 5.f);
 }
@@ -21,6 +22,7 @@ float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH, float linearRoughn
     return lightScatter * viewScatter * energyFactor;
 }
 
+float V_SmithGGXCorrelated(float NdotL, float NdotV, float alphaG);
 float V_SmithGGXCorrelated(float NdotL, float NdotV, float alphaG) {
     float alphaG2 = alphaG * alphaG;
     
@@ -31,12 +33,14 @@ float V_SmithGGXCorrelated(float NdotL, float NdotV, float alphaG) {
     return 0.5f / max(Lambda_GGXV + Lambda_GGXL, 1e-6f);
 }
 
+float D_GGX(float NdotH, float m);
 float D_GGX(float NdotH, float m) {
     float m2 = m * m;
     float f = (NdotH * m2 - NdotH) * NdotH + 1;
     return m2 / (f * f);
 }
 
+float3 BRDF(float3 V, float3 L, float3 N, float NdotV, float NdotL, float3 albedo, float3 f0, float f90, float linearRoughness);
 float3 BRDF(float3 V, float3 L, float3 N, float NdotV, float NdotL, float3 albedo, float3 f0, float f90, float linearRoughness) {
     
     float roughness = linearRoughness * linearRoughness;

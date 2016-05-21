@@ -42,8 +42,8 @@ final class OpenCLKernel {
 }
 
 enum OpenCLProgramError : ErrorProtocol {
-    case FailedProgramCreation(cl_int)
-    case FailedProgramBuild(String, cl_int)
+    case FailedProgramCreation(OpenCLError)
+    case FailedProgramBuild(String, OpenCLError)
 }
 
 final class OpenCLProgram {
@@ -59,7 +59,7 @@ final class OpenCLProgram {
         }
         
         if err != CL_SUCCESS {
-            throw OpenCLProgramError.FailedProgramCreation(err)
+            throw OpenCLProgramError.FailedProgramCreation(OpenCLError(rawValue: err)!)
         }
         
         // Build the program executable
@@ -81,7 +81,7 @@ final class OpenCLProgram {
             
             print("Error: Failed to build program executable!\n");
             clGetProgramBuildInfo(self.clProgram, deviceID, cl_program_build_info(CL_PROGRAM_BUILD_LOG), buffer.count, &buffer, &len);
-            throw OpenCLProgramError.FailedProgramBuild(String(cString: buffer), err)
+            throw OpenCLProgramError.FailedProgramBuild(String(cString: buffer), OpenCLError(rawValue: err)!)
         }
         
     }

@@ -2,7 +2,7 @@ typedef struct {
     float4 m[4];        // member elements of the matrix
 } mat4;
 
-
+mat4 transpose(mat4 matrix);
 mat4 transpose(mat4 matrix) {
     // read matrix into a float16 vector
     float16 x = (float16)( matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3] );
@@ -17,6 +17,7 @@ mat4 transpose(mat4 matrix) {
     return result;
 }
 
+float4 multiplyMatrixVector(mat4 matrix, float4 p);
 float4 multiplyMatrixVector(mat4 matrix, float4 p) {
     matrix = transpose(matrix);
     return
@@ -26,6 +27,7 @@ float4 multiplyMatrixVector(mat4 matrix, float4 p) {
     matrix.m[3] * p;
 }
 
+mat4 multiplyMatrix(mat4 a, mat4 b);
 mat4 multiplyMatrix(mat4 a, mat4 b) {
     a = transpose(a);
     

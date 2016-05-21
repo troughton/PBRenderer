@@ -1,7 +1,10 @@
+
+float saturate(float value);
 float saturate(float value) {
     return clamp(value, 0.f, 1.f);
 }
 
+float sqr(float value);
 float sqr(float value) {
     return value * value;
 }
