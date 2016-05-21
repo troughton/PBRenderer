@@ -32,7 +32,7 @@ extension Scene {
             return count + lightLibrary.light.count
         }
         
-        let lightBuffer = GPUBuffer<GPULight>(capacity: lightCount, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+        let lightBuffer = GPUBuffer<GPULight>(capacity: lightCount, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
         
         var i = 0
         for lightLibrary in root.libraryLights {

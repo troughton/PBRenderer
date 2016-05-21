@@ -75,8 +75,8 @@ float getDistanceAtt(float3 unnormalizedLightVector, float invSqrAttRadius) {
 
 float getAngleAtt(float3 normalizedLightVector, float3 lightDir, float lightAngleScale, float lightAngleOffset) {
     // On the CPU
-    // float lightAngleScale = 1.0f / max(0.001f, (cosInner - cosOuter)); = 1000
-    // float lightAngleOffset = -cosOuter * angleScale; = -939.6926208
+    // float lightAngleScale = 1.0f / max(0.001f, (cosInner - cosOuter));
+    // float lightAngleOffset = -cosOuter * angleScale;
     
     float cd = dot(lightDir, normalizedLightVector);
     float attenuation = saturate(cd * lightAngleScale + lightAngleOffset);
@@ -145,7 +145,7 @@ __kernel void lightAccumulationPass(__write_only image2d_t lightAccumulationBuff
                                     float3 nearPlane, float2 depthRange, float3 matrixTerms,
                                     mat4 worldToCameraMatrix,
                                     __read_only image2d_t gBuffer0Tex, __read_only image2d_t gBuffer1Tex, __read_only image2d_t gBuffer2Tex, __read_only image2d_t gBufferDepthTex,
-                                    __global LightData *lights) {
+                                    __global LightData *lights, int lightCount) {
 
     const sampler_t sampler = CLK_FILTER_NEAREST | CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE;
     
@@ -172,7 +172,11 @@ __kernel void lightAccumulationPass(__write_only image2d_t lightAccumulationBuff
     float3 V = fast_normalize(-cameraSpacePosition);
     float NdotV = fabs(dot(N, V)) + 1e-5f; //bias the result to avoid artifacts
     
-    float3 lightAccumulation = evaluateLighting(cameraSpacePosition, &worldToCameraMatrix, V, N, NdotV, albedo, f0, f90, linearRoughness, lights);
+    float3 lightAccumulation = (float3)(0, 0, 0);
+    
+    for (int i = 0; i < lightCount; i++) {
+        lightAccumulation += evaluateLighting(cameraSpacePosition, &worldToCameraMatrix, V, N, NdotV, albedo, f0, f90, linearRoughness, &(lights[i]));
+    }
     
     write_imagef(lightAccumulationBuffer, coord, (float4)(lightAccumulation, 1));
 }

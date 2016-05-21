@@ -17,7 +17,8 @@ final class OpenCLKernel {
         self.clKernel = kernel
     }
     
-    func setArgument<T>(_ argument: inout T, size: Int? = nil, index: Int) {
+    func setArgument<T>(_ argument: T, size: Int? = nil, index: Int) {
+        var argument = argument
         let argSize = size ?? sizeofValue(argument)
         let result = clSetKernelArg(self.clKernel, cl_uint(index), argSize, &argument)
         if result != CL_SUCCESS {

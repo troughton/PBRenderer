@@ -99,6 +99,19 @@ enum LightType {
     func fillGPULight(gpuLight: inout GPULight) {
         gpuLight.lightTypeFlag = self.lightTypeFlag
         
+        switch self {
+        case let .Spot(innerCutoff, outerCutoff):
+            let cosInner = cos(innerCutoff)
+            let cosOuter = cos(outerCutoff)
+            
+            let lightAngleScale = 1.0 / max(0.001, (cosInner - cosOuter));
+            let lightAngleOffset = -cosOuter * lightAngleScale;
+            gpuLight.extraData = vec4(lightAngleScale, lightAngleOffset, 0, 0)
+            
+        default:
+            break
+        }
+        
     }
 }
 

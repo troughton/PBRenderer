@@ -177,14 +177,14 @@ final class LightAccumulationPass {
         var glObjects = [cl_mem?]()
         var kernelIndex = 0
         
-        self.kernel.setArgument(&lightAccumulationTextureCL.memory, index: kernelIndex)
+        self.kernel.setArgument(lightAccumulationTextureCL.memory, index: kernelIndex)
         glObjects.append(lightAccumulationTextureCL.memory)
         clRetainMemObject(lightAccumulationTextureCL.memory)
         
         kernelIndex += 1
         
         var inverseImageDimensions = vec2(1.0 / Float(self.lightAccumulationTexture.descriptor.width), 1.0 / Float(self.lightAccumulationTexture.descriptor.height))
-        self.kernel.setArgument(&inverseImageDimensions, index: kernelIndex)
+        self.kernel.setArgument(inverseImageDimensions, index: kernelIndex)
         
         kernelIndex += 1
         
@@ -192,17 +192,17 @@ final class LightAccumulationPass {
         var depthRange = vec2(0, 1)
         var matrixTerms = vec3(camera.projectionMatrix[3][2], camera.projectionMatrix[2][3], camera.projectionMatrix[2][2])
         
-        self.kernel.setArgument(&nearPlane, index: kernelIndex)
+        self.kernel.setArgument(nearPlane, index: kernelIndex)
         kernelIndex += 1
         
-        self.kernel.setArgument(&depthRange, index: kernelIndex)
+        self.kernel.setArgument(depthRange, index: kernelIndex)
         kernelIndex += 1
         
-        self.kernel.setArgument(&matrixTerms, index: kernelIndex)
+        self.kernel.setArgument(matrixTerms, index: kernelIndex)
         kernelIndex += 1
         
         var worldToCameraMatrix = camera.sceneNode.transform.worldToNodeMatrix
-        self.kernel.setArgument(&worldToCameraMatrix, index: kernelIndex)
+        self.kernel.setArgument(worldToCameraMatrix, index: kernelIndex)
         kernelIndex += 1
         
         for buffer in gBufferColours {
@@ -211,7 +211,7 @@ final class LightAccumulationPass {
             clRetainMemObject(clTexture.memory)
             glObjects.append(clTexture.memory)
             
-            self.kernel.setArgument(&clTexture.memory, index: kernelIndex)
+            self.kernel.setArgument(clTexture.memory, index: kernelIndex)
             
             kernelIndex += 1
         }
@@ -221,7 +221,7 @@ final class LightAccumulationPass {
         clRetainMemObject(depthTexture.memory)
         glObjects.append(depthTexture.memory)
         
-        self.kernel.setArgument(&depthTexture.memory, index: kernelIndex)
+        self.kernel.setArgument(depthTexture.memory, index: kernelIndex)
         
         kernelIndex += 1
         
@@ -229,7 +229,12 @@ final class LightAccumulationPass {
         clRetainMemObject(lightCL.memory)
         glObjects.append(lightCL.memory)
         
-        self.kernel.setArgument(&lightCL.memory, index: kernelIndex)
+        self.kernel.setArgument(lightCL.memory, index: kernelIndex)
+        
+        kernelIndex += 1
+        
+        let lightCount = lights.capacity
+        self.kernel.setArgument(lightCount, index: kernelIndex)
         
         clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
         
