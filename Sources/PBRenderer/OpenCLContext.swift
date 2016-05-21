@@ -12,6 +12,7 @@ import SGLOpenGL
 import CGLFW3
 
 private var _implicitCLSyncSupported = false
+var OpenCLDepthTextureSupported = false
 
 func OpenCLSyncContexts(commandQueue: cl_command_queue) {
     if !_implicitCLSyncSupported {
@@ -72,6 +73,7 @@ final class OpenCLMemory {
         }
         
         _implicitCLSyncSupported = supportedExtensions.contains("cl_khr_gl_event")
+        OpenCLDepthTextureSupported = supportedExtensions.contains("cl_khr_gl_depth_images")
         
         return (context!, devices[0]!)
     }
@@ -125,6 +127,7 @@ var platforms = [cl_platform_id?](repeating: nil, count: 32)
         }
         
         _implicitCLSyncSupported = supportedExtensions.contains("cl_khr_gl_event")
+        OpenCLDepthTextureSupported = supportedExtensions.contains("cl_khr_gl_depth_images")
         
         return (context!, devices[0]!)
     }

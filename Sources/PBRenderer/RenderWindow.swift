@@ -27,7 +27,10 @@ final class GBufferPass {
         let gBuffer = GBufferPass.gBufferFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
         
         let geometryPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "GeometryPass.vert"))
-        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: "GeometryPass.frag")
+        
+        let fragmentName = OpenCLDepthTextureSupported ? "GeometryPass.frag" : "GeometryPassSeparateDepth.frag"
+        
+        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: fragmentName))
         
         let geometryShader = Shader(withVertexShader: geometryPassVertex, fragmentShader: geometryPassFragment)
         
@@ -66,6 +69,13 @@ final class GBufferPass {
         attachment3.loadAction = .Clear
         attachment3.storeAction = .Store
         
+        let attachment4Texture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        
+        var attachment4 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+        attachment4.texture = attachment4Texture
+        attachment4.loadAction = .Clear
+        attachment4.storeAction = .Store
+        
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: Int(width), height: Int(height), mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_STENCIL, type: GL_UNSIGNED_INT_24_8, data: nil as [Void]?)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
@@ -73,7 +83,18 @@ final class GBufferPass {
         depthAttachment.storeAction = .Store
         depthAttachment.texture = depthTexture
         
-        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3], depthAttachment: depthAttachment, stencilAttachment: nil)
+        var depthAttachmentAsColour : RenderPassColourAttachment? = nil
+        if !OpenCLDepthTextureSupported {
+            let colourDepthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_R16F, width: Int(width), height: Int(height), mipmapped: false)
+            let colourDepthTexture = Texture(textureWithDescriptor: colourDepthDescriptor, format: GL_RED, type: GL_HALF_FLOAT, data: nil as [Void]?)
+            
+            depthAttachmentAsColour = RenderPassColourAttachment(clearColour: vec4(1));
+            depthAttachmentAsColour?.texture = colourDepthTexture
+            depthAttachmentAsColour?.loadAction = .Clear
+            depthAttachmentAsColour?.storeAction = .Store
+        }
+        
+        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, attachment4, depthAttachmentAsColour], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     func renderNode(_ node: SceneNode, worldToCameraMatrix: mat4, cameraToClipMatrix: mat4, shader: Shader) {
@@ -143,7 +164,14 @@ final class LightAccumulationPass {
             // Create the compute program from the source buffer
             //
             
-            let program = try OpenCLProgram(contentsOfFile: Resources.pathForResource(named: "LightAccumulationPass.cl"), clContext: openCLContext, deviceID: openCLDevice)
+            let fileName : String
+            if OpenCLDepthTextureSupported {
+                fileName = "LightAccumulationPassKernelDepth.cl"
+            } else {
+                fileName = "LightAccumulationPassKernelColourDepth.cl"
+            }
+            
+            let program = try OpenCLProgram(contentsOfFile: Resources.pathForResource(named: fileName), clContext: openCLContext, deviceID: openCLDevice)
             
             self.kernel = program.kernelNamed("lightAccumulationPass")!
             
@@ -192,18 +220,15 @@ final class LightAccumulationPass {
         kernelIndex += 1
         
         let nearPlane = self.calculateNearPlaneSize(zNear: camera.zNear, cameraAspect: camera.aspectRatio, projectionMatrix: camera.projectionMatrix)
-        let depthRange = vec2(0, 1)
-        let matrixTerms = vec3(camera.projectionMatrix[3][2], camera.projectionMatrix[2][3], camera.projectionMatrix[2][2])
-        
-        self.kernel.setArgument(nearPlane, index: kernelIndex)
+        let nearPlaneAndDepthMin = vec4(nearPlane.x, nearPlane.y, nearPlane.z, 0)
+        let depthMaxAndMatrixTerms = vec4(1, camera.projectionMatrix[3][2], camera.projectionMatrix[2][3], camera.projectionMatrix[2][2])
+//
+        self.kernel.setArgument(nearPlaneAndDepthMin, index: kernelIndex)
         kernelIndex += 1
         
-        self.kernel.setArgument(depthRange, index: kernelIndex)
+        self.kernel.setArgument(depthMaxAndMatrixTerms, index: kernelIndex)
         kernelIndex += 1
-        
-        self.kernel.setArgument(matrixTerms, index: kernelIndex)
-        kernelIndex += 1
-        
+//
         let worldToCameraMatrix = camera.sceneNode.transform.worldToNodeMatrix
         self.kernel.setArgument(worldToCameraMatrix, index: kernelIndex)
         kernelIndex += 1
@@ -228,17 +253,17 @@ final class LightAccumulationPass {
         
         kernelIndex += 1
         
-        let lightCL = lights.openCLMemory(clContext: clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY))
-        clRetainMemObject(lightCL.memory)
-        glObjects.append(lightCL.memory)
-        
-        self.kernel.setArgument(lightCL.memory, index: kernelIndex)
-        
-        kernelIndex += 1
-        
-        let lightCount = lights.capacity
-        self.kernel.setArgument(lightCount, index: kernelIndex)
-        
+//        let lightCL = lights.openCLMemory(clContext: clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY))
+//        clRetainMemObject(lightCL.memory)
+//        glObjects.append(lightCL.memory)
+//        
+//        self.kernel.setArgument(lightCL.memory, index: kernelIndex)
+//        
+//        kernelIndex += 1
+//        
+//        let lightCount = lights.capacity
+//        self.kernel.setArgument(lightCount, index: kernelIndex)
+//
         var err = clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
         
         if err != CL_SUCCESS {
@@ -327,7 +352,7 @@ final class RenderWindow : Window {
     func renderScene(_ scene: Scene, camera: Camera) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
-        let lightAccumulationTexture = self.lightAccumulationPass.performPass(lights: scene.lightBuffer, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+        let lightAccumulationTexture = self.lightAccumulationPass.performPass(lights: scene.lightBuffer, camera: camera, gBufferColours: [Texture](gBuffers[0..<3]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
     }
     
