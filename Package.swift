@@ -9,6 +9,8 @@ let package = Package(
                       .Package(url: "https://github.com/troughton/CPBRendererLibs", majorVersion: 1)
                       ],
     targets: [
+                 Target(name: "PBRendererApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
+                    ]),
                  Target(name: "PBRenderer", dependencies: [ .Target(name: "ColladaParser")
                                                                ]),
                  Target(name: "ColladaParser")

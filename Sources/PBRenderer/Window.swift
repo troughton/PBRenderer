@@ -12,7 +12,7 @@ import SGLOpenGL
 import SGLMath
 import ColladaParser
 
-class Window {
+public class Window {
     // called whenever a key is pressed/released via GLFW
     func keyCallback(window: OpaquePointer!, key: Int32, scancode: Int32, action: Int32, mode: Int32) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -24,7 +24,7 @@ class Window {
     
     let _glfwWindow : OpaquePointer!
     
-    struct Size {
+    public struct Size {
         let width: GLint
         let height: GLint
         
@@ -38,29 +38,29 @@ class Window {
         }
     }
     
-    var dimensions : Size {
+    public var dimensions : Size {
         var width : GLint = 0, height : GLint = 0
         glfwGetWindowSize(_glfwWindow, &width, &height)
         return Size(width, height)
     }
     
-    var pixelDimensions : Size {
+    public var pixelDimensions : Size {
         var width : GLint = 0, height : GLint = 0
         glfwGetFramebufferSize(_glfwWindow, &width, &height)
         return Size(width, height)
     }
     
-    var shouldClose : Bool {
+    public var shouldClose : Bool {
         return glfwWindowShouldClose(_glfwWindow) != 0
     }
     
-    typealias OnUpdate = (window: Window, deltaTime: Double) -> ()
+    public typealias OnUpdate = (window: Window, deltaTime: Double) -> ()
     
     private var onUpdateClosures = [OnUpdate]()
     
     private var _timeLastFrame = 0.0
     
-    init(name: String, width: Int, height: Int) {
+    public init(name: String, width: Int, height: Int) {
         // Create a GLFWwindow object that we can use for GLFW's functions
         _glfwWindow = glfwCreateWindow(GLint(width), GLint(height), name, nil, nil)
         glfwMakeContextCurrent(_glfwWindow)
@@ -88,7 +88,7 @@ class Window {
         Window.glfwWindowsToWindows[_glfwWindow] = nil
     }
     
-    final func update() {
+    public final func update() {
         
         let currentTime = glfwGetTime()
         let elapsedTime = currentTime - _timeLastFrame
@@ -110,7 +110,7 @@ class Window {
         
     }
     
-    func registerForUpdate(onUpdate: OnUpdate) {
+    public func registerForUpdate(onUpdate: OnUpdate) {
         self.onUpdateClosures.append(onUpdate)
     }
 }

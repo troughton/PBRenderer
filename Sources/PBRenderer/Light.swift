@@ -9,24 +9,24 @@
 import Foundation
 import SGLMath
 
-typealias Kelvin = Float
+public typealias Kelvin = Float
 
 /** Luminous efficacy. */
-typealias LumensPerWatt = Float
+public typealias LumensPerWatt = Float
 
-typealias ExposureValue = Float
+public typealias ExposureValue = Float
 
-typealias CandelasPerMetreSq = Float
+public typealias CandelasPerMetreSq = Float
 
 //Luminous Intensity
-typealias Candelas = Float
+public typealias Candelas = Float
 
 //Using K = 12.5
 func luminanceFromEV(_ ev: ExposureValue) -> CandelasPerMetreSq {
     return pow(2, ev - 3)
 }
 
-enum LightColourMode {
+public enum LightColourMode {
     case Temperature(Kelvin)
     case Colour(vec3)
     
@@ -80,7 +80,7 @@ enum LightColourMode {
     }
 }
 
-enum LightType {
+public enum LightType {
     case Point
     case Spot(innerCutoff: Float, outerCutoff: Float)
     case Directional
@@ -115,26 +115,26 @@ enum LightType {
     }
 }
 
-final class Light {
-    var sceneNode : SceneNode! = nil {
+public final class Light {
+    public var sceneNode : SceneNode! = nil {
         didSet {
             self.transformDidChange()
         }
     }
     
-    var type : LightType {
+    public var type : LightType {
         didSet {
             self.backingGPULight.withElement { self.type.fillGPULight(gpuLight: &$0) }
         }
     }
     
-    var colour : LightColourMode {
+    public var colour : LightColourMode {
         didSet {
             self.backingGPULight.withElement { $0.colour = self.colour.rgbColour }
         }
     }
     
-    var intensity : Candelas {
+    public var intensity : Candelas {
         get {
             return self.backingGPULight.readOnlyElement.intensity
         }
@@ -145,7 +145,7 @@ final class Light {
         }
     }
     
-    var falloffRadius : Float {
+    public var falloffRadius : Float {
         didSet {
             self.backingGPULight.withElement { gpuLight in
                 let radiusSquared = self.falloffRadius * self.falloffRadius

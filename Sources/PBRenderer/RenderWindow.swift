@@ -66,8 +66,8 @@ final class GBufferPass {
         attachment3.loadAction = .Clear
         attachment3.storeAction = .Store
         
-        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false)
-        let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_COMPONENT, type: GL_UNSIGNED_SHORT, data: nil as [Void]?)
+        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT32F, width: Int(width), height: Int(height), mipmapped: false)
+        let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_COMPONENT, type: GL_FLOAT, data: nil as [Void]?)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.loadAction = .Clear
         depthAttachment.storeAction = .Store
@@ -310,13 +310,13 @@ final class FinalPass {
     }
 }
 
-final class RenderWindow : Window {
+public final class RenderWindow : Window {
     
     var gBufferPass : GBufferPass! = nil
     var lightAccumulationPass : LightAccumulationPass! = nil
     var finalPass : FinalPass! = nil
     
-    override init(name: String, width: Int, height: Int) {
+    public override init(name: String, width: Int, height: Int) {
         
         super.init(name: name, width: width, height: height)
         
@@ -335,7 +335,7 @@ final class RenderWindow : Window {
         self.finalPass.resize(newPixelDimensions: width, height)
     }
     
-    func renderScene(_ scene: Scene, camera: Camera) {
+    public func renderScene(_ scene: Scene, camera: Camera) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)

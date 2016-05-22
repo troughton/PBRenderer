@@ -9,7 +9,7 @@
 import Foundation
 import SGLMath
 
-typealias quat = Quaternion<Float>
+public typealias quat = Quaternion<Float>
 
 extension Matrix4x4 {
     init(_ array: [T]) {
@@ -20,13 +20,13 @@ extension Matrix4x4 {
     }
 }
 
-final class Scene {
+public final class Scene {
     
-    let nodes : [SceneNode]
+    public let nodes : [SceneNode]
     let meshes : [[GLMesh]]
     let materialBuffer : GPUBuffer<Material>
     let lightBuffer : GPUBuffer<GPULight>
-    var idsToNodes : [String : SceneNode]! = nil
+    public var idsToNodes : [String : SceneNode]! = nil
 
     init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>) {
         self.nodes = nodes
@@ -43,7 +43,7 @@ final class Scene {
         self.idsToNodes = dictionary
     }
 
-    var flattenedScene : [SceneNode] {
+    public var flattenedScene : [SceneNode] {
         var nodes = [SceneNode]()
         var stack = [SceneNode]()
         
@@ -59,15 +59,15 @@ final class Scene {
     }
 }
 
-final class SceneNode {
-    let id : String?
-    let name : String?
-    let transform : Transform
+public final class SceneNode {
+    public let id : String?
+    public let name : String?
+    public let transform : Transform
     let meshes : [GLMesh]
-    let children : [SceneNode]
-    let cameras : [Camera]
-    let lights : [Light]
-    let materials : [String : GPUBufferElement<Material>]
+    public let children : [SceneNode]
+    public let cameras : [Camera]
+    public let lights : [Light]
+    public let materials : [String : GPUBufferElement<Material>]
     
     func initialiseComponents() {
         self.transform.sceneNode = self
@@ -93,16 +93,16 @@ final class SceneNode {
     }
 }
 
-final class Camera {
-    var sceneNode : SceneNode! = nil
+public final class Camera {
+    public var sceneNode : SceneNode! = nil
     
-    let id : String?
-    let name: String?
+    public let id : String?
+    public let name: String?
     
-    let projectionMatrix: mat4
-    let zNear: Float
-    let zFar: Float
-    let aspectRatio : Float
+    public let projectionMatrix: mat4
+    public let zNear: Float
+    public let zFar: Float
+    public let aspectRatio : Float
     
     init(id: String?, name: String?, projectionMatrix: mat4, zNear: Float, zFar: Float, aspectRatio: Float) {
         self.id = id
@@ -114,23 +114,23 @@ final class Camera {
     }
 }
 
-final class Transform {
-    var sceneNode : SceneNode! = nil
+public final class Transform {
+    public var sceneNode : SceneNode! = nil
     
-    var parent : Transform? = nil
+    public var parent : Transform? = nil
     
-    var translation : vec3 {
+    public var translation : vec3 {
         didSet {
             self.sceneNode?.transformDidChange()
         }
     }
-    var rotation : quat {
+    public var rotation : quat {
         didSet {
             self.sceneNode?.transformDidChange()
         }
     }
     
-    var scale : vec3 {
+    public var scale : vec3 {
         didSet {
             self.sceneNode?.transformDidChange()
         }
@@ -167,7 +167,7 @@ final class Transform {
         return transform * parentTransform;
     }
     
-    var nodeToWorldMatrix : mat4 {
+    public var nodeToWorldMatrix : mat4 {
         get {
             if let transform = _nodeToWorldMatrix {
                 return transform
@@ -179,7 +179,7 @@ final class Transform {
         }
     }
     
-    var worldToNodeMatrix : mat4 {
+    public var worldToNodeMatrix : mat4 {
         get {
             if let transform = _worldToNodeMatrix {
                 return transform

@@ -166,7 +166,7 @@ extension Scene {
         
     }
     
-    convenience init(fromCollada root: Collada) {
+    public convenience init(fromCollada root: Collada) {
         guard let scene = root.scene?.instanceVisualScene else { fatalError("Why is there no scene in your scene graph?") }
         
         guard let visualScene = root[scene.url] as? VisualSceneType else { fatalError() }

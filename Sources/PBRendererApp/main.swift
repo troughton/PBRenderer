@@ -3,6 +3,7 @@ import CGLFW3
 import SGLOpenGL
 import SGLMath
 import ColladaParser
+import PBRenderer
 
 let mainWindow : Window
 
