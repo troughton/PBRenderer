@@ -625,11 +625,19 @@ public final class TechniqueType : ColladaType {
 					*/
 	public let profile: String
 
-
-
+    public let attributes : [String : String]
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.profile = String(xmlElement.attribute(forName: "profile")!.stringValue!)
+        
+        var attributes = [String : String]()
+        for element in xmlElement.childElements {
+	        let key = element.name!
+	        let value = element.stringValue
+	        attributes[key] = value
+        }
+        self.attributes = attributes
+        
 	}
 
 }

@@ -26,12 +26,21 @@ final class Scene {
     let meshes : [[GLMesh]]
     let materialBuffer : GPUBuffer<Material>
     let lightBuffer : GPUBuffer<GPULight>
+    var idsToNodes : [String : SceneNode]! = nil
 
     init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>) {
         self.nodes = nodes
         self.meshes = meshes
         self.materialBuffer = materials
         self.lightBuffer = lights
+        
+        var dictionary = [String : SceneNode]()
+        self.flattenedScene.forEach({ (node) in
+            if let id = node.id {
+                dictionary[id] = node
+            }
+        })
+        self.idsToNodes = dictionary
     }
 
     var flattenedScene : [SceneNode] {

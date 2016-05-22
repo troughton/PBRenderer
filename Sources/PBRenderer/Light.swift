@@ -176,9 +176,6 @@ final class Light {
     }
     
     func transformDidChange() {
-        if let sceneNode = self.sceneNode {
-            self.backingGPULight.withElement { $0.lightToWorld = sceneNode.transform.nodeToWorldMatrix }
-        }
     }
 }
 
@@ -190,11 +187,13 @@ enum LightTypeFlag : UInt32 {
 
 
 struct GPULight {
-    var lightToWorld : mat4
     var colourAndIntensity : vec4
+    var cameraSpacePosition : vec4
+    var cameraSpaceDirection : vec4
     var extraData = vec4(0)
     var lightTypeFlag : LightTypeFlag
     var inverseSquareAttenuationRadius : Float
+    var padding = vec2(0)
     
     var colour : vec3 {
         get {

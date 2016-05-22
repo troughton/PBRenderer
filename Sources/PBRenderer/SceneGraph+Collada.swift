@@ -40,6 +40,8 @@ extension Scene {
                 let colourAndIntensity : vec3
                 let type : LightType
                 
+                let openColladaMayaTechnique = light.extra.first?.technique.first
+                
                 switch light.techniqueCommon.lightType {
                 case let .Directional(colour):
                     colourAndIntensity = vec3(colour)
@@ -47,15 +49,26 @@ extension Scene {
                 case let .Point(colour):
                     type = .Point
                     colourAndIntensity = vec3(colour)
-                case let .Spot(colour, falloffDegrees, falloffExponent):
-                    type = .Spot(innerCutoff: radians(degrees: falloffDegrees), outerCutoff: radians(degrees: falloffDegrees))
+                case let .Spot(colour, falloffDegrees, _):
+                    
+                    var outerCutoff = falloffDegrees
+                    if let penumbra = openColladaMayaTechnique?.attributes["penumbra_angle"] {
+                        outerCutoff += max(0, Float(penumbra)!)
+                    }
+                    
+                    type = .Spot(innerCutoff: radians(degrees: falloffDegrees),
+                                 outerCutoff: radians(degrees: outerCutoff))
                     colourAndIntensity = vec3(colour)
                 case .Ambient(_):
                     continue
                 }
                 
-                let intensity = length(colourAndIntensity)
+                var intensity = length(colourAndIntensity)
                 let colour = colourAndIntensity / intensity
+                
+                if let mayaIntensity = openColladaMayaTechnique?.attributes["intensity"] {
+                    intensity *= Float(mayaIntensity)!
+                }
                 
                 let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensity, falloffRadius: 100.0, backingGPULight: lightBuffer[viewForIndex: i])
                 elementsInBuffer[light.id!] = pbLight
@@ -111,7 +124,7 @@ extension Scene {
                         if case let .float(_, value) = reflectivity {
                             material.reflectance = value
                         }
-                        if _isDebugAssertConfiguration() && material.reflectance >= 0 && material.reflectance <= 1 {
+                        if _isDebugAssertConfiguration() && (material.reflectance < 0 && material.reflectance > 1) {
                             print("Warning: material reflectance should be in the range [0, 1]")
                             material.reflectance = clamp(material.reflectance, min: 0, max: 1)
                         }
@@ -123,7 +136,7 @@ extension Scene {
                             material.smoothness = value
                         }
                         
-                        if _isDebugAssertConfiguration() && material.smoothness >= 0 && material.smoothness <= 1 {
+                        if _isDebugAssertConfiguration() && !(material.smoothness >= 0 && material.smoothness <= 1) {
                             print("Warning: material smoothness should be in the range [0, 1]")
                             material.smoothness = clamp(material.smoothness, min: 0, max: 1)
                         }
@@ -134,7 +147,7 @@ extension Scene {
                             material.metalMask = vec4(colour).r
                         }
                         
-                        if _isDebugAssertConfiguration() && material.metalMask >= 0 && material.metalMask <= 1 {
+                        if _isDebugAssertConfiguration() && !(material.metalMask >= 0 && material.metalMask <= 1) {
                             print("Warning: material MetalMask should be in the range [0, 1]")
                             material.metalMask = clamp(material.metalMask, min: 0, max: 1)
                         }

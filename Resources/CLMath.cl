@@ -17,14 +17,25 @@ mat4 transpose(mat4 matrix) {
     return result;
 }
 
-float4 multiplyMatrixVector(mat4 matrix, float4 p);
-float4 multiplyMatrixVector(mat4 matrix, float4 p) {
-    matrix = transpose(matrix);
+float4 multiplyMatrixVector(mat4 matrix, float4 vector);
+float4 multiplyMatrixVector(mat4 matrix, float4 vector) {
+   // matrix = transpose(matrix);
     return
-    matrix.m[0] * p +
-    matrix.m[1] * p +
-    matrix.m[2] * p +
-    matrix.m[3] * p;
+    matrix.m[0] * vector +
+    matrix.m[1] * vector +
+    matrix.m[2] * vector +
+    matrix.m[3] * vector;
+
+//    float4 result;
+//    for (int i = 0; i < 4; i++) {
+//        float total = 0;
+//        for (int j = 0; j < 4; j++) {
+//            total += matrix.m[i][j] * vector[j];
+//        }
+//        
+//        result[i] = total;
+//    }
+//    return result;
 }
 
 mat4 multiplyMatrix(mat4 a, mat4 b);

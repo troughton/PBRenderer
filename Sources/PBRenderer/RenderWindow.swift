@@ -66,8 +66,8 @@ final class GBufferPass {
         attachment3.loadAction = .Clear
         attachment3.storeAction = .Store
         
-        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: Int(width), height: Int(height), mipmapped: false)
-        let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_STENCIL, type: GL_UNSIGNED_INT_24_8, data: nil as [Void]?)
+        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false)
+        let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_COMPONENT, type: GL_UNSIGNED_SHORT, data: nil as [Void]?)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.loadAction = .Clear
         depthAttachment.storeAction = .Store
@@ -76,10 +76,14 @@ final class GBufferPass {
         return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
-    func renderNode(_ node: SceneNode, worldToCameraMatrix: mat4, cameraToClipMatrix: mat4, shader: Shader) {
-        let modelToCamera = worldToCameraMatrix * node.transform.nodeToWorldMatrix
-        let modelToClip = cameraToClipMatrix * modelToCamera
-        let normalTransform = node.transform.worldToNodeMatrix.upperLeft.transpose
+    func renderNode(_ node: SceneNode, camera: Camera, shader: Shader) {
+        
+        let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
+        let cameraToClip = camera.projectionMatrix
+        
+        let modelToCamera = worldToCamera * node.transform.nodeToWorldMatrix
+        let modelToClip = cameraToClip * modelToCamera
+        let normalTransform = (node.transform.worldToNodeMatrix * camera.sceneNode.transform.nodeToWorldMatrix).upperLeft.transpose
         
         shader.setMatrix(modelToClip, forProperty: BasicShaderProperty.ModelToClipMatrix)
         shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToCameraMatrix)
@@ -95,7 +99,7 @@ final class GBufferPass {
         }
         
         for child in node.children {
-            self.renderNode(child, worldToCameraMatrix: worldToCameraMatrix, cameraToClipMatrix: cameraToClipMatrix, shader: shader)
+            self.renderNode(child, camera: camera, shader: shader)
         }
     }
     
@@ -103,11 +107,8 @@ final class GBufferPass {
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             
-            let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
-            let cameraToClip = camera.projectionMatrix
-            
             for node in scene.nodes {
-                self.renderNode(node, worldToCameraMatrix: worldToCamera, cameraToClipMatrix: cameraToClip, shader: shader)
+                self.renderNode(node, camera: camera, shader: shader)
             }
         }
         
@@ -168,15 +169,34 @@ final class LightAccumulationPass {
         self.lightAccumulationTextureCL = self.lightAccumulationTexture.openCLMemory(clContext: self.clContext, flags: cl_mem_flags(CL_MEM_WRITE_ONLY), mipLevel: 0)
     }
     
-    func calculateNearPlaneSize(zNear: Float, cameraAspect: Float, projectionMatrix: mat4) -> vec3 {
+    //Calculates the size of a plane positioned at z = -1 (hence the divide by zNear)
+    func calculateNearPlaneSize(zNear: Float, cameraAspect: Float, projectionMatrix: mat4) -> vec2 {
         let tanHalfFoV = 1/(projectionMatrix[0][0] * cameraAspect)
         let y = tanHalfFoV * zNear
         let x = y * cameraAspect
-        return vec3(x, y, -zNear)
+        return vec2(x, y) / zNear
     }
     
-    func performPass(lights: GPUBuffer<GPULight>, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
+    func fillLightData(scene: Scene, camera: Camera) {
+        for node in scene.flattenedScene {
+            
+            let nodeToCamera = camera.sceneNode.transform.worldToNodeMatrix * node.transform.nodeToWorldMatrix
+            
+            for light in node.lights {
+                light.backingGPULight.withElementNoUpdate { light in
+                    light.cameraSpacePosition = nodeToCamera * vec4(0, 0, 0, 1)
+                    light.cameraSpaceDirection = normalize(nodeToCamera * vec4(0, 0, 1, 0))
+                }
+            }
+        }
+        
+        scene.lightBuffer.didModify()
+    }
+    
+    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
 
+        self.fillLightData(scene: scene, camera: camera)
+        
         var glObjects = [cl_mem?]()
         var kernelIndex = 0
         
@@ -192,20 +212,11 @@ final class LightAccumulationPass {
         kernelIndex += 1
         
         let nearPlane = self.calculateNearPlaneSize(zNear: camera.zNear, cameraAspect: camera.aspectRatio, projectionMatrix: camera.projectionMatrix)
-        let depthRange = vec2(0, 1)
-        let matrixTerms = vec3(camera.projectionMatrix[3][2], camera.projectionMatrix[2][3], camera.projectionMatrix[2][2])
+        let projectionA = camera.zFar / (camera.zFar - camera.zNear)
+        let projectionB = (-camera.zFar * camera.zNear) / (camera.zFar - camera.zNear)
+        let nearPlaneAndProjectionTerms = vec4(nearPlane.x, nearPlane.y, projectionA, projectionB)
         
-        self.kernel.setArgument(nearPlane, index: kernelIndex)
-        kernelIndex += 1
-        
-        self.kernel.setArgument(depthRange, index: kernelIndex)
-        kernelIndex += 1
-        
-        self.kernel.setArgument(matrixTerms, index: kernelIndex)
-        kernelIndex += 1
-        
-        let worldToCameraMatrix = camera.sceneNode.transform.worldToNodeMatrix
-        self.kernel.setArgument(worldToCameraMatrix, index: kernelIndex)
+        self.kernel.setArgument(nearPlaneAndProjectionTerms, index: kernelIndex)
         kernelIndex += 1
         
         for buffer in gBufferColours {
@@ -228,7 +239,7 @@ final class LightAccumulationPass {
         
         kernelIndex += 1
         
-        let lightCL = lights.openCLMemory(clContext: clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY))
+        let lightCL = scene.lightBuffer.openCLMemory(clContext: clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY))
         clRetainMemObject(lightCL.memory)
         glObjects.append(lightCL.memory)
         
@@ -236,7 +247,7 @@ final class LightAccumulationPass {
         
         kernelIndex += 1
         
-        let lightCount = lights.capacity
+        let lightCount = scene.lightBuffer.capacity
         self.kernel.setArgument(lightCount, index: kernelIndex)
         
         var err = clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
@@ -327,7 +338,7 @@ final class RenderWindow : Window {
     func renderScene(_ scene: Scene, camera: Camera) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
-        let lightAccumulationTexture = self.lightAccumulationPass.performPass(lights: scene.lightBuffer, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+        let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
     }
     

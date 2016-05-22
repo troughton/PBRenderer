@@ -156,6 +156,16 @@ public class GPUBufferElement<T> {
         return result
     }
     
+    public func withElementNoUpdate<U>(_ function: @noescape (inout T) throws -> U) rethrows -> U {
+        var element = self.buffer[_bufferIndex]
+        
+        let result = try function(&element)
+        
+        self.buffer[_bufferIndex] = element
+        
+        return result
+    }
+    
     var readOnlyElement : T {
         return self.buffer[_bufferIndex]
     }

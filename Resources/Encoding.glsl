@@ -15,6 +15,13 @@ vec3 decode(vec2 enc) {
 
 #include "MaterialData.glsl"
 
+void encodeMaterialToGBuffers(in MaterialData data, inout vec4 gBuffer0, inout vec4 gBuffer1, inout vec4 gBuffer2) {
+    gBuffer0.b = data.smoothness;
+    gBuffer1.rgb = data.baseColour;
+    gBuffer2.g = data.metalMask;
+    gBuffer2.b = data.reflectance;
+}
+
 MaterialData decodeMaterialFromGBuffers(vec4 gBuffer0, vec4 gBuffer1, vec4 gBuffer2) {
     MaterialData data;
     data.smoothness = gBuffer0.b;
