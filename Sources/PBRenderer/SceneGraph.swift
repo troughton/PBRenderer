@@ -121,17 +121,20 @@ public final class Transform {
     
     public var translation : vec3 {
         didSet {
+            self.setNeedsRecalculateTransform()
             self.sceneNode?.transformDidChange()
         }
     }
     public var rotation : quat {
         didSet {
+            self.setNeedsRecalculateTransform()
             self.sceneNode?.transformDidChange()
         }
     }
     
     public var scale : vec3 {
         didSet {
+            self.setNeedsRecalculateTransform()
             self.sceneNode?.transformDidChange()
         }
     }
@@ -145,6 +148,11 @@ public final class Transform {
         self.scale = scale
         
         self.parent = parent
+    }
+    
+    private func setNeedsRecalculateTransform() {
+        _nodeToWorldMatrix = nil
+        _worldToNodeMatrix = nil
     }
     
     private func calculateNodeToWorldMatrix() -> mat4 {

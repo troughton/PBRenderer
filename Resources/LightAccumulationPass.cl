@@ -1,5 +1,6 @@
-#pragma OPENCL EXTENSION cl_khr_gl_sharing : enable
-#pragma OPENCL EXTENSION cl_khr_gl_depth_images : enable
+#pragma OPENCL EXTENSION cl_khr_gl_sharing : require
+#pragma OPENCL EXTENSION cl_khr_depth_images : require
+#pragma OPENCL EXTENSION cl_khr_gl_depth_images : require
 
 #include "CLMath.cl"
 #include "BRDF.cl"
@@ -50,10 +51,10 @@ MaterialData decodeMaterialFromGBuffers(float4 gBuffer0, float4 gBuffer1, float4
 
 void evaluateMaterialData(MaterialData data, float3 *albedo, float3 *f0, float *f90, float *linearRoughness);
 void evaluateMaterialData(MaterialData data, float3 *albedo, float3 *f0, float *f90, float *linearRoughness) {
-    float3 diffuseF0 = (float3)(0.16 + data.reflectance * data.reflectance);
+    float3 diffuseF0 = (float3)(0.16f + data.reflectance * data.reflectance);
     *albedo = mix(data.baseColour, (float3)(0), data.metalMask);
     *f0 = mix(diffuseF0, data.baseColour, data.metalMask);
-    *f90 = saturate(50.0 * dot(*f0, (float3)(0.33)));
+    *f90 = saturate(50.0f * dot(*f0, (float3)(0.33f, 0.33f, 0.33f)));
     *linearRoughness = 1 - data.smoothness;
 }
 

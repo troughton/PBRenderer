@@ -6,8 +6,8 @@ float sqr(float value) {
     return value * value;
 }
 
-const float PI = 3.141592653589793;
-const float INV_PI = 0.3183098862;
+const float PI = 3.141592653589793f;
+const float INV_PI = 0.3183098862f;
 
 vec2 angularProbeDirectionToUV(vec3 angularProbeDirection) {
     float r = 1.f/PI * acos(angularProbeDirection.z)/length(angularProbeDirection);

@@ -51,9 +51,9 @@ extension Scene {
                     colourAndIntensity = vec3(colour)
                 case let .Spot(colour, falloffDegrees, _):
                     
-                    var outerCutoff = falloffDegrees
+                    var outerCutoff = falloffDegrees * 0.5
                     if let penumbra = openColladaMayaTechnique?.attributes["penumbra_angle"] {
-                        outerCutoff += max(0, Float(penumbra)!)
+                        outerCutoff += max(0, Float(penumbra)!) * 0.5
                     }
                     
                     type = .Spot(innerCutoff: radians(degrees: falloffDegrees),
@@ -70,6 +70,7 @@ extension Scene {
                     intensity *= Float(mayaIntensity)!
                 }
                 
+                let warningFalloffIsHardCoded = true
                 let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensity, falloffRadius: 100.0, backingGPULight: lightBuffer[viewForIndex: i])
                 elementsInBuffer[light.id!] = pbLight
                     i += 1

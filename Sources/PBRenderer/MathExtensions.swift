@@ -27,15 +27,29 @@ func clamp<T : ArithmeticType>(_ x: T, min: T, max: T) -> T {
     }
 }
 
-func *<T:FloatingPoint>(lhs: Quaternion<T>, rhs: Quaternion<T>) -> Quaternion<T> {
-    let w = lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z
-    var x = lhs.w * rhs.x + lhs.x * rhs.w
-    x += lhs.y * rhs.z - lhs.z * rhs.y
-    let y = lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x
-    var z = lhs.w * rhs.z + lhs.x * rhs.y
-    z -= lhs.y * rhs.x + lhs.z * rhs.w;
+public func *<T:FloatingPoint>(lhs: Quaternion<T>, rhs: Quaternion<T>) -> Quaternion<T> {
+    var x = lhs.w * rhs.x +
+        lhs.x * rhs.w
+    x += lhs.y * rhs.z -
+        lhs.z * rhs.y
+    var y = lhs.w * rhs.y +
+        lhs.y * rhs.w
+    y += lhs.z * rhs.x -
+        lhs.x * rhs.z
+    var z = lhs.w * rhs.z +
+        lhs.z * rhs.w
+    z += lhs.x * rhs.y -
+        lhs.y * rhs.x
+    var w = lhs.w * rhs.w -
+        lhs.x * rhs.x
+    w -= lhs.y * rhs.y
+    w -= lhs.z * rhs.z
     
-    return Quaternion<T>(x, y, z, w)
+    return Quaternion(x, y, z, w);
+}
+
+public func *=<T:FloatingPoint>(lhs: inout Quaternion<T>, rhs: Quaternion<T>) {
+    lhs = lhs * rhs
 }
 
 func dot<T:FloatingPoint>(_ lhs: Quaternion<T>, _ rhs: Quaternion<T>)  -> T {
@@ -77,7 +91,7 @@ extension Matrix4x4 {
 }
 
 extension Quaternion where T : FloatingPoint {
-    init(angle: T, axis: Vector3<T>) {
+    public init(angle: T, axis: Vector3<T>) {
         let halfAngle = angle * 0.5;
         let scale : T
         let w : T
@@ -154,7 +168,7 @@ extension Quaternion where T : FloatingPoint {
 }
 
 extension Matrix4x4 where T : FloatingPointArithmeticType {
-    init(withQuaternion quaternion: Quaternion<T>) {
+    public init(withQuaternion quaternion: Quaternion<T>) {
         let normalised = normalize(unsafeBitCast(quaternion, to: Vector4<T>.self))
         
         let (x, y, z, w) = (normalised.x, normalised.y, normalised.z, normalised.w)

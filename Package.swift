@@ -11,6 +11,8 @@ let package = Package(
     targets: [
                  Target(name: "PBRendererApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
                     ]),
+                 Target(name: "PBRendererMusicApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
+                    ]),
                  Target(name: "PBRenderer", dependencies: [ .Target(name: "ColladaParser")
                                                                ]),
                  Target(name: "ColladaParser")

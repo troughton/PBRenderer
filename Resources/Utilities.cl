@@ -9,5 +9,5 @@ float sqr(float value) {
     return value * value;
 }
 
-__constant const float PI = 3.141592653589793;
-__constant const float INV_PI = 0.3183098862;
+__constant const float PI = 3.141592653589793f;
+__constant const float INV_PI = 0.3183098862f;
