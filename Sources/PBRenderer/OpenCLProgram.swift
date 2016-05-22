@@ -72,16 +72,22 @@ final class OpenCLProgram {
         
         let args = "-cl-fast-relaxed-math -cl-mad-enable -I " + path
         err = clBuildProgram(self.clProgram, 0, nil, args, nil, nil);
+        
+        
+        var len = size_t(0);
+        clGetProgramBuildInfo(self.clProgram, deviceID, cl_program_build_info(CL_PROGRAM_BUILD_LOG), 0, nil, &len);
+        
+        var buffer = [CChar](repeating: 0, count: len);
+        
+        clGetProgramBuildInfo(self.clProgram, deviceID, cl_program_build_info(CL_PROGRAM_BUILD_LOG), buffer.count, &buffer, &len);
+        
+        let buildString = String(cString: buffer)
+        print(buildString)
+        
         if (err != CL_SUCCESS) {
             
-            var len = size_t(0);
-            clGetProgramBuildInfo(self.clProgram, deviceID, cl_program_build_info(CL_PROGRAM_BUILD_LOG), 0, nil, &len);
-            
-            var buffer = [CChar](repeating: 0, count: len);
-            
             print("Error: Failed to build program executable!\n");
-            clGetProgramBuildInfo(self.clProgram, deviceID, cl_program_build_info(CL_PROGRAM_BUILD_LOG), buffer.count, &buffer, &len);
-            throw OpenCLProgramError.FailedProgramBuild(String(cString: buffer), OpenCLError(rawValue: err)!)
+            throw OpenCLProgramError.FailedProgramBuild(buildString, OpenCLError(rawValue: err)!)
         }
         
     }

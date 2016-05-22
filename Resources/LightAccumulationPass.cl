@@ -1,7 +1,3 @@
-#pragma OPENCL EXTENSION cl_khr_gl_sharing : require
-#pragma OPENCL EXTENSION cl_khr_depth_images : require
-#pragma OPENCL EXTENSION cl_khr_gl_depth_images : require
-
 #include "CLMath.cl"
 #include "BRDF.cl"
 
@@ -101,37 +97,37 @@ float getAngleAtt(float3 normalizedLightVector, float3 lightDir, float lightAngl
 float3 evaluatePunctualLight(float3 cameraSpacePosition,
                              float3 V, float3 N, float NdotV,
                              float3 albedo, float3 f0, float f90, float linearRoughness,
-                             LightData light);
+                             __global LightData *light);
 float3 evaluatePunctualLight(float3 cameraSpacePosition,
                              float3 V, float3 N, float NdotV,
                              float3 albedo, float3 f0, float f90, float linearRoughness,
-                            LightData light) {
+                           __global LightData *light) {
     
-    float4 lightPositionCamera = light.cameraSpacePosition;
-    float3 lightDirectionCamera = light.cameraSpaceDirection.xyz;
+    float4 lightPositionCamera = light->cameraSpacePosition;
+    float3 lightDirectionCamera = light->cameraSpaceDirection.xyz;
     
     float3 unnormalizedLightVector;
     float3 L;
     float attenuation = 1;
     
-    if (light.lightTypeFlag == LightTypeDirectional) {
+    if (light->lightTypeFlag == LightTypeDirectional) {
         unnormalizedLightVector = lightDirectionCamera.xyz;
         L = fast_normalize(unnormalizedLightVector);
     } else {
         unnormalizedLightVector = lightPositionCamera.xyz - cameraSpacePosition;
         L = fast_normalize(unnormalizedLightVector);
         
-        attenuation *= getDistanceAtt(unnormalizedLightVector, light.inverseSquareAttenuationRadius);
+        attenuation *= getDistanceAtt(unnormalizedLightVector, light->inverseSquareAttenuationRadius);
 
-        if (light.lightTypeFlag == LightTypeSpot) {
+        if (light->lightTypeFlag == LightTypeSpot) {
             
-            float2 lightAngleScaleAndOffset = light.extraData.xy;
+            float2 lightAngleScaleAndOffset = light->extraData.xy;
             
             attenuation *= getAngleAtt(L, lightDirectionCamera, lightAngleScaleAndOffset.x, lightAngleScaleAndOffset.y);
         }
     }
 
-    float3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
+    float3 lightColour = light->colourAndIntensity.xyz * light->colourAndIntensity.w;
     
     float NdotL = saturate(dot(N, L));
     
@@ -145,18 +141,23 @@ float3 evaluatePunctualLight(float3 cameraSpacePosition,
 float3 evaluateLighting(float3 cameraSpacePosition,
                         float3 V, float3 N, float NdotV,
                         float3 albedo, float3 f0, float f90, float linearRoughness,
-                        LightData light);
+                        __global LightData *light);
 float3 evaluateLighting(float3 cameraSpacePosition,
                         float3 V, float3 N, float NdotV,
                         float3 albedo, float3 f0, float f90, float linearRoughness,
-                         LightData light) {
-    switch (light.lightTypeFlag) {
+                         __global LightData *light) {
+    switch (light->lightTypeFlag) {
         case LightTypePoint:
         case LightTypeDirectional:
         case LightTypeSpot:
+            
             return evaluatePunctualLight(cameraSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
+        break;
+        default:
+            return (float3)(0);
+            break;
     }
-    return (float3)(0);
+    
 }
 
 //Should be applied in every lighting shader before writing the colour
@@ -165,10 +166,13 @@ float3 epilogueLighting(float3 color, float exposureMultiplier) {
     return color * exposureMultiplier;
 }
 
-void lightAccumulationPass(__write_only image2d_t lightAccumulationBuffer, float2 invImageDimensions,
-                                    float4 nearPlaneAndProjectionTerms,
-                                    float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
-                                    __global LightData *lights, int lightCount, int2 coord, float2 uv) {
+float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
+                           float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
+                             __global LightData *lights, int lightCount, float2 uv);
+
+float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
+                             float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
+                             __global LightData *lights, int lightCount,float2 uv) {
 
     float3 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
     MaterialData material = decodeMaterialFromGBuffers(gBuffer0, gBuffer1, gBuffer2);
@@ -186,10 +190,10 @@ void lightAccumulationPass(__write_only image2d_t lightAccumulationBuffer, float
     float3 lightAccumulation = (float3)(0, 0, 0);
     
     for (int i = 0; i < lightCount; i++) {
-        lightAccumulation += evaluateLighting(cameraSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, lights[i]);
+        lightAccumulation += evaluateLighting(cameraSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, &lights[i]);
     }
     
     float3 epilogue = epilogueLighting(lightAccumulation, 100.f);
     
-    write_imagef(lightAccumulationBuffer, coord, (float4)(epilogue, 1));
+    return epilogue;
 }

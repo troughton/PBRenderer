@@ -11,11 +11,13 @@ __kernel void lightAccumulationPassKernel(__write_only image2d_t lightAccumulati
     
     int2 coord = (int2)(get_global_id(0), get_global_id(1));
     float2 uv = (float2)(coord.x, coord.y) * invImageDimensions;
-    
+
     float4 gBuffer0 = read_imagef(gBuffer0Tex, sampler, coord);
     float4 gBuffer1 = read_imagef(gBuffer1Tex, sampler, coord);
     float4 gBuffer2 = read_imagef(gBuffer2Tex, sampler, coord);
     float gBufferDepth = read_imagef(gBufferDepthTex, sampler, coord).r;
 
-    lightAccumulationPass(lightAccumulationBuffer, invImageDimensions, nearPlaneAndProjectionTerms, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, lights, lightCount, coord, uv);
+    float3 result = lightAccumulationPass(nearPlaneAndProjectionTerms, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, lights, lightCount, uv);
+    
+    write_imagef(lightAccumulationBuffer, coord, (float4)(result, 1));
 }
