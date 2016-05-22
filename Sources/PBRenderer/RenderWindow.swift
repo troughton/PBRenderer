@@ -27,7 +27,9 @@ final class GBufferPass {
         let gBuffer = GBufferPass.gBufferFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
         
         let geometryPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "GeometryPass.vert"))
-        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: "GeometryPass.frag")
+        
+        let fragmentShaderName = OpenCLDepthTextureSupported ? "GeometryPass.frag" : "GeometryPassColourDepth.frag"
+        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: fragmentShaderName)
         
         let geometryShader = Shader(withVertexShader: geometryPassVertex, fragmentShader: geometryPassFragment)
         
@@ -73,7 +75,19 @@ final class GBufferPass {
         depthAttachment.storeAction = .Store
         depthAttachment.texture = depthTexture
         
-        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3], depthAttachment: depthAttachment, stencilAttachment: nil)
+        var depthAttachmentAsColour : RenderPassColourAttachment? = nil
+        if !OpenCLDepthTextureSupported {
+            let colourDepthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_R32F, width: Int(width), height: Int(height), mipmapped: false)
+            let colourDepthTexture = Texture(textureWithDescriptor: colourDepthDescriptor, format: GL_RED, type: GL_HALF_FLOAT, data: nil as [Void]?)
+            
+            depthAttachmentAsColour = RenderPassColourAttachment(clearColour: vec4(1));
+            depthAttachmentAsColour?.texture = colourDepthTexture
+            depthAttachmentAsColour?.loadAction = .Clear
+            depthAttachmentAsColour?.storeAction = .Store
+        }
+
+        
+        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, depthAttachmentAsColour], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     func renderNode(_ node: SceneNode, camera: Camera, shader: Shader) {
@@ -134,19 +148,18 @@ final class LightAccumulationPass {
         var err = Int32(0); // error code returned from api calls
         
         // Create a command commands
-        //
         self.commandQueue = clCreateCommandQueue(openCLContext, openCLDevice, 0, &err);
         if err != CL_SUCCESS {
             fatalError("Error: Failed to create a command queue. \(OpenCLError(rawValue: err)!)\n");
         }
         
         do {
+            let programName = OpenCLDepthTextureSupported ? "LightAccumulationPassDepth.cl" : "LightAccumulationPassColourDepth.cl"
+           
             // Create the compute program from the source buffer
-            //
+            let program = try OpenCLProgram(contentsOfFile: Resources.pathForResource(named: programName), clContext: openCLContext, deviceID: openCLDevice)
             
-            let program = try OpenCLProgram(contentsOfFile: Resources.pathForResource(named: "LightAccumulationPass.cl"), clContext: openCLContext, deviceID: openCLDevice)
-            
-            self.kernel = program.kernelNamed("lightAccumulationPass")!
+            self.kernel = program.kernelNamed("lightAccumulationPassKernel")!
             
         } catch let OpenCLProgramError.FailedProgramBuild(text, clError) {
             fatalError(text + String(clError))
@@ -338,7 +351,7 @@ public final class RenderWindow : Window {
     public func renderScene(_ scene: Scene, camera: Camera) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
-        let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+        let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<3]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
     }
     
