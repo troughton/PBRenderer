@@ -60,8 +60,8 @@ final class AudioVisualManager : SongDelegate {
         
         self.camera.sceneNode.transform.translation += vec3(0, 0, 0.01)
         
-        if beatNumber >= 16.0 {
-            let rotation = quat(angle: 0.001, axis: vec3(0, 0, 1))
+        if beatNumber >= 24.0 {
+            let rotation = quat(angle: 0.001, axis: normalize(vec3(randomFloat(), randomFloat(), randomFloat())))
             plane.transform.rotation *= rotation
         }
     }

@@ -70,7 +70,7 @@ final class OpenCLProgram {
             path = "."
         }
         
-        let args = "-cl-fast-relaxed-math -cl-mad-enable -I " + path
+        let args = "-cl-fast-relaxed-math -cl-no-signed-zeros -cl-mad-enable -I " + path
         err = clBuildProgram(self.clProgram, 0, nil, args, nil, nil);
         
         

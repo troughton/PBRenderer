@@ -33,7 +33,8 @@ final class GBufferPass {
         
         let geometryShader = Shader(withVertexShader: geometryPassVertex, fragmentShader: geometryPassFragment)
         
-        let pipelineState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height), framebuffer: gBuffer, shader: geometryShader, depthStencilState: depthState)
+        var pipelineState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height), framebuffer: gBuffer, shader: geometryShader, depthStencilState: depthState)
+        pipelineState.cullMode = GL_BACK
         
         self.gBufferPassState = pipelineState
     }
@@ -148,7 +149,7 @@ final class LightAccumulationPass {
         var err = Int32(0); // error code returned from api calls
         
         // Create a command commands
-        self.commandQueue = clCreateCommandQueue(openCLContext, openCLDevice, 0, &err);
+        self.commandQueue = clCreateCommandQueue(openCLContext, openCLDevice, UInt64(CL_QUEUE_PROFILING_ENABLE), &err);
         if err != CL_SUCCESS {
             fatalError("Error: Failed to create a command queue. \(OpenCLError(rawValue: err)!)\n");
         }
@@ -207,8 +208,6 @@ final class LightAccumulationPass {
     }
     
     func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
-
-        self.fillLightData(scene: scene, camera: camera)
         
         var glObjects = [cl_mem?]()
         var kernelIndex = 0
@@ -348,11 +347,33 @@ public final class RenderWindow : Window {
         self.finalPass.resize(newPixelDimensions: width, height)
     }
     
+    var timingQuery : GLuint? = nil
+    
     public func renderScene(_ scene: Scene, camera: Camera) {
+        var timeElapsed = GLuint(0)
+        
+        if let query = timingQuery {
+            glGetQueryObjectuiv(query, GL_QUERY_RESULT, &timeElapsed)
+            let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
+            print(String(format: "Elapsed frame time: %.2fms", timeElapsedMillis))
+        } else {
+            var query : GLuint = 0
+            glGenQueries(1, &query)
+            self.timingQuery = query
+        }
+        
+        
+        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
+        
+        
+        self.lightAccumulationPass.fillLightData(scene: scene, camera: camera)
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<3]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
+        
+        
+        glEndQuery(GLenum(GL_TIME_ELAPSED))
     }
     
 }

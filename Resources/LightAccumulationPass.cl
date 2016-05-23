@@ -26,7 +26,7 @@ float3 decode(float2);
 float3 decode(float2 enc) {
     float2 fenc = enc*4-2;
     float f = dot(fenc,fenc);
-    float g = sqrt(1-f/4);
+    float g = native_sqrt(1-f/4);
     float3 n;
     n.xy = fenc*g;
     n.z = 1-f/2;
@@ -50,7 +50,7 @@ void evaluateMaterialData(MaterialData data, float3 *albedo, float3 *f0, float *
     *albedo = mix(data.baseColour, (float3)(0), data.metalMask);
     *f0 = mix(diffuseF0, data.baseColour, data.metalMask);
     *f90 = saturate(50.0f * dot(*f0, (float3)(0.33f, 0.33f, 0.33f)));
-    *linearRoughness = 1 - data.smoothness;
+    *linearRoughness = 1.f - data.smoothness;
 }
 
 float3 calculateCameraSpacePositionFromWindowZ(float, float2, float2, float2);
@@ -59,8 +59,8 @@ float3 calculateCameraSpacePositionFromWindowZ(float windowZ,
                                               float2 nearPlane,
                                               float2 projectionTerms) {
     
-    float3 cameraDirection = (float3)(nearPlane * ((uv.xy * 2) - 1), -1);
-    float linearDepth = projectionTerms.y / (windowZ - projectionTerms.x);
+    float3 cameraDirection = (float3)(nearPlane * (uv.xy * 2 - 1), -1);
+    float linearDepth = native_divide(projectionTerms.y, (windowZ - projectionTerms.x));
     return cameraDirection * linearDepth;
 }
 
@@ -74,7 +74,7 @@ float smoothDistanceAtt(float squaredDistance, float invSqrAttRadius) {
 float getDistanceAtt(float3 unnormalizedLightVector, float invSqrAttRadius);
 float getDistanceAtt(float3 unnormalizedLightVector, float invSqrAttRadius) {
     float sqrDist = dot(unnormalizedLightVector, unnormalizedLightVector);
-    float attenuation = 1.0f / (max(sqrDist, 0.01f*0.01f));
+    float attenuation = native_recip(max(sqrDist, 0.0001f));
     attenuation *= smoothDistanceAtt(sqrDist, invSqrAttRadius);
     
     return attenuation;
@@ -112,10 +112,10 @@ float3 evaluatePunctualLight(float3 cameraSpacePosition,
     
     if (light->lightTypeFlag == LightTypeDirectional) {
         unnormalizedLightVector = lightDirectionCamera.xyz;
-        L = fast_normalize(unnormalizedLightVector);
+        L = native_normalize(unnormalizedLightVector);
     } else {
         unnormalizedLightVector = lightPositionCamera.xyz - cameraSpacePosition;
-        L = fast_normalize(unnormalizedLightVector);
+        L = native_normalize(unnormalizedLightVector);
         
         attenuation *= getDistanceAtt(unnormalizedLightVector, light->inverseSquareAttenuationRadius);
 
@@ -183,8 +183,8 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
     float linearRoughness;
     evaluateMaterialData(material, &albedo, &f0, &f90, &linearRoughness);
 
-    float3 N = fast_normalize(decode(gBuffer0.xy));
-    float3 V = fast_normalize(-cameraSpacePosition);
+    float3 N = native_normalize(decode(gBuffer0.xy));
+    float3 V = native_normalize(-cameraSpacePosition);
     float NdotV = fabs(dot(N, V)) + 1e-5f; //bias the result to avoid artifacts
     
     float3 lightAccumulation = (float3)(0, 0, 0);
