@@ -6,18 +6,27 @@
 
 float3 F_Schlick(float3 f0, float f90, float u);
 float3 F_Schlick(float3 f0, float f90, float u) {
-    return f0 + (f90 - f0) * native_powr(1.f - u, 5.f);
+    //Use a Spherical Gaussian approximation as in Real Shading in Unreal Engine 4,  Siggraph 2013.
+    return f0 + (f90 - f0) * native_exp2((-5.55473f * u - 6.98316f) * u);  //native_powr(1.f - u, 5.f);
 }
+
+float F_Schlick_Float(float f0, float f90, float u);
+float F_Schlick_Float(float f0, float f90, float u) {
+    //Use a Spherical Gaussian approximation as in Real Shading in Unreal Engine 4,  Siggraph 2013.
+    return f0 + (f90 - f0) * native_exp2((-5.55473f * u - 6.98316f) * u);  //native_powr(1.f - u, 5.f);
+}
+
 
 float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH, float linearRoughness);
 
 float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH, float linearRoughness) {
     float energyBias = mix(0.f, 0.5f, linearRoughness);
     float energyFactor = mix(1.0f, 0.6622516556f, linearRoughness);
-    float fd90 = energyBias + 2.0 * LdotH*LdotH * linearRoughness;
-    float3 f0 = (float3)(1.0f, 1.0f, 1.0f);
-    float lightScatter = F_Schlick(f0, fd90, NdotL).r;
-    float viewScatter = F_Schlick(f0, fd90, NdotV).r;
+    float fd90 = energyBias + 2.0f * LdotH*LdotH * linearRoughness;
+    float f0 = 1.0f;
+    
+    float lightScatter = F_Schlick_Float(f0, fd90, NdotL);
+    float viewScatter = F_Schlick_Float(f0, fd90, NdotV);
     
     return lightScatter * viewScatter * energyFactor;
 }

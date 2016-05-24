@@ -77,6 +77,11 @@ public class Window {
             window.keyAction(key: key, scanCode: scanCode, action: action, modifiers: modifiers)
         }
         
+        glfwSetMouseButtonCallback(_glfwWindow) { (glfwWindow, button, action, mods) in
+            let window = Window.glfwWindowsToWindows[glfwWindow!]!
+            window.mouseAction();
+        }
+        
         glfwSetFramebufferSizeCallback(_glfwWindow) { (glfwWindow, width, height) in
             let window = Window.glfwWindowsToWindows[glfwWindow!]!
             window.framebufferDidResize(width: width, height: height)
@@ -103,6 +108,10 @@ public class Window {
     }
     
     func keyAction(key: Int32, scanCode: Int32, action: Int32, modifiers: Int32) {
+        
+    }
+    
+    func mouseAction(key: Int32, scanCode: Int32, action: Int32, modifiers: Int32) {
         
     }
     

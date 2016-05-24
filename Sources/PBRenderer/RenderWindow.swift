@@ -365,7 +365,6 @@ public final class RenderWindow : Window {
         
         glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
         
-        
         self.lightAccumulationPass.fillLightData(scene: scene, camera: camera)
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
