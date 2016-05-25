@@ -79,7 +79,7 @@ public class Window {
         
         glfwSetMouseButtonCallback(_glfwWindow) { (glfwWindow, button, action, mods) in
             let window = Window.glfwWindowsToWindows[glfwWindow!]!
-            window.mouseAction();
+
         }
         
         glfwSetFramebufferSizeCallback(_glfwWindow) { (glfwWindow, width, height) in

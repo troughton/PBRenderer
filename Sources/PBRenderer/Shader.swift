@@ -23,30 +23,41 @@ struct StringShaderProperty : ShaderProperty {
     }
 }
 
-class Shader {
+public class Shader {
     
     private var uniformMappings = [String : GLint]()
     
-    private let _glProgramRef : GLuint
+    public let glProgramRef : GLuint
+    private let _shaderStages : [GLuint]
     
-    init(withVertexShader vertexShader: String, fragmentShader: String) {
+    public init(withVertexShader vertexShader: String, fragmentShader: String) {
         let shaders = [Shader.createShader(type: GL_VERTEX_SHADER, text: vertexShader), Shader.createShader(type: GL_FRAGMENT_SHADER, text: fragmentShader)]
-        _glProgramRef = Shader.createProgram(shaderList: shaders)
+        _shaderStages = shaders
+        self.glProgramRef = Shader.createProgram(shaderList: shaders)
     }
     
     private func useProgram() {
 
-        glUseProgram(_glProgramRef)
+        glUseProgram(self.glProgramRef)
     }
     
     private func endUseProgram() {
         glUseProgram(0)
     }
     
-    func withProgram(_ function: @noescape (Shader) -> ()) -> () {
+    public func withProgram(_ function: @noescape (Shader) -> ()) -> () {
         self.useProgram()
         function(self)
         self.endUseProgram()
+    }
+    
+    deinit {
+        for shader in _shaderStages {
+            glDetachShader(self.glProgramRef, shader)
+            glDeleteShader(shader)
+        }
+        
+        glDeleteProgram(self.glProgramRef);
     }
     
     private func uniformLocation(forProperty property: ShaderProperty) -> GLint? {
@@ -54,9 +65,9 @@ class Shader {
             return location
         }
         
-        var location = glGetUniformLocation(_glProgramRef, property.name)
+        var location = glGetUniformLocation(self.glProgramRef, property.name)
         if location == -1 {
-            let blockIndex = glGetUniformBlockIndex(_glProgramRef, property.name)
+            let blockIndex = glGetUniformBlockIndex(self.glProgramRef, property.name)
             location = unsafeBitCast(blockIndex, to: GLint.self)
         }
         if location == -1 {
@@ -71,7 +82,7 @@ class Shader {
     func setUniformBlockBindingPoints(forProperties properties: [ShaderProperty?]) {
         for (index, property) in properties.enumerated() where property != nil {
             guard let uniformBlockIndex = self.uniformLocation(forProperty: property!) else { continue }
-            glUniformBlockBinding(_glProgramRef, GLuint(uniformBlockIndex), GLuint(index))
+            glUniformBlockBinding(self.glProgramRef, GLuint(uniformBlockIndex), GLuint(index))
         }
     }
     

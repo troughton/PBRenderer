@@ -34,7 +34,6 @@ func main() {
         mainWindow.renderScene(scene, camera: camera)
     }
     
-    
     // Game loop
     while !mainWindow.shouldClose {
         // Check if any events have been activated
