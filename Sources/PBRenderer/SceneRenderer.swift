@@ -322,26 +322,26 @@ final class FinalPass {
     }
 }
 
-public final class RenderWindow : Window {
+public final class SceneRenderer {
     
-    var gBufferPass : GBufferPass! = nil
-    var lightAccumulationPass : LightAccumulationPass! = nil
-    var finalPass : FinalPass! = nil
+    var gBufferPass : GBufferPass
+    var lightAccumulationPass : LightAccumulationPass
+    var finalPass : FinalPass
     
-    public override init(name: String, width: Int, height: Int) {
+    public init(window: Window) {
+        let (clContext, clDeviceID) = OpenCLGetContext(glfwWindow: window.glfwWindow)
         
-        super.init(name: name, width: width, height: height)
-        
-        let (clContext, clDeviceID) = OpenCLGetContext(glfwWindow: _glfwWindow)
-        
-        let pixelDimensions = self.pixelDimensions
+        let pixelDimensions = window.pixelDimensions
         
         self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions)
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, openCLContext: clContext, openCLDevice: clDeviceID)
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
+        
+        
+        window.registerForFramebufferResize(onResize: self.framebufferDidResize)
     }
     
-    override func framebufferDidResize(width: Int32, height: Int32) {
+    func framebufferDidResize(width: Int32, height: Int32) {
         self.gBufferPass.resize(newPixelDimensions: width, height)
         self.lightAccumulationPass.resize(newPixelDimensions: width, height)
         self.finalPass.resize(newPixelDimensions: width, height)
