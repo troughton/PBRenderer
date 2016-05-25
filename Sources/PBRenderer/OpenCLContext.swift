@@ -90,7 +90,10 @@ var platforms = [cl_platform_id?](repeating: nil, count: 32)
         
         typealias GLContextInfoFunc = @convention(c) (UnsafePointer<cl_context_properties>?, cl_gl_context_info, size_t, UnsafeMutablePointer<Void>?, UnsafeMutablePointer<size_t>?) -> cl_int
         
-        let clGetGLContextInfo = unsafeBitCast(clGetExtensionFunctionAddressForPlatform(platforms[0], "clGetGLContextInfoKHR"), to: GLContextInfoFunc.self)
+        let clGetGLContextInfo = "clGetGLContextInfoKHR".withCString { (cString) -> GLContextInfoFunc in
+            var string : UnsafePointer<Int8>? = cString
+            return unsafeBitCast(clGetExtensionFunctionAddressForPlatform(platforms[0], "clGetGLContextInfoKHR"), to: GLContextInfoFunc.self)
+        }
         
         let properties : [cl_context_properties] = [
                                                        cl_context_properties(CL_GL_CONTEXT_KHR), unsafeBitCast(glfwGetGLXContext(glfwWindow), to: cl_context_properties.self), // GLX Context
