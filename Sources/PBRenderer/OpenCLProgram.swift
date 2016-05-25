@@ -22,7 +22,7 @@ final class OpenCLKernel {
         let argSize = size ?? sizeofValue(argument)
         let result = clSetKernelArg(self.clKernel, cl_uint(index), argSize, &argument)
         if result != CL_SUCCESS {
-            print("Error: Failed to set kernel argument at index \(index) to value \(argument)")
+            print("Error: Failed to set kernel argument at index \(index) to value \(argument): \(OpenCLError(rawValue: result)!)")
         }
     }
     
