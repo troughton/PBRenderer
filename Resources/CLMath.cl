@@ -37,17 +37,3 @@ float4 multiplyMatrixVector(mat4 matrix, float4 vector) {
 //    }
 //    return result;
 }
-
-mat4 multiplyMatrix(mat4 a, mat4 b);
-mat4 multiplyMatrix(mat4 a, mat4 b) {
-    a = transpose(a);
-    
-    mat4 result;
-    
-    for (int row = 0; row < 3; row++) {
-        for (int col = 0; col < 3; col++) {
-            result.m[col][row] = dot(a.m[row], b.m[col]);
-        }
-    }
-    return result;
-}

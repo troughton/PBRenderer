@@ -85,7 +85,7 @@ var platforms = [cl_platform_id?](repeating: nil, count: 32)
     func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
         
         var platformsSize = cl_uint(0);
-        clGetPlatformIDs(UInt32(32 * sizeof(cl_platform_id)), &platforms, &platformsSize);
+        clGetPlatformIDs(UInt32(32), &platforms, &platformsSize);
         
         
         typealias GLContextInfoFunc = @convention(c) (UnsafePointer<cl_context_properties>?, cl_gl_context_info, size_t, UnsafeMutablePointer<Void>?, UnsafeMutablePointer<size_t>?) -> cl_int
@@ -124,7 +124,7 @@ var platforms = [cl_platform_id?](repeating: nil, count: 32)
         clGetDeviceInfo(devices[0]!, cl_device_info(CL_DEVICE_EXTENSIONS), 1024, extensionsString, &extensionsSize)
         let supportedExtensions = String(cString: UnsafePointer<CChar>(extensionsString!))
         
-        if !supportedExtensions.contains("cl_KHR_gl_sharing") {
+        if !supportedExtensions.localizedCaseInsensitiveContains("cl_KHR_gl_sharing") {
             fatalError("OpenGL-OpenCL sharing is unsupported on this hardware")
         }
         

@@ -36,10 +36,10 @@ float3 decode(float2 enc) {
 MaterialData decodeMaterialFromGBuffers(float4, float4, float4);
 MaterialData decodeMaterialFromGBuffers(float4 gBuffer0, float4 gBuffer1, float4 gBuffer2) {
     MaterialData data;
-    data.smoothness = gBuffer0.b;
-    data.baseColour = gBuffer1.rgb;
-    data.metalMask = gBuffer2.g;
-    data.reflectance = gBuffer2.b;
+    data.smoothness = gBuffer0.z;
+    data.baseColour = gBuffer1.xyz;
+    data.metalMask = gBuffer2.y;
+    data.reflectance = gBuffer2.z;
     
     return data;
 }
