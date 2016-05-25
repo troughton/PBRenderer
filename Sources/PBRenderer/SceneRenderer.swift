@@ -259,7 +259,7 @@ final class LightAccumulationPass {
         
         kernelIndex += 1
         
-        let lightCount = scene.lightBuffer.capacity
+        let lightCount = Int32(scene.lightBuffer.capacity)
         self.kernel.setArgument(lightCount, index: kernelIndex)
         
         var err = clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
