@@ -6,6 +6,8 @@
 //  Copyright © 2016 Thomas Roughton. All rights reserved.
 //
 
+#if os(OSX)
+
 import Foundation
 import AudioToolbox
 
@@ -49,3 +51,5 @@ enum MIDIEventType {
         }
     }
 }
+
+#endif

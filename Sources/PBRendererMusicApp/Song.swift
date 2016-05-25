@@ -6,6 +6,8 @@
 //
 //
 
+#if os(OSX)
+
 import Foundation
 import AudioToolbox
 import AVFoundation
@@ -118,3 +120,5 @@ final class Song : NSObject, AVAudioPlayerDelegate {
     }
     
 }
+
+#endif

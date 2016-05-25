@@ -11,8 +11,6 @@ let package = Package(
     targets: [
                  Target(name: "PBRendererApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
                     ]),
-                 Target(name: "PBRendererMusicApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
-                    ]),
                  Target(name: "PBRenderer", dependencies: [ .Target(name: "ColladaParser")
                                                                ]),
                  Target(name: "ColladaParser")
@@ -30,4 +28,6 @@ package.dependencies.append(Package.Dependency.Package(url: "https://github.com/
 package.dependencies.append(
     Package.Dependency.Package(url: "https://github.com/SwiftGL/CGLFW3.git", majorVersion: 1)
 )
+package.targets.append(Target(name: "PBRendererMusicApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
+    ]))
 #endif

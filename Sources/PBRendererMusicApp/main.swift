@@ -1,3 +1,5 @@
+#if os(OSX)
+
 import Foundation
 import CGLFW3
 import SGLOpenGL
@@ -109,10 +111,4 @@ func main() {
 
 main()
 
-
-
-
-
-
-
-
+#endif
