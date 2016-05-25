@@ -290,7 +290,7 @@ func    ImGui_ImplGlfwGL3_Init(window: OpaquePointer, install_callbacks: Bool) -
     g_Window = window;
     
     let io = igGetIO()
-    let keyMap = withUnsafeMutablePointer(&io!.pointee.KeyMap) { return UnsafeMutableBufferPointer<Int32>(start: UnsafeMutablePointer<Int32>($0), count: 18) }
+    let keyMap = withUnsafeMutablePointer(&io!.pointee.KeyMap) { return UnsafeMutableBufferPointer<Int32>(start: UnsafeMutablePointer<Int32>($0), count: 19) }
     keyMap[Int(ImGuiKey_Tab.rawValue)] = GLFW_KEY_TAB;                         // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
     keyMap[Int(ImGuiKey_LeftArrow.rawValue)] = GLFW_KEY_LEFT;
     keyMap[Int(ImGuiKey_RightArrow.rawValue)] = GLFW_KEY_RIGHT;
