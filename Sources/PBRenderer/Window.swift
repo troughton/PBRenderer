@@ -198,7 +198,7 @@ public extension WindowInputDelegate {
     }
 }
 
-public class Window {
+public final class PBWindow {
     
     // called whenever a key is pressed/released via GLFW
     func keyCallback(window: OpaquePointer!, key: Int32, scancode: Int32, action: Int32, mode: Int32) {
@@ -207,7 +207,7 @@ public class Window {
         }
     }
     
-    private static var glfwWindowsToWindows = [OpaquePointer : Window]()
+    private static var glfwWindowsToWindows = [OpaquePointer : PBWindow]()
     
     public let glfwWindow : OpaquePointer!
     
@@ -246,7 +246,7 @@ public class Window {
         return glfwWindowShouldClose(self.glfwWindow) != 0
     }
     
-    public typealias OnUpdate = (window: Window, deltaTime: Double) -> ()
+    public typealias OnUpdate = (window: PBWindow, deltaTime: Double) -> ()
     private var onUpdateClosures = [OnUpdate]()
     
     public typealias OnFramebufferResize = (width: Int32, height: Int32) -> ()
@@ -269,16 +269,16 @@ public class Window {
             fatalError("Failed to create GLFW window")
         }
         
-        Window.glfwWindowsToWindows[self.glfwWindow] = self
+        PBWindow.glfwWindowsToWindows[self.glfwWindow] = self
         
         // Set the required callback functions
         glfwSetKeyCallback(self.glfwWindow) { (glfwWindow, key, scanCode, action, modifiers) in
-            let window = Window.glfwWindowsToWindows[glfwWindow!]!
+            let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
             window.inputDelegate?.keyAction(key: InputKey(rawValue: key)!, action: InputAction(rawValue: action)!, modifiers: InputModifiers(rawValue: modifiers))
         }
         
         glfwSetMouseButtonCallback(self.glfwWindow) { (glfwWindow, button, action, modifiers) in
-            let window = Window.glfwWindowsToWindows[glfwWindow!]!
+            let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
             
             var xPosition : Double = 0.0, yPosition : Double = 0.0;
             glfwGetCursorPos(glfwWindow, &xPosition, &yPosition);
@@ -287,7 +287,7 @@ public class Window {
         }
         
         glfwSetCursorPosCallback(self.glfwWindow) { (glfwWindow, xPosition, yPosition) in
-            let window = Window.glfwWindowsToWindows[glfwWindow!]!
+            let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
             
             let action = glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT)
             let mouseDeltaX = window._previousMouseX - xPosition;
@@ -303,14 +303,14 @@ public class Window {
         }
         
         glfwSetFramebufferSizeCallback(self.glfwWindow) { (glfwWindow, width, height) in
-            let window = Window.glfwWindowsToWindows[glfwWindow!]!
+            let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
             window.onFramebufferResizeClosures.forEach { $0(width: width, height: height) }
         }
     }
     
     deinit {
         glfwSetWindowShouldClose(self.glfwWindow, 1)
-        Window.glfwWindowsToWindows[self.glfwWindow] = nil
+        PBWindow.glfwWindowsToWindows[self.glfwWindow] = nil
     }
     
     public final func update() {

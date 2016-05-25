@@ -18,7 +18,7 @@ final class GBufferPass {
     
     var gBufferPassState : PipelineState
     
-    init(pixelDimensions: Window.Size) {
+    init(pixelDimensions: PBWindow.Size) {
         
         var depthState = DepthStencilState()
         depthState.depthCompareFunction = GL_LESS
@@ -139,7 +139,7 @@ final class LightAccumulationPass {
     let commandQueue : cl_command_queue
     let kernel : OpenCLKernel
     
-    init(pixelDimensions: Window.Size, openCLContext: cl_context, openCLDevice: cl_device_id) {
+    init(pixelDimensions: PBWindow.Size, openCLContext: cl_context, openCLDevice: cl_device_id) {
         
         self.clContext = openCLContext
         
@@ -290,7 +290,7 @@ final class FinalPass {
     
     var finalPassState : PipelineState
     
-    init(pixelDimensions: Window.Size) {
+    init(pixelDimensions: PBWindow.Size) {
         let finalBuffer = Framebuffer.defaultFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
         
         var depthState = DepthStencilState()
@@ -328,7 +328,7 @@ public final class SceneRenderer {
     var lightAccumulationPass : LightAccumulationPass
     var finalPass : FinalPass
     
-    public init(window: Window) {
+    public init(window: PBWindow) {
         let (clContext, clDeviceID) = OpenCLGetContext(glfwWindow: window.glfwWindow)
         
         let pixelDimensions = window.pixelDimensions

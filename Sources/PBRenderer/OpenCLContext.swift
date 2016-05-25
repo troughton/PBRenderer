@@ -88,7 +88,7 @@ var platforms = [cl_platform_id?](repeating: nil, count: 32)
         clGetPlatformIDs(UInt32(32 * sizeof(cl_platform_id)), &platforms, &platformsSize);
         
         
-        typealias GLContextInfoFunc = @convention(c) (UnsafePointer<cl_context_properties>!, cl_gl_context_info, size_t, UnsafeMutablePointer<Void>!, UnsafeMutablePointer<size_t>!) -> cl_int
+        typealias GLContextInfoFunc = @convention(c) (UnsafePointer<cl_context_properties>?, cl_gl_context_info, size_t, UnsafeMutablePointer<Void>?, UnsafeMutablePointer<size_t>?) -> cl_int
         
         let clGetGLContextInfo = unsafeBitCast(clGetExtensionFunctionAddressForPlatform(platforms[0], "clGetGLContextInfoKHR"), to: GLContextInfoFunc.self)
         
@@ -137,7 +137,7 @@ private func checkForSupportedExtensions(supportedExtensions: String) {
 }
 
 private func isOpenCLDepthTextureSupported(supportedExtensions: String) -> Bool {
-    return supportedExtensions.contains("cl_khr_gl_depth_images") && NSProcessInfo().environment["UseColourBufferForDepthTexture"] == nil
+    return supportedExtensions.contains("cl_khr_gl_depth_images") && NSProcessInfo.processInfo().environment["UseColourBufferForDepthTexture"] == nil
 }
 
 enum OpenCLError : cl_int {

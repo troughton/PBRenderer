@@ -6,7 +6,7 @@ import ColladaParser
 import PBRenderer
 import CPBRendererLibs
 
-let mainWindow : Window
+let mainWindow : PBWindow
 
 
 final class CameraControl : WindowInputDelegate {
@@ -89,14 +89,14 @@ func main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
     glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE)
     
-    let mainWindow = Window(name: "PBRenderer", width: 800, height: 600)
+    let mainWindow = PBWindow(name: "PBRenderer", width: 800, height: 600)
     
     guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
     
     let scene = Scene(fromCollada: collada)
     let camera = scene.flattenedScene.flatMap { $0.cameras.first }.first!
     
-    mainWindow.dimensions = Window.Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)
+    mainWindow.dimensions = PBWindow.Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
