@@ -4,6 +4,7 @@ import SGLOpenGL
 import SGLMath
 import ColladaParser
 import PBRenderer
+import CPBRendererLibs
 
 let mainWindow : Window
 
@@ -102,10 +103,55 @@ func main() {
     let cameraControl = CameraControl(camera: camera)
     mainWindow.inputDelegate = cameraControl
     
+    // Setup ImGui binding
+    ImGui_ImplGlfwGL3_Init(window: mainWindow.glfwWindow, install_callbacks: true);
+    
+    var show_test_window = true;
+    var show_another_window = false;
+    var clear_color = vec3(114, 144, 154);
+    
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
         sceneRenderer.renderScene(scene, camera: camera)
+        
+        ImGui_ImplGlfwGL3_NewFrame();
+        
+        // 1. Show a simple window
+        // Tip: if we don't call igBegin()/igEnd() the widgets appears in a window automatically called "Debug"
+        {
+            var f = Float(0.0);
+            igText("Hello, world!");
+            igSliderFloat(label: "float", value: &f, vMin: 0.0, vMax: 1.0);
+            withUnsafeMutablePointer(&clear_color.x) { igColorEdit3("clear color", $0); }
+            if (igButton(label: "Test Window")) { show_test_window = !show_test_window; }
+            if (igButton(label: "Another Window")) { show_another_window = !show_another_window; }
+            igText(String(format: "Application average %.3f ms/frame (%.1f FPS)", 1000.0 / igGetIO().pointee.Framerate, igGetIO().pointee.Framerate));
+        }()
+        
+        // 2. Show another simple window, this time using an explicit Begin/End pair
+        if (show_another_window)
+        {
+            igSetNextWindowSize(ImVec2(x: 200,y: 100), Int32(ImGuiSetCond_FirstUseEver.rawValue));
+            igBegin(name: "Another Window", didOpen: &show_another_window);
+            igText("Hello");
+            igEnd();
+        }
+        
+        // 3. Show the ImGui test window. Most of the sample code is in igShowTestWindow()
+        if (show_test_window)
+        {
+            igSetNextWindowPos(ImVec2(x: 650, y: 20), Int32(ImGuiSetCond_FirstUseEver.rawValue));
+            igShowTestWindow(&show_test_window);
+        }
+        
+        igRender();
+        
+      
     }
+    
+    // Cleanup
+    ImGui_ImplGlfwGL3_Shutdown();
+
     
     // Game loop
     while !mainWindow.shouldClose {

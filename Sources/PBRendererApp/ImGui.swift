@@ -12,6 +12,18 @@ import CPBRendererLibs
 import SGLOpenGL
 import CGLFW3
 
+func igSliderFloat(label: String, value: inout Float, vMin: Float, vMax: Float, displayFormat: String = "%.3f", power: Float = 1.0) -> Bool {
+    return igSliderFloat(label, &value, vMin, vMax, displayFormat, power)
+}
+
+func igButton(label: String, size: ImVec2 = ImVec2(x: 0, y: 0)) -> Bool {
+    return igButton(label, size)
+}
+
+func igBegin(name: String, didOpen: UnsafeMutablePointer<Bool>? = nil, flags: ImGuiWindowFlags = 0) {
+    igBegin(name, didOpen, flags);
+}
+
 // Data
 private var  g_Window : OpaquePointer! = nil;
 private var       g_Time = 0.0;

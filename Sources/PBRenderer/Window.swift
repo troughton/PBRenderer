@@ -209,7 +209,7 @@ public class Window {
     
     private static var glfwWindowsToWindows = [OpaquePointer : Window]()
     
-    let glfwWindow : OpaquePointer!
+    public let glfwWindow : OpaquePointer!
     
     public struct Size {
         let width: GLint
@@ -288,7 +288,18 @@ public class Window {
         
         glfwSetCursorPosCallback(self.glfwWindow) { (glfwWindow, xPosition, yPosition) in
             let window = Window.glfwWindowsToWindows[glfwWindow!]!
-
+            
+            let action = glfwGetMouseButton(glfwWindow, GLFW_MOUSE_BUTTON_LEFT)
+            let mouseDeltaX = window._previousMouseX - xPosition;
+            let mouseDeltaY = window._previousMouseY - yPosition;
+            
+            if (action == GLFW_PRESS) {
+                window.inputDelegate?.mouseDrag(delta: (mouseDeltaX, mouseDeltaY));
+            }
+            window.inputDelegate?.mouseMove(delta: (mouseDeltaX, mouseDeltaY))
+            
+            window._previousMouseX = xPosition;
+            window._previousMouseY = yPosition;
         }
         
         glfwSetFramebufferSizeCallback(self.glfwWindow) { (glfwWindow, width, height) in
