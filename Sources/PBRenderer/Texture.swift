@@ -116,30 +116,35 @@ class Texture {
         case GL_RGBA32F: return GL_RGBA
         case GL_R11F_G11F_B10F: return GL_RGB
         case GL_RGB9_E5: return GL_RGB
-        case GL_R8I: return GL_RED
-        case GL_R8UI: return GL_RED
-        case GL_R16I: return GL_RED
-        case GL_R16UI: return GL_RED
-        case GL_R32I: return GL_RED
-        case GL_R32UI: return GL_RED
-        case GL_RG8I: return GL_RG
-        case GL_RG8UI: return GL_RG
-        case GL_RG16I: return GL_RG
-        case GL_RG16UI: return GL_RG
-        case GL_RG32I: return GL_RG
-        case GL_RG32UI: return GL_RG
-        case GL_RGB8I: return GL_RGB
-        case GL_RGB8UI: return GL_RGB
-        case GL_RGB16I: return GL_RGB
-        case GL_RGB16UI: return GL_RGB
-        case GL_RGB32I: return GL_RGB
-        case GL_RGB32UI: return GL_RGB
-        case GL_RGBA8I: return GL_RGBA
-        case GL_RGBA8UI: return GL_RGBA
-        case GL_RGBA16I: return GL_RGBA
-        case GL_RGBA16UI: return GL_RGBA
-        case GL_RGBA32I: return GL_RGBA
-        case GL_RGBA32UI: return GL_RGBA
+        case GL_R8I: return GL_RED_INTEGER
+        case GL_R8UI: return GL_RED_INTEGER
+        case GL_R16I: return GL_RED_INTEGER
+        case GL_R16UI: return GL_RED_INTEGER
+        case GL_R32I: return GL_RED_INTEGER
+        case GL_R32UI: return GL_RED_INTEGER
+        case GL_RG8I: return GL_RG_INTEGER
+        case GL_RG8UI: return GL_RG_INTEGER
+        case GL_RG16I: return GL_RG_INTEGER
+        case GL_RG16UI: return GL_RG_INTEGER
+        case GL_RG32I: return GL_RG_INTEGER
+        case GL_RG32UI: return GL_RG_INTEGER
+        case GL_RGB8I: return GL_RGB_INTEGER
+        case GL_RGB8UI: return GL_RGB_INTEGER
+        case GL_RGB16I: return GL_RGB_INTEGER
+        case GL_RGB16UI: return GL_RGB_INTEGER
+        case GL_RGB32I: return GL_RGB_INTEGER
+        case GL_RGB32UI: return GL_RGB_INTEGER
+        case GL_RGBA8I: return GL_RGBA_INTEGER
+        case GL_RGBA8UI: return GL_RGBA_INTEGER
+        case GL_RGBA16I: return GL_RGBA_INTEGER
+        case GL_RGBA16UI: return GL_RGBA_INTEGER
+        case GL_RGBA32I: return GL_RGBA_INTEGER
+        case GL_RGBA32UI: return GL_RGBA_INTEGER
+        case GL_DEPTH_COMPONENT16: return GL_DEPTH_COMPONENT
+        case GL_DEPTH_COMPONENT24: return GL_DEPTH_COMPONENT
+        case GL_DEPTH_COMPONENT32F: return GL_DEPTH_COMPONENT
+        case GL_DEPTH24_STENCIL8: return GL_DEPTH_STENCIL
+        case GL_DEPTH32F_STENCIL8: return GL_DEPTH_STENCIL
         case GL_COMPRESSED_RED: return GL_RED
         case GL_COMPRESSED_RG: return GL_RG
         case GL_COMPRESSED_RGB: return GL_RGB
@@ -158,6 +163,71 @@ class Texture {
         }
     }
     
+    static func validTypesForInternalFormat(_ pixelFormat: SGLOpenGL.GLenum) -> [SGLOpenGL.GLenum] {
+        switch pixelFormat {
+            case GL_RGB: return [GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5]
+            case GL_RGBA: return [GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1]
+            case GL_LUMINANCE_ALPHA: return [GL_UNSIGNED_BYTE]
+            case GL_LUMINANCE: return [GL_UNSIGNED_BYTE]
+            case GL_ALPHA: return [GL_UNSIGNED_BYTE]
+            case GL_R8: return [GL_UNSIGNED_BYTE]
+            case GL_R8_SNORM: return [GL_BYTE]
+            case GL_R16F: return [GL_HALF_FLOAT,GL_FLOAT]
+            case GL_R32F: return [GL_FLOAT]
+            case GL_R8UI: return [GL_UNSIGNED_BYTE]
+            case GL_R8I: return [GL_BYTE]
+            case GL_R16UI: return [GL_UNSIGNED_SHORT]
+            case GL_R16I: return [GL_SHORT]
+            case GL_R32UI: return [GL_UNSIGNED_INT]
+            case GL_R32I: return [GL_INT]
+            case GL_RG8: return [GL_UNSIGNED_BYTE]
+            case GL_RG8_SNORM: return [GL_BYTE]
+            case GL_RG16F: return [GL_HALF_FLOAT,GL_FLOAT]
+            case GL_RG32F: return [GL_FLOAT]
+            case GL_RG8UI: return [GL_UNSIGNED_BYTE]
+            case GL_RG8I: return [GL_BYTE]
+            case GL_RG16UI: return [GL_UNSIGNED_SHORT]
+            case GL_RG16I: return [GL_SHORT]
+            case GL_RG32UI: return [GL_UNSIGNED_INT]
+            case GL_RG32I: return [GL_INT]
+            case GL_RGB8: return [GL_UNSIGNED_BYTE]
+            case GL_SRGB8: return [GL_UNSIGNED_BYTE]
+            case GL_RGB565: return [GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5]
+            case GL_RGB8_SNORM: return [GL_BYTE]
+            case GL_R11F_G11F_B10F: return [GL_UNSIGNED_INT_10F_11F_11F_REV, GL_HALF_FLOAT, GL_FLOAT]
+            case GL_RGB9_E5: return [GL_UNSIGNED_INT_5_9_9_9_REV, GL_HALF_FLOAT, GL_FLOAT]
+            case GL_RGB16F: return [GL_HALF_FLOAT, GL_FLOAT]
+            case GL_RGB32F: return [GL_FLOAT]
+            case GL_RGB8UI: return [GL_UNSIGNED_BYTE]
+            case GL_RGB8I: return [GL_BYTE]
+            case GL_RGB16UI: return [GL_UNSIGNED_SHORT]
+            case GL_RGB16I: return [GL_SHORT]
+            case GL_RGB32UI: return [GL_UNSIGNED_INT]
+            case GL_RGB32I: return [GL_INT]
+            case GL_RGBA8: return [GL_UNSIGNED_BYTE]
+            case GL_SRGB8_ALPHA8: return [GL_UNSIGNED_BYTE]
+            case GL_RGBA8_SNORM: return [GL_BYTE]
+            case GL_RGB5_A1: return [GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_5_5_1, GL_UNSIGNED_INT_2_10_10_10_REV]
+            case GL_RGBA4: return [GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4]
+            case GL_RGB10_A2: return [GL_UNSIGNED_INT_2_10_10_10_REV]
+            case GL_RGBA16F: return [GL_HALF_FLOAT, GL_FLOAT]
+            case GL_RGBA32F: return [GL_FLOAT]
+            case GL_RGBA8UI: return [GL_UNSIGNED_BYTE]
+            case GL_RGBA8I: return [GL_BYTE]
+            case GL_RGB10_A2UI: return [GL_UNSIGNED_INT_2_10_10_10_REV]
+            case GL_RGBA16UI: return [GL_UNSIGNED_SHORT]
+            case GL_RGBA16I: return [GL_SHORT]
+            case GL_RGBA32I: return [GL_INT]
+            case GL_RGBA32UI: return [GL_UNSIGNED_INT]
+            case GL_DEPTH_COMPONENT16: return [GL_UNSIGNED_SHORT, GL_UNSIGNED_INT]
+            case GL_DEPTH_COMPONENT24: return [GL_UNSIGNED_INT]
+            case GL_DEPTH_COMPONENT32F: return [GL_FLOAT]
+            case GL_DEPTH24_STENCIL8: return [GL_UNSIGNED_INT_24_8]
+            case GL_DEPTH32F_STENCIL8: return [GL_FLOAT_32_UNSIGNED_INT_24_8_REV]
+            default: fatalError("Invalid internal format \(pixelFormat)")
+        }
+    }
+    
     private let _glTexture : GLuint!
     private let _renderBuffer : GLuint!
     
@@ -165,8 +235,10 @@ class Texture {
     
     let buffer : GPUBuffer<UInt8>?
     
+    typealias TextureFillFunction = (mipLevel: Int, arrayIndex: Int, slice: Int) -> (type: SGLOpenGL.GLenum, data: UnsafePointer<Void>?)
+    
     //Note: data is assumed to be for the first mipmap level.
-    init<T>(textureWithDescriptor descriptor: TextureDescriptor, type: SGLOpenGL.GLenum? = nil, format: SGLOpenGL.GLenum? = nil, data: UnsafePointer<T>? = nil) {
+    init(textureWithDescriptor descriptor: TextureDescriptor, data: TextureFillFunction? = nil) {
         
         self.descriptor = descriptor
         self.buffer = nil
@@ -218,8 +290,8 @@ class Texture {
             fatalError("Invalid texture format for descriptor \(descriptor)")
         }
         
-        let type = type ?? GL_UNSIGNED_INT
-        let format = format ?? Texture.formatForInternalFormat(descriptor.pixelFormat)
+        let type = Texture.validTypesForInternalFormat(descriptor.pixelFormat).first!
+        let format = Texture.formatForInternalFormat(descriptor.pixelFormat)
         
         //The width/height/depth of a mipmap level is the width/height/depth of the base level / 2k, where k is the mipmap level (remember: 0 is the base level). And remember to round down.
         
@@ -229,13 +301,42 @@ class Texture {
                 let width = descriptor.width / max(Int( 2 * mipLevel ), 1)
                 let height = descriptor.height / max(Int(2 * mipLevel ), 1)
                 
+                
                 if descriptor.textureType == GL_TEXTURE_CUBE_MAP {
                     for face in GL_TEXTURE_CUBE_MAP_POSITIVE_X...GL_TEXTURE_CUBE_MAP_NEGATIVE_Z {
-                        texCreationFunction(target: face, level: GLint(mipLevel), internalformat: descriptor.pixelFormat, width: GLsizei(width), height: GLsizei(max(height, arrayIndex)), depth: GLsizei(max(depth, descriptor.arrayLength)), format: format, type: type, pixels: data)
+                        
+                        let pixelData = data?(mipLevel: Int(mipLevel), arrayIndex: arrayIndex, slice: Int(face))
+                        
+                        let height = max(height, arrayIndex)
+                        let depth = max(depth, descriptor.arrayLength)
+                        
+                        texCreationFunction(target: face,
+                                            level: GLint(mipLevel),
+                                            internalformat: descriptor.pixelFormat,
+                                            width: GLsizei(width),
+                                            height: GLsizei(height),
+                                            depth: GLsizei(depth),
+                                            format: format,
+                                            type: pixelData?.type ?? type,
+                                            pixels: pixelData?.data)
                     }
                     
                 } else {
-                    texCreationFunction(target: descriptor.textureType, level: GLint(mipLevel), internalformat: descriptor.pixelFormat, width: GLsizei(width), height: GLsizei(max(height, arrayIndex)), depth: GLsizei(max(depth, descriptor.arrayLength)), format: format, type: type, pixels: data)
+                    
+                    let pixelData = data?(mipLevel: Int(mipLevel), arrayIndex: arrayIndex, slice: depth)
+                    
+                    let height = max(height, arrayIndex)
+                    let depth = max(depth, descriptor.arrayLength)
+                    
+                    texCreationFunction(target: descriptor.textureType,
+                                        level: GLint(mipLevel),
+                                        internalformat: descriptor.pixelFormat,
+                                        width: GLsizei(width),
+                                        height: GLsizei(height),
+                                        depth: GLsizei(depth),
+                                        format: format,
+                                        type: pixelData?.type ?? type,
+                                        pixels: pixelData?.data)
                     }
                 }
                 

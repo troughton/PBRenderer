@@ -51,3 +51,33 @@ vec3 ImportanceSampleGGX(vec2 Xi, float roughness, vec3 N) {
     // Tangent to world space
     return TangentX * H.x + TangentY * H.y + N * H.z;
 }
+
+vec3 cubeMapFaceUVToDirection(vec2 uv, int face) {
+    
+    vec2 scaledUV = (uv - vec2(0.5)) * 2;
+    vec3 direction;
+    
+    switch (face) {
+        case 0: //GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+            direction = vec3(1.f, scaledUV.x, scaledUV.y);
+            break;
+        case 1: //GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+            direction = vec3(scaledUV.x, 1.f, scaledUV.y);
+            break;
+        case 2: //GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+            direction = vec3(scaledUV.x, scaledUV.y, 1.f);
+            break;
+        case 3: //GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+            direction = vec3(-1.f, scaledUV.x, scaledUV.y);
+            break;
+        case 4: //GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+            direction = vec3(scaledUV.x, -1.f, scaledUV.y);
+            break;
+        case 5: //GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+            direction = vec3(scaledUV.x, scaledUV.y, -1.f);
+            break;
+        default:
+            break;
+    }
+    return direction;
+}

@@ -79,10 +79,11 @@ final class OpenCLMemory {
     
 #else
     
-var devices = [cl_device_id?](repeating: nil, count: 32) //Here be dragons if you put these lines inside the context retrieval method.
-    
-var platforms = [cl_platform_id?](repeating: nil, count: 32)
     func OpenCLGetContext(glfwWindow: OpaquePointer) -> (cl_context, cl_device_id) {
+    
+        var devices = [cl_device_id?](repeating: nil, count: 32) //Here be dragons if you put these lines inside the context retrieval method.
+        
+        var platforms = [cl_platform_id?](repeating: nil, count: 32)
         
         var platformsSize = cl_uint(0);
         clGetPlatformIDs(UInt32(32), &platforms, &platformsSize);

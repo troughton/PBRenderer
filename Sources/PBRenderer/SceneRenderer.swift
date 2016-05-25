@@ -29,7 +29,7 @@ final class GBufferPass {
         let geometryPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "GeometryPass.vert"))
         
         let fragmentShaderName = OpenCLDepthTextureSupported ? "GeometryPass.frag" : "GeometryPassColourDepth.frag"
-        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: fragmentShaderName)
+        let geometryPassFragment = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: fragmentShaderName))
         
         let geometryShader = Shader(withVertexShader: geometryPassVertex, fragmentShader: geometryPassFragment)
         
@@ -48,21 +48,21 @@ final class GBufferPass {
         
         let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: Int(width), height: Int(height), mipmapped: false)
         
-        let attachment1Texture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        let attachment1Texture = Texture(textureWithDescriptor: descriptor)
         
         var attachment1 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment1.texture = attachment1Texture
         attachment1.loadAction = .Clear
         attachment1.storeAction = .Store
         
-        let attachment2Texture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        let attachment2Texture = Texture(textureWithDescriptor: descriptor)
         
         var attachment2 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment2.texture = attachment2Texture
         attachment2.loadAction = .Clear
         attachment2.storeAction = .Store
         
-        let attachment3Texture = Texture(textureWithDescriptor: descriptor, data: nil as [Void]?)
+        let attachment3Texture = Texture(textureWithDescriptor: descriptor)
         
         var attachment3 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment3.texture = attachment3Texture
@@ -70,7 +70,7 @@ final class GBufferPass {
         attachment3.storeAction = .Store
         
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT32F, width: Int(width), height: Int(height), mipmapped: false)
-        let depthTexture = Texture(textureWithDescriptor: depthDescriptor, format: GL_DEPTH_COMPONENT, type: GL_FLOAT, data: nil as [Void]?)
+        let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.loadAction = .Clear
         depthAttachment.storeAction = .Store
@@ -79,7 +79,7 @@ final class GBufferPass {
         var depthAttachmentAsColour : RenderPassColourAttachment? = nil
         if !OpenCLDepthTextureSupported {
             let colourDepthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_R32F, width: Int(width), height: Int(height), mipmapped: false)
-            let colourDepthTexture = Texture(textureWithDescriptor: colourDepthDescriptor, format: GL_RED, type: GL_HALF_FLOAT, data: nil as [Void]?)
+            let colourDepthTexture = Texture(textureWithDescriptor: colourDepthDescriptor)
             
             depthAttachmentAsColour = RenderPassColourAttachment(clearColour: vec4(1));
             depthAttachmentAsColour?.texture = colourDepthTexture
@@ -175,7 +175,7 @@ final class LightAccumulationPass {
     
     class func generateLightAccumulationTexture(width: GLint, height: GLint) -> Texture {
         let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
-        return Texture(textureWithDescriptor: descriptor, format: GL_RGBA, type: GL_HALF_FLOAT, data: nil as [Void]?)
+        return Texture(textureWithDescriptor: descriptor)
     }
     
     func resize(newPixelDimensions width: GLint, _ height: GLint) {
