@@ -346,14 +346,14 @@ public final class SceneRenderer {
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
         
-        print("Loading textures")
-        let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
-        let dfgTexture = DFGTexture.defaultTexture
-        let envMapLDTexture = LDTexture(resolution: 512)
-        
-        print("Creating LD textures")
-        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLDTexture], cubeMaps: [envMapTexture])
-        print("Finished creating LD textures")
+//        print("Loading textures")
+//        let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
+//        let dfgTexture = DFGTexture.defaultTexture
+//        let envMapLDTexture = LDTexture(resolution: 512)
+//        
+//        print("Creating LD textures")
+//        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLDTexture], cubeMaps: [envMapTexture])
+//        print("Finished creating LD textures")
     }
     
     func framebufferDidResize(width: Int32, height: Int32) {
