@@ -1,24 +1,10 @@
-typedef struct {
-    float4 m[4];        // member elements of the matrix
-} mat4;
-
-mat4 transpose(mat4 matrix);
-mat4 transpose(mat4 matrix) {
-    // read matrix into a float16 vector
-    float16 x = (float16)( matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3] );
-    float16 t;
+float4 multiplyMatrixVector(float16 m, float4 vector);
+float4 multiplyMatrixVector(float16 m, float4 vector) {
     
-    //transpose
-    t.even = x.lo; t.odd = x.hi; x.even = t.lo; x.odd = t.hi;
+    float x = m.s0 * vector.x + m.s4 * vector.y + m.s8 * vector.z + m.sc * vector.w;
+    float y = m.s1 * vector.x + m.s5 * vector.y + m.s9 * vector.z + m.sd * vector.w;
+    float z = m.s2 * vector.x + m.s6 * vector.y + m.sa * vector.z + m.se * vector.w;
+    float w = m.s3 * vector.x + m.s7 * vector.y + m.sb * vector.z + m.sf * vector.w;
     
-    mat4 result;
-    //write back
-    result.m[0] = x.lo.lo; result.m[1] = x.lo.hi; result.m[2] = x.hi.lo; result.m[3] = x.hi.hi;
-    return result;
-}
-
-float4 multiplyMatrixVector(mat4 matrix, float4 vector);
-float4 multiplyMatrixVector(mat4 matrix, float4 vector) {
-    matrix = transpose(matrix);
-    return (float4)(dot(matrix.m[0], vector), dot(matrix.m[1], vector), dot(matrix.m[2], vector), dot(matrix.m[3], vector));
+    return (float4)(x, y, z, w);
 }

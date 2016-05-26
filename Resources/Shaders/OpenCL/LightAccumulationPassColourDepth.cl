@@ -5,7 +5,7 @@
 __kernel void lightAccumulationPassKernel(__write_only image2d_t lightAccumulationBuffer, float2 invImageDimensions,
                                     float4 nearPlaneAndProjectionTerms,
                                     __read_only image2d_t gBuffer0Tex, __read_only image2d_t gBuffer1Tex, __read_only image2d_t gBuffer2Tex, __read_only image2d_t gBufferDepthTex,
-                                    __global LightData *lights, int lightCount, mat4 cameraToWorldMatrix) {
+                                    __global LightData *lights, int lightCount, float16 cameraToWorldMatrix) {
     
     const sampler_t sampler = CLK_FILTER_NEAREST | CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE;
     

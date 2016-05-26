@@ -167,11 +167,11 @@ float3 epilogueLighting(float3 color, float exposureMultiplier) {
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
                            float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
-                             __global LightData *lights, int lightCount, float2 uv, mat4 cameraToWorldMatrix);
+                             __global LightData *lights, int lightCount, float2 u, float16 cameraToWorldMatrix);
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
                              float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
-                             __global LightData *lights, int lightCount,float2 uv, mat4 cameraToWorldMatrix) {
+                             __global LightData *lights, int lightCount,float2 uv, float16 cameraToWorldMatrix) {
 
     float4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
     float3 worldSpacePosition = multiplyMatrixVector(cameraToWorldMatrix, cameraSpacePosition).xyz;
