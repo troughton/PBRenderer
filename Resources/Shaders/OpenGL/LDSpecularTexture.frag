@@ -24,7 +24,7 @@ layout(location = 4) out vec4 out4;
 layout(location = 5) out vec4 out5;
 
 vec4 integrateSpecularCubeLD(vec3 V, vec3 N, float roughness) {
-    vec3 accBrdf(0);
+    vec3 accBrdf = vec3(0);
     float accBrdfWeight = 0;
     
     for (uint i=0; i < sampleCount; ++i) {

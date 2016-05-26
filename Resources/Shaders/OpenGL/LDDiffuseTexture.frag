@@ -16,7 +16,7 @@ layout(location = 5) out vec4 out5;
 
 vec4 integrateDiffuseCubeLD(vec3 N) {
     
-    vec3 accBrdf(0);
+    vec3 accBrdf = vec3(0);
     for (uint i = 0; i < sampleCount; ++i) {
         vec2 eta = getSample(i, sampleCount);
         vec3 L;

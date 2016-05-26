@@ -47,6 +47,12 @@ final class LDTexture {
         return Shader(withVertexShader: vertexText, fragmentShader: fragmentText)
     }()
     
+    private static let sampler : Sampler = {
+        let sampler = Sampler()
+        sampler.minificationFilter = GL_LINEAR_MIPMAP_NEAREST
+        return sampler
+    }()
+    
     init(resolution: Int) {
         self.resolution = resolution
         
@@ -168,6 +174,9 @@ final class LDTexture {
     }
     
     static func fillLDTexturesFromCubeMaps(textures: [LDTexture], cubeMaps: [Texture]) {
+        
+        
+        LDTexture.sampler.bindToIndex(0)
         
         for (texture, cubeMap) in zip(textures, cubeMaps) {
             texture.fillDiffuseFromCubeMap(cubeMap)

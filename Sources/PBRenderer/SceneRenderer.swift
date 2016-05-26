@@ -289,6 +289,7 @@ final class LightAccumulationPass {
 final class FinalPass {
     
     var finalPassState : PipelineState
+    var sampler : Sampler
     
     init(pixelDimensions: PBWindow.Size) {
         let finalBuffer = Framebuffer.defaultFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
@@ -305,6 +306,10 @@ final class FinalPass {
         self.finalPassState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height), framebuffer: finalBuffer, shader: finalPassShader, depthStencilState: depthState)
         
         self.finalPassState.sRGBConversionEnabled = true
+        
+        self.sampler = Sampler()
+        sampler.minificationFilter = GL_NEAREST
+        sampler.magnificationFilter = GL_NEAREST
     }
     
     func performPass(lightAccumulationTexture: Texture) {
@@ -312,6 +317,7 @@ final class FinalPass {
         self.finalPassState.renderPass { (framebuffer, shader) in
             shader.setUniform(GLint(0), forProperty: CompositionPassShaderProperty.LightAccumulationBuffer)
             lightAccumulationTexture.bindToIndex(0)
+            self.sampler.bindToIndex(0)
             
             GLMesh.fullScreenQuad.render()
         }
@@ -339,6 +345,15 @@ public final class SceneRenderer {
         
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
+        
+//        print("Loading textures")
+//        let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
+//        let dfgTexture = DFGTexture.defaultTexture
+//        let envMapLDTexture = LDTexture(resolution: 512)
+//        
+//        print("Creating LD textures")
+//        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLDTexture], cubeMaps: [envMapTexture])
+//        print("Finished creating LD textures")
     }
     
     func framebufferDidResize(width: Int32, height: Int32) {
