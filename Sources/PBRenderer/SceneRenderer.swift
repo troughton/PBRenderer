@@ -46,7 +46,7 @@ final class GBufferPass {
     
     class func gBufferFramebuffer(width: GLint, height: GLint) -> Framebuffer {
         
-        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: Int(width), height: Int(height), mipmapped: false)
+        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: Int(width), height: Int(height), mipmapped: false)
         
         let attachment1Texture = Texture(textureWithDescriptor: descriptor)
         
@@ -346,14 +346,14 @@ public final class SceneRenderer {
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
         
-//        print("Loading textures")
-//        let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
-//        let dfgTexture = DFGTexture.defaultTexture
-//        let envMapLDTexture = LDTexture(resolution: 512)
-//        
-//        print("Creating LD textures")
-//        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLDTexture], cubeMaps: [envMapTexture])
-//        print("Finished creating LD textures")
+        print("Loading textures")
+        let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
+        let dfgTexture = DFGTexture.defaultTexture
+        let envMapLDTexture = LDTexture(resolution: 512)
+        
+        print("Creating LD textures")
+        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLDTexture], cubeMaps: [envMapTexture])
+        print("Finished creating LD textures")
     }
     
     func framebufferDidResize(width: Int32, height: Int32) {

@@ -118,24 +118,14 @@ final class TextureLoader {
         
         
         let textureDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: cubeWidth, height: cubeWidth, mipmapped: true)
-        let texture = Texture(textureWithDescriptor: textureDescriptor) { (mipLevel, arrayIndex, slice) -> (type: GLenum, data: UnsafePointer<Void>?) in
-            switch GLenum(slice) {
-            case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-                return (type: GL_FLOAT, data: UnsafePointer<Void>(topFace))
-            case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-                return (type: GL_FLOAT, data: UnsafePointer<Void>(rightFace))
-            case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-                return (type: GL_FLOAT, data: UnsafePointer<Void>(backFace))
-            case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-                return (type: GL_FLOAT, data: UnsafePointer<Void>(leftFace))
-            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-                return (type: GL_FLOAT, data: UnsafePointer<Void>(topFace))
-            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-                return (type: GL_FLOAT, data: UnsafePointer<Void>(frontFace))
-            default:
-                return (type: GL_FLOAT, data: nil)
-            }
-        }
+        let texture = Texture(textureWithDescriptor: textureDescriptor)
+        
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: rightFace!)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_Y, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: topFace!)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_Z, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: backFace!)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: leftFace!)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: bottomFace!)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: frontFace!)
         
         texture.generateMipmaps()
         

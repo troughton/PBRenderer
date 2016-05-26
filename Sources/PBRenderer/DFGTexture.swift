@@ -17,7 +17,7 @@ final class DFGTexture {
     init(resolution: Int) {
         self.resolution = resolution
         
-        let textureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: resolution, height: resolution, mipmapped: false)
+        let textureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: resolution, height: resolution, mipmapped: false)
         
         self.texture = Texture(textureWithDescriptor: textureDescriptor)
         
@@ -25,7 +25,7 @@ final class DFGTexture {
         colourAttachment.texture = self.texture
         colourAttachment.storeAction = .Store
         
-        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH24_STENCIL8, width: resolution, height: resolution, mipmapped: false)
+        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: resolution, height: resolution, mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
         
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
