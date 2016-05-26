@@ -53,7 +53,6 @@ public class Shader {
     
     deinit {
         for shader in _shaderStages {
-            glDetachShader(self.glProgramRef, shader)
             glDeleteShader(shader)
         }
         

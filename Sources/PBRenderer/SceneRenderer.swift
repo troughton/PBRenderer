@@ -46,7 +46,7 @@ final class GBufferPass {
     
     class func gBufferFramebuffer(width: GLint, height: GLint) -> Framebuffer {
         
-        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA, width: Int(width), height: Int(height), mipmapped: false)
+        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: Int(width), height: Int(height), mipmapped: false)
         
         let attachment1Texture = Texture(textureWithDescriptor: descriptor)
         

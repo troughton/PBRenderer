@@ -63,6 +63,7 @@ final class LDTexture {
         let specularCubeDescriptor = TextureDescriptor(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: GL_RGB16F, width: resolution, height: resolution, depth: 1, mipmapLevelCount: specularMipMapCount, arrayLength: 1, multisampleCount: 1)
         self.specularTexture = Texture(textureWithDescriptor: specularCubeDescriptor)
         
+        
         self.depthTextures = (0..<specularMipMapCount).map { (mipLevel) -> Texture in
             let mipLevelSize = resolution / Int(1 << mipLevel)
             

@@ -235,10 +235,8 @@ class Texture {
     
     let buffer : GPUBuffer<UInt8>?
     
-    typealias TextureFillFunction = (mipLevel: Int, arrayIndex: Int, slice: Int) -> (type: SGLOpenGL.GLenum, data: UnsafePointer<Void>?)
-    
     //Note: data is assumed to be for the first mipmap level.
-    init(textureWithDescriptor descriptor: TextureDescriptor, data: TextureFillFunction? = nil) {
+    init(textureWithDescriptor descriptor: TextureDescriptor) {
         
         self.descriptor = descriptor
         self.buffer = nil
@@ -265,11 +263,11 @@ class Texture {
         
         glBindTexture(descriptor.textureType, _glTexture)
         
-        let texCreationFunction : (target: SGLOpenGL.GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: SGLOpenGL.GLenum, type: SGLOpenGL.GLenum, pixels: UnsafePointer<Void>?) -> ()
+        let texCreationFunction : (target: SGLOpenGL.GLenum, levels: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei) -> ()
         
         switch descriptor.textureType {
         case GL_TEXTURE_1D:
-            texCreationFunction = { (target, level, internalformat, width, height, depth, format, type, pixels) in glTexImage1D(target, level, internalformat, width, 0, format, type, pixels) }
+            texCreationFunction = { (target, levelCount, internalformat, width, height, depth) in glTexStorage1D(target, levelCount, internalformat, width) }
         case GL_TEXTURE_1D_ARRAY:
             fallthrough
         case GL_TEXTURE_RECTANGLE:
@@ -277,71 +275,26 @@ class Texture {
         case GL_TEXTURE_CUBE_MAP:
             fallthrough
         case GL_TEXTURE_2D:
-            texCreationFunction = { (target, level, internalformat, width, height, depth, format, type, pixels) in glTexImage2D(target, level, internalformat, width, height, 0, format, type, pixels) }
+            texCreationFunction = { (target, levels, internalformat, width, height, depth) in glTexStorage2D(target, levels, internalformat, width, height) }
         case GL_TEXTURE_2D_ARRAY:
             fallthrough
         case GL_TEXTURE_CUBE_MAP_ARRAY:
             fallthrough
         case GL_TEXTURE_3D:
-            texCreationFunction = { (target, level, internalformat, width, height, depth, format, type, pixels) in glTexImage3D(target, level, internalformat, width, height, depth, 0, format, type, pixels) }
+            texCreationFunction = { (target, levels, internalformat, width, height, depth) in glTexStorage3D(target, levels, internalformat, width, height, depth) }
         case GL_TEXTURE_2D_MULTISAMPLE:
-            texCreationFunction = { (target, level, internalformat, width, height, depth, format, type, pixels) in glTexImage2DMultisample(target, GLsizei(descriptor.multisampleCount), internalformat, width, height, false) }
+            texCreationFunction = { (target, level, internalformat, width, height, depth) in glTexStorage2DMultisample(target, GLsizei(descriptor.multisampleCount), internalformat, width, height, false) }
         default:
             fatalError("Invalid texture format for descriptor \(descriptor)")
         }
         
-        let type = Texture.validTypesForInternalFormat(descriptor.pixelFormat).first!
-        let format = Texture.formatForInternalFormat(descriptor.pixelFormat)
         
-        //The width/height/depth of a mipmap level is the width/height/depth of the base level / 2k, where k is the mipmap level (remember: 0 is the base level). And remember to round down.
-        
-        for depth in 1...descriptor.depth {
-            for arrayIndex in 1...descriptor.arrayLength {
-            for mipLevel in 0..<descriptor.mipmapLevelCount {
-                let width = descriptor.width / max(Int( 2 * mipLevel ), 1)
-                let height = descriptor.height / max(Int(2 * mipLevel ), 1)
-                
-                
-                if descriptor.textureType == GL_TEXTURE_CUBE_MAP {
-                    for face in GL_TEXTURE_CUBE_MAP_POSITIVE_X...GL_TEXTURE_CUBE_MAP_NEGATIVE_Z {
-                        
-                        let pixelData = data?(mipLevel: Int(mipLevel), arrayIndex: arrayIndex, slice: Int(face))
-                        
-                        let height = max(height, arrayIndex)
-                        let depth = max(depth, descriptor.arrayLength)
-                        
-                        texCreationFunction(target: face,
-                                            level: GLint(mipLevel),
-                                            internalformat: descriptor.pixelFormat,
-                                            width: GLsizei(width),
-                                            height: GLsizei(height),
-                                            depth: GLsizei(depth),
-                                            format: format,
-                                            type: pixelData?.type ?? type,
-                                            pixels: pixelData?.data)
-                    }
-                    
-                } else {
-                    
-                    let pixelData = data?(mipLevel: Int(mipLevel), arrayIndex: arrayIndex, slice: depth)
-                    
-                    let height = max(height, arrayIndex)
-                    let depth = max(depth, descriptor.arrayLength)
-                    
-                    texCreationFunction(target: descriptor.textureType,
-                                        level: GLint(mipLevel),
-                                        internalformat: descriptor.pixelFormat,
-                                        width: GLsizei(width),
-                                        height: GLsizei(height),
-                                        depth: GLsizei(depth),
-                                        format: format,
-                                        type: pixelData?.type ?? type,
-                                        pixels: pixelData?.data)
-                    }
-                }
-                
-            }
-        }
+        texCreationFunction(target: descriptor.textureType,
+                            levels: GLint(descriptor.mipmapLevelCount),
+                            internalformat: descriptor.pixelFormat,
+                            width: GLsizei(descriptor.width),
+                            height: GLsizei(descriptor.height),
+                            depth: GLsizei(descriptor.depth))
         
         glTexParameteri(descriptor.textureType, GL_TEXTURE_BASE_LEVEL, 0)
         glTexParameteri(descriptor.textureType, GL_TEXTURE_MAX_LEVEL, Int32(descriptor.mipmapLevelCount - 1))
@@ -376,6 +329,12 @@ class Texture {
         glBindTexture(descriptor.textureType, 0)
     }
     
+    func fillSubImage(target: SGLOpenGL.GLenum, mipmapLevel: Int, width: Int, height: Int, type: SGLOpenGL.GLenum, data: UnsafePointer<Void>) {
+        glBindTexture(descriptor.textureType, _glTexture)
+        glTexSubImage2D(target, GLint(mipmapLevel), 0, 0, GLint(width), GLint(height), Texture.formatForInternalFormat(descriptor.pixelFormat), type, data)
+        glBindTexture(descriptor.textureType, 0)
+    }
+    
     func bindToIndex(_ index: Int) {
         glActiveTexture(GL_TEXTURE0 + index)
         glBindTexture(descriptor.textureType, _glTexture)
@@ -391,9 +350,9 @@ class Texture {
             case GL_TEXTURE_2D_ARRAY:
                 fallthrough
             case GL_TEXTURE_3D:
-                fallthrough
-            case GL_TEXTURE_CUBE_MAP:
                 glFramebufferTextureLayer(framebuffer, attachment, glTexture, GLint(mipmapLevel), GLint(max(textureSlice, depthPlane)))
+            case GL_TEXTURE_CUBE_MAP:
+                glFramebufferTexture2D(framebuffer, attachment, GL_TEXTURE_CUBE_MAP_POSITIVE_X + GLenum(textureSlice), glTexture, GLint(mipmapLevel))
             default:
                 glFramebufferTexture(framebuffer, attachment, glTexture, GLint(mipmapLevel))
             }
