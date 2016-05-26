@@ -99,10 +99,10 @@ final class GBufferPass {
         
         let modelToCamera = worldToCamera * node.transform.nodeToWorldMatrix
         let modelToClip = cameraToClip * modelToCamera
-        let normalTransform = (node.transform.worldToNodeMatrix * camera.sceneNode.transform.nodeToWorldMatrix).upperLeft.transpose
+        let normalTransform = (node.transform.worldToNodeMatrix).upperLeft.transpose
         
         shader.setMatrix(modelToClip, forProperty: BasicShaderProperty.ModelToClipMatrix)
-        shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToCameraMatrix)
+        shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToWorldMatrix)
         
         let materialBlockIndex = 0
         
@@ -192,22 +192,6 @@ final class LightAccumulationPass {
         return vec2(x, y) / zNear
     }
     
-    func fillLightData(scene: Scene, camera: Camera) {
-        for node in scene.flattenedScene {
-            
-            let nodeToCamera = camera.sceneNode.transform.worldToNodeMatrix * node.transform.nodeToWorldMatrix
-            
-            for light in node.lights {
-                light.backingGPULight.withElementNoUpdate { light in
-                    light.cameraSpacePosition = nodeToCamera * vec4(0, 0, 0, 1)
-                    light.cameraSpaceDirection = normalize(nodeToCamera * vec4(0, 0, 1, 0))
-                }
-            }
-        }
-        
-        scene.lightBuffer.didModify()
-    }
-    
     func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
         
         var glObjects = [cl_mem?]()
@@ -262,6 +246,10 @@ final class LightAccumulationPass {
         
         let lightCount = Int32(scene.lightBuffer.capacity)
         self.kernel.setArgument(lightCount, index: kernelIndex)
+        
+        kernelIndex += 1
+        var cameraToWorldMatrix = camera.sceneNode.transform.nodeToWorldMatrix;
+        self.kernel.setArgument(cameraToWorldMatrix, index: kernelIndex)
         
         var err = clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
         
@@ -383,8 +371,6 @@ public final class SceneRenderer {
         
         
         glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
-        
-        self.lightAccumulationPass.fillLightData(scene: scene, camera: camera)
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<3]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)

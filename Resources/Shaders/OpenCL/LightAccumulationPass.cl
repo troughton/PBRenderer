@@ -14,8 +14,8 @@ typedef struct MaterialData {
 
 typedef struct LightData {
     float4 colourAndIntensity;
-    float4 cameraSpacePosition;
-    float4 cameraSpaceDirection;
+    float4 worldSpacePosition;
+    float4 worldSpaceDirection;
     float4 extraData;
     uint lightTypeFlag;
     float inverseSquareAttenuationRadius;
@@ -53,15 +53,15 @@ void evaluateMaterialData(MaterialData data, float3 *albedo, float3 *f0, float *
     *linearRoughness = 1.f - data.smoothness;
 }
 
-float3 calculateCameraSpacePositionFromWindowZ(float, float2, float2, float2);
-float3 calculateCameraSpacePositionFromWindowZ(float windowZ,
+float4 calculateCameraSpacePositionFromWindowZ(float, float2, float2, float2);
+float4 calculateCameraSpacePositionFromWindowZ(float windowZ,
                                               float2 uv,
                                               float2 nearPlane,
                                               float2 projectionTerms) {
     
     float3 cameraDirection = (float3)(nearPlane * (uv.xy * 2 - 1), -1);
     float linearDepth = native_divide(projectionTerms.y, (windowZ - projectionTerms.x));
-    return cameraDirection * linearDepth;
+    return (float4)(cameraDirection * linearDepth, 1);
 }
 
 float smoothDistanceAtt(float squaredDistance, float invSqrAttRadius);
@@ -94,27 +94,27 @@ float getAngleAtt(float3 normalizedLightVector, float3 lightDir, float lightAngl
     return attenuation;
 }
 
-float3 evaluatePunctualLight(float3 cameraSpacePosition,
+float3 evaluatePunctualLight(float3 worldSpacePosition,
                              float3 V, float3 N, float NdotV,
                              float3 albedo, float3 f0, float f90, float linearRoughness,
                              __global LightData *light);
-float3 evaluatePunctualLight(float3 cameraSpacePosition,
+float3 evaluatePunctualLight(float3 worldSpacePosition,
                              float3 V, float3 N, float NdotV,
                              float3 albedo, float3 f0, float f90, float linearRoughness,
                            __global LightData *light) {
     
-    float4 lightPositionCamera = light->cameraSpacePosition;
-    float3 lightDirectionCamera = light->cameraSpaceDirection.xyz;
+    float4 lightPositionWorld = light->worldSpacePosition;
+    float3 lightDirectionWorld = light->worldSpaceDirection.xyz;
     
     float3 unnormalizedLightVector;
     float3 L;
     float attenuation = 1;
     
     if (light->lightTypeFlag == LightTypeDirectional) {
-        unnormalizedLightVector = lightDirectionCamera.xyz;
+        unnormalizedLightVector = lightDirectionWorld.xyz;
         L = native_normalize(unnormalizedLightVector);
     } else {
-        unnormalizedLightVector = lightPositionCamera.xyz - cameraSpacePosition;
+        unnormalizedLightVector = lightPositionWorld.xyz - worldSpacePosition;
         L = native_normalize(unnormalizedLightVector);
         
         attenuation *= getDistanceAtt(unnormalizedLightVector, light->inverseSquareAttenuationRadius);
@@ -123,7 +123,7 @@ float3 evaluatePunctualLight(float3 cameraSpacePosition,
             
             float2 lightAngleScaleAndOffset = light->extraData.xy;
             
-            attenuation *= getAngleAtt(L, lightDirectionCamera, lightAngleScaleAndOffset.x, lightAngleScaleAndOffset.y);
+            attenuation *= getAngleAtt(L, lightDirectionWorld, lightAngleScaleAndOffset.x, lightAngleScaleAndOffset.y);
         }
     }
 
@@ -138,11 +138,11 @@ float3 evaluatePunctualLight(float3 cameraSpacePosition,
     return luminance;
 }
 
-float3 evaluateLighting(float3 cameraSpacePosition,
+float3 evaluateLighting(float3 worldSpacePosition,
                         float3 V, float3 N, float NdotV,
                         float3 albedo, float3 f0, float f90, float linearRoughness,
                         __global LightData *light);
-float3 evaluateLighting(float3 cameraSpacePosition,
+float3 evaluateLighting(float3 worldSpacePosition,
                         float3 V, float3 N, float NdotV,
                         float3 albedo, float3 f0, float f90, float linearRoughness,
                          __global LightData *light) {
@@ -150,8 +150,7 @@ float3 evaluateLighting(float3 cameraSpacePosition,
         case LightTypePoint:
         case LightTypeDirectional:
         case LightTypeSpot:
-            
-            return evaluatePunctualLight(cameraSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
+            return evaluatePunctualLight(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
         break;
         default:
             return (float3)(0);
@@ -168,13 +167,15 @@ float3 epilogueLighting(float3 color, float exposureMultiplier) {
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
                            float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
-                             __global LightData *lights, int lightCount, float2 uv);
+                             __global LightData *lights, int lightCount, float2 uv, mat4 cameraToWorldMatrix);
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
                              float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
-                             __global LightData *lights, int lightCount,float2 uv) {
+                             __global LightData *lights, int lightCount,float2 uv, mat4 cameraToWorldMatrix) {
 
-    float3 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
+    float4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
+    float3 worldSpacePosition = multiplyMatrixVector(cameraToWorldMatrix, cameraSpacePosition).xyz;
+    
     MaterialData material = decodeMaterialFromGBuffers(gBuffer0, gBuffer1, gBuffer2);
     
     float3 albedo;
@@ -190,10 +191,10 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
     float3 lightAccumulation = (float3)(0, 0, 0);
     
     for (int i = 0; i < lightCount; i++) {
-        lightAccumulation += evaluateLighting(cameraSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, &lights[i]);
+        lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, &lights[i]);
     }
     
     float3 epilogue = epilogueLighting(lightAccumulation, 100.f);
-    
+        
     return epilogue;
 }
