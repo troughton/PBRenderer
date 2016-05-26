@@ -183,7 +183,7 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
     float linearRoughness;
     evaluateMaterialData(material, &albedo, &f0, &f90, &linearRoughness);
 
-    float3 N = native_normalize(decode(gBuffer0.xy));
+    float3 N = decode(gBuffer0.xy);
     float3 V = native_normalize(-cameraSpacePosition);
     float NdotV = fabs(dot(N, V)) + 1e-5f; //bias the result to avoid artifacts
     

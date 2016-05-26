@@ -1,3 +1,4 @@
+//http://aras-p.info/texts/CompactNormalStorage.html
 vec2 encode (vec3 n) {
     float f = sqrt(8*n.z+8);
     return n.xy / f + 0.5;

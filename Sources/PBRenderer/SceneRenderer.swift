@@ -46,23 +46,24 @@ final class GBufferPass {
     
     class func gBufferFramebuffer(width: GLint, height: GLint) -> Framebuffer {
         
-        let descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: Int(width), height: Int(height), mipmapped: false)
-        
-        let attachment1Texture = Texture(textureWithDescriptor: descriptor)
+        let rgba16Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16, width: Int(width), height: Int(height), mipmapped: false)
+        let attachment1Texture = Texture(textureWithDescriptor: rgba16Descriptor)
         
         var attachment1 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment1.texture = attachment1Texture
         attachment1.loadAction = .Clear
         attachment1.storeAction = .Store
         
-        let attachment2Texture = Texture(textureWithDescriptor: descriptor)
+        let rgba8Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: Int(width), height: Int(height), mipmapped: false)
+        
+        let attachment2Texture = Texture(textureWithDescriptor: rgba8Descriptor)
         
         var attachment2 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment2.texture = attachment2Texture
         attachment2.loadAction = .Clear
         attachment2.storeAction = .Store
         
-        let attachment3Texture = Texture(textureWithDescriptor: descriptor)
+        let attachment3Texture = Texture(textureWithDescriptor: rgba8Descriptor)
         
         var attachment3 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment3.texture = attachment3Texture
@@ -343,18 +344,19 @@ public final class SceneRenderer {
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, openCLContext: clContext, openCLDevice: clDeviceID)
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
+        self.envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
+        
+        var query : GLuint = 0
+        glGenQueries(1, &query)
+        
+        let dfgTexture = DFGTexture.defaultTexture
+        self.envMapLD = LDTexture(resolution: 256)
+        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLD], cubeMaps: [envMapTexture])
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
-        
-//        print("Loading textures")
-//        let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
-//        let dfgTexture = DFGTexture.defaultTexture
-//        let envMapLDTexture = LDTexture(resolution: 512)
-//        
-//        print("Creating LD textures")
-//        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLDTexture], cubeMaps: [envMapTexture])
-//        print("Finished creating LD textures")
     }
+    var envMapLD : LDTexture
+    var envMapTexture : Texture
     
     func framebufferDidResize(width: Int32, height: Int32) {
         self.gBufferPass.resize(newPixelDimensions: width, height)
@@ -365,6 +367,8 @@ public final class SceneRenderer {
     var timingQuery : GLuint? = nil
     
     public func renderScene(_ scene: Scene, camera: Camera) {
+        
+        
         var timeElapsed = GLuint(0)
         
         if let query = timingQuery {

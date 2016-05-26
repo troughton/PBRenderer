@@ -117,7 +117,7 @@ final class TextureLoader {
         }
         
         
-        let textureDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: cubeWidth, height: cubeWidth, mipmapped: true)
+        let textureDescriptor = TextureDescriptor(textureCubeWithPixelFormat: pixelFormat, width: cubeWidth, height: cubeWidth, mipmapped: true)
         let texture = Texture(textureWithDescriptor: textureDescriptor)
         
         texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: rightFace!)

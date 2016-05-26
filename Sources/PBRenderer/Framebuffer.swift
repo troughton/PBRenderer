@@ -152,6 +152,7 @@ public class Framebuffer {
                 error = "GL_READ_BUFFER is not GL_NONE and the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment point named by GL_READ_BUFFER."
             case GL_FRAMEBUFFER_UNSUPPORTED:
                 error = "unsupported framebuffer. The combination of internal formats of the attached images violates an implementation-dependent set of restrictions."
+                break
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
                 error = "the value of GL_RENDERBUFFER_SAMPLES is not the same for all attached renderbuffers; the value of GL_TEXTURE_SAMPLES is the not same for all attached textures; or, if the attached images are a mix of renderbuffers and textures, the value of GL_RENDERBUFFER_SAMPLES does not match the value of GL_TEXTURE_SAMPLES.\n Alternatively, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same for all attached textures; or, if the attached images are a mix of renderbuffers and textures, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures."
             case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
@@ -160,7 +161,11 @@ public class Framebuffer {
                 error = "unknown error."
             }
             
-            fatalError("Error creating framebuffer: \(error) (OpenGL error: \(completeness))")
+            if completeness != GL_FRAMEBUFFER_UNSUPPORTED {
+                fatalError("Error creating framebuffer: \(error) (OpenGL error: \(completeness))")
+            } else {
+                print("Warning: error creating framebuffer: \(error) (OpenGL error: \(completeness))")
+            }
         }
         
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
