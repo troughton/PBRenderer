@@ -33,10 +33,19 @@ float3 decode(float2 enc) {
     return n;
 }
 
-MaterialData decodeMaterialFromGBuffers(float4, float4, float4);
-MaterialData decodeMaterialFromGBuffers(float4 gBuffer0, float4 gBuffer1, float4 gBuffer2) {
+MaterialData decodeDataFromGBuffers(float3*, uint, float4, float4);
+MaterialData decodeDataFromGBuffers(float3 *N, uint gBuffer0, float4 gBuffer1, float4 gBuffer2) {
+    const float divideFactor = 0.0009775171065f; // 1 / 1023
+    
+    uint nX = (gBuffer0 >> 22) & 0b1111111111;
+    uint nY = (gBuffer0 >> 12) & 0b1111111111;
+    uint smoothness = (gBuffer0 >> 2) & 0b1111111111;
+    float2 encodedNormal = (float2)(nX * divideFactor, nY * divideFactor);
+    encodedNormal = encodedNormal * 2.f - 1.f;
+    *N = decode(encodedNormal);
+    
     MaterialData data;
-    data.smoothness = gBuffer0.z;
+    data.smoothness = (float)(smoothness * divideFactor);
     data.baseColour = gBuffer1.xyz;
     data.metalMask = gBuffer2.y;
     data.reflectance = gBuffer2.z;
@@ -166,17 +175,19 @@ float3 epilogueLighting(float3 color, float exposureMultiplier) {
 }
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
-                           float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
+                           uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
                              __global LightData *lights, int lightCount, float2 u, float16 cameraToWorldMatrix);
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
-                             float4 gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
+                             uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
                              __global LightData *lights, int lightCount,float2 uv, float16 cameraToWorldMatrix) {
 
     float4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
     float3 worldSpacePosition = multiplyMatrixVector(cameraToWorldMatrix, cameraSpacePosition).xyz;
     
-    MaterialData material = decodeMaterialFromGBuffers(gBuffer0, gBuffer1, gBuffer2);
+    float3 N;
+    
+    MaterialData material = decodeDataFromGBuffers(&N, gBuffer0, gBuffer1, gBuffer2);
     
     float3 albedo;
     float3 f0;
@@ -184,7 +195,6 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
     float linearRoughness;
     evaluateMaterialData(material, &albedo, &f0, &f90, &linearRoughness);
 
-    float3 N = decode(gBuffer0.xy);
     float3 V = native_normalize(multiplyMatrixVector(cameraToWorldMatrix, (float4)(-cameraSpacePosition.xyz, 0)).xyz);
     float NdotV = fabs(dot(N, V)) + 1e-5f; //bias the result to avoid artifacts
     
