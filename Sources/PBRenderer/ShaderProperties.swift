@@ -40,7 +40,7 @@ enum CompositionPassShaderProperty: String, ShaderProperty {
 
 enum BasicShaderProperty : String, ShaderProperty {
     case ModelToClipMatrix = "modelToClipMatrix"
-    case NormalModelToCameraMatrix = "normalModelToCameraMatrix"
+    case NormalModelToWorldMatrix = "normalModelToWorldMatrix"
     case ModelToCameraMatrix = "modelToCameraMatrix"
     case Material
     

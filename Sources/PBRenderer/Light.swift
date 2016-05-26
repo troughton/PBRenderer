@@ -176,6 +176,10 @@ public final class Light {
     }
     
     func transformDidChange() {
+        self.backingGPULight.withElement { gpuLight in
+            gpuLight.worldSpacePosition  = self.sceneNode.transform.worldSpacePosition;
+            gpuLight.worldSpaceDirection = self.sceneNode.transform.worldSpaceDirection;
+        }
     }
 }
 
@@ -188,8 +192,8 @@ enum LightTypeFlag : UInt32 {
 
 struct GPULight {
     var colourAndIntensity : vec4
-    var cameraSpacePosition : vec4
-    var cameraSpaceDirection : vec4
+    var worldSpacePosition : vec4
+    var worldSpaceDirection : vec4
     var extraData = vec4(0)
     var lightTypeFlag : LightTypeFlag
     var inverseSquareAttenuationRadius : Float

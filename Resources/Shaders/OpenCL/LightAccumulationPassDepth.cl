@@ -7,7 +7,7 @@
 __kernel void lightAccumulationPassKernel(__write_only image2d_t lightAccumulationBuffer, float2 invImageDimensions,
                                     float4 nearPlaneAndProjectionTerms,
                                     __read_only image2d_t gBuffer0Tex, __read_only image2d_t gBuffer1Tex, __read_only image2d_t gBuffer2Tex, __read_only image2d_depth_t gBufferDepthTex,
-                                    __global LightData *lights, int lightCount) {
+                                    __global LightData *lights, int lightCount, mat4 cameraToWorldMatrix) {
     
     const sampler_t sampler = CLK_FILTER_NEAREST | CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE;
     
@@ -19,7 +19,7 @@ __kernel void lightAccumulationPassKernel(__write_only image2d_t lightAccumulati
     float4 gBuffer2 = read_imagef(gBuffer2Tex, sampler, coord);
     float gBufferDepth = read_imagef(gBufferDepthTex, sampler, coord);
 
-    float3 result = lightAccumulationPass(nearPlaneAndProjectionTerms, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, lights, lightCount, uv);
+    float3 result = lightAccumulationPass(nearPlaneAndProjectionTerms, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, lights, lightCount, uv, cameraToWorldMatrix);
     
     write_imagef(lightAccumulationBuffer, coord, (float4)(result, 1));
 }

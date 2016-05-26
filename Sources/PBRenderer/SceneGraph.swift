@@ -142,6 +142,10 @@ public final class Transform {
     private var _nodeToWorldMatrix : mat4? = nil
     private var _worldToNodeMatrix : mat4? = nil
     
+    private var _worldSpacePosition : vec4? = nil
+    private var _worldSpaceDirection : vec4? = nil
+
+    
     init(parent: Transform?, translation: vec3 = vec3(0), rotation: quat = quat(1, 0, 0, 0), scale: vec3 = vec3(1)) {
         self.translation = translation
         self.rotation = rotation
@@ -153,6 +157,8 @@ public final class Transform {
     private func setNeedsRecalculateTransform() {
         _nodeToWorldMatrix = nil
         _worldToNodeMatrix = nil
+        _worldSpacePosition = nil
+        _worldSpaceDirection = nil
     }
     
     private func calculateNodeToWorldMatrix() -> mat4 {
@@ -195,6 +201,30 @@ public final class Transform {
                 let transform = self.calculateWorldToNodeMatrix()
                 _worldToNodeMatrix = transform
                 return transform
+            }
+        }
+    }
+    
+    public var worldSpacePosition : vec4 {
+        get {
+            if let position = _worldSpacePosition {
+                return position
+            } else {
+                let position = nodeToWorldMatrix * vec4(0, 0, 0, 1)
+                _worldSpacePosition = position
+                return position
+            }
+        }
+    }
+    
+    public var worldSpaceDirection : vec4 {
+        get {
+            if let direction = _worldSpaceDirection {
+                return direction
+            } else {
+                let direction = normalize(nodeToWorldMatrix * vec4(0, 0, 1, 0))
+                _worldSpaceDirection = direction
+                return direction
             }
         }
     }
