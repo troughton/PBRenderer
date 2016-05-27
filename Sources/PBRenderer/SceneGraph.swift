@@ -89,7 +89,9 @@ public final class SceneNode {
     }
     
     func transformDidChange() {
-        
+        self.lights.forEach { (light) in
+            light.transformDidChange()
+        }
     }
 }
 
