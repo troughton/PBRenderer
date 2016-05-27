@@ -8,7 +8,7 @@ import ColladaParser
 import PBRenderer
 import AudioToolbox
 
-let mainWindow : Window
+let mainWindow : PBWindow
 
 let song = try! Song(audioFilePath: Process.arguments[2], midiFilePath: Process.arguments[3])
 
@@ -84,9 +84,11 @@ func main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
     glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE)
     
-    let mainWindow = RenderWindow(name: "PBRenderer Music", width: 1280, height: 800)
+    let mainWindow = PBWindow(name: "PBRenderer Music", width: 1280, height: 800)
     let avManager = AudioVisualManager()
     song.delegate = avManager
+    
+    let sceneRenderer = SceneRenderer(window: mainWindow)
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         if !song.isPlaying {
@@ -94,7 +96,7 @@ func main() {
         }
         song.update()
         avManager.update()
-        mainWindow.renderScene(avManager.scene, camera: avManager.camera)
+        sceneRenderer.renderScene(avManager.scene, camera: avManager.camera)
     }
     
     
