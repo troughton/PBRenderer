@@ -143,7 +143,7 @@ float calculateDiskIlluminance(float3 worldSpacePosition, float NdotL, float sqr
     float lightRadius = light->extraData.x;
     float sqrLightRadius = lightRadius * lightRadius;
     // Do not let the surface penetrate the light
-    float sinSigmaSqr = sqrLightRadius / (sqrLightRadius + max(sqrLightRadius, sqrDist));
+    float sinSigmaSqr = native_divide(sqrLightRadius, (sqrLightRadius + max(sqrLightRadius, sqrDist)));
     // Multiply by saturate(dot(planeNormal, -L)) to better match ground truth.
     float illuminance = illuminanceSphereOrDisk(cosTheta, sinSigmaSqr) * saturate(dot(light->worldSpaceDirection.xyz, -L));
     
@@ -152,13 +152,13 @@ float calculateDiskIlluminance(float3 worldSpacePosition, float NdotL, float sqr
 
 float calculateSphereIlluminance(float3 worldSpacePosition, float NdotL, float sqrDist, __global LightData *light);
 float calculateSphereIlluminance(float3 worldSpacePosition, float NdotL, float sqrDist, __global LightData *light) {
-    float cosTheta = clamp(NdotL, -0.999, 0.999); // Clamp to avoid edge case
+    float cosTheta = clamp(NdotL, -0.999f, 0.999f); // Clamp to avoid edge case
     // We need to prevent the object penetrating into the surface
     // and we must avoid divide by 0, thus the 0.9999f
     
     float lightRadius = light->extraData.x;
     float sqrLightRadius = lightRadius * lightRadius;
-    float sinSigmaSqr = min(sqrLightRadius / sqrDist, 0.9999f);
+    float sinSigmaSqr = min(native_divide(sqrLightRadius, sqrDist), 0.9999f);
     
     return illuminanceSphereOrDisk(cosTheta, sinSigmaSqr);
 }
