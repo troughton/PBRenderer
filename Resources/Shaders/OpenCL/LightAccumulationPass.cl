@@ -11,6 +11,8 @@ typedef struct MaterialData {
 #define LightTypePoint 0
 #define LightTypeDirectional 1
 #define LightTypeSpot 2
+#define LightTypeSphereArea 3
+#define LightTypeDiskArea 4
 
 typedef struct LightData {
     float4 colourAndIntensity;
@@ -103,6 +105,95 @@ float getAngleAtt(float3 normalizedLightVector, float3 lightDir, float lightAngl
     return attenuation;
 }
 
+float3 getSpecularDominantDirArea(float3 N, float3 R, float NdotV, float roughness);
+float3 getSpecularDominantDirArea(float3 N, float3 R, float NdotV, float roughness) {
+    // Simple linear approximation
+    float lerpFactor = (1 - roughness);
+    
+    return native_normalize(mix(N, R, lerpFactor));
+}
+
+float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr);
+float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr) {
+    float sinTheta = native_sqrt(1.0f - cosTheta * cosTheta);
+    
+    float illuminance = 0.0f;
+    // Note: Following test is equivalent to the original formula.
+    // There is 3 phase in the curve: cosTheta > sqrt(sinSigmaSqr),
+    // cosTheta > -sqrt(sinSigmaSqr) and else it is 0
+    // The two outer case can be merge into a cosTheta * cosTheta > sinSigmaSqr
+    // and using saturate(cosTheta) instead.
+    if (cosTheta * cosTheta > sinSigmaSqr) {
+        illuminance = PI * sinSigmaSqr * saturate(cosTheta);
+    } else {
+        float x = native_sqrt(1.0f / sinSigmaSqr - 1.0f); // For a disk this simplify to x = d / r
+        float y = -x * (cosTheta / sinTheta);
+        float sinThetaSqrtY = sinTheta * native_sqrt(1.0f - y * y);
+        illuminance = (cosTheta * fast_acos(y) - x * sinThetaSqrtY) * sinSigmaSqr + fast_atan(sinThetaSqrtY / x);
+    }
+    
+    return max(illuminance, 0.0f);
+}
+
+float calculateDiskIlluminance(float3 worldSpacePosition, float NdotL, float sqrDist, float3 L,  __global LightData *light);
+float calculateDiskIlluminance(float3 worldSpacePosition, float NdotL, float sqrDist, float3 L, __global LightData *light) {
+    // Disk evaluation
+    float cosTheta = NdotL;
+    
+    float lightRadius = light->extraData.x;
+    float sqrLightRadius = lightRadius * lightRadius;
+    // Do not let the surface penetrate the light
+    float sinSigmaSqr = sqrLightRadius / (sqrLightRadius + max(sqrLightRadius, sqrDist));
+    // Multiply by saturate(dot(planeNormal, -L)) to better match ground truth.
+    float illuminance = illuminanceSphereOrDisk(cosTheta, sinSigmaSqr) * saturate(dot(light->worldSpaceDirection.xyz, -L));
+    
+    return illuminance;
+}
+
+float calculateSphereIlluminance(float3 worldSpacePosition, float NdotL, float sqrDist, __global LightData *light);
+float calculateSphereIlluminance(float3 worldSpacePosition, float NdotL, float sqrDist, __global LightData *light) {
+    float cosTheta = clamp(NdotL, -0.999, 0.999); // Clamp to avoid edge case
+    // We need to prevent the object penetrating into the surface
+    // and we must avoid divide by 0, thus the 0.9999f
+    
+    float lightRadius = light->extraData.x;
+    float sqrLightRadius = lightRadius * lightRadius;
+    float sinSigmaSqr = min(sqrLightRadius / sqrDist, 0.9999f);
+    
+    return illuminanceSphereOrDisk(cosTheta, sinSigmaSqr);
+}
+
+
+float3 evaluateAreaLight(float3 worldSpacePosition,
+                         float3 V, float3 N, float NdotV,
+                         float3 albedo, float3 f0, float f90, float linearRoughness,
+                         __global LightData *light);
+float3 evaluateAreaLight(float3 worldSpacePosition,
+                         float3 V, float3 N, float NdotV,
+                         float3 albedo, float3 f0, float f90, float linearRoughness,
+                         __global LightData *light) {
+    float3 Lunormalized = light->worldSpacePosition.xyz - worldSpacePosition;
+    float3 L = normalize(Lunormalized);
+    float sqrDist = dot(Lunormalized, Lunormalized);
+    
+    float NdotL = dot(N, L);
+    
+    float illuminance;
+    if (light->lightTypeFlag == LightTypeSphereArea) {
+        illuminance = calculateSphereIlluminance(worldSpacePosition, NdotL, sqrDist, light);
+    } else {
+        illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
+    }
+    
+    NdotL = saturate(NdotL);
+    
+    L = getSpecularDominantDirArea(N, L, NdotV, linearRoughness * linearRoughness);
+    
+    float3 lightColour = light->colourAndIntensity.xyz * light->colourAndIntensity.w;
+    
+    return BRDF(V, L, N, NdotV, NdotL, albedo, f0, f90, linearRoughness) * illuminance * lightColour;
+}
+
 float3 evaluatePunctualLight(float3 worldSpacePosition,
                              float3 V, float3 N, float NdotV,
                              float3 albedo, float3 f0, float f90, float linearRoughness,
@@ -160,6 +251,10 @@ float3 evaluateLighting(float3 worldSpacePosition,
         case LightTypeDirectional:
         case LightTypeSpot:
             return evaluatePunctualLight(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
+        break;
+        case LightTypeSphereArea:
+        case LightTypeDiskArea:
+            return evaluateAreaLight(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
         break;
         default:
             return (float3)(0);

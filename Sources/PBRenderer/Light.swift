@@ -84,6 +84,8 @@ public enum LightType {
     case Point
     case Spot(innerCutoff: Float, outerCutoff: Float)
     case Directional
+    case SphereArea(radius: Float)
+    case DiskArea(radius: Float)
     
     private var lightTypeFlag : LightTypeFlag {
         switch self {
@@ -93,6 +95,10 @@ public enum LightType {
             return .Spot
         case .Directional(_):
             return .Directional
+        case .SphereArea(_):
+            return .SphereArea
+        case .DiskArea(_):
+            return .DiskArea
         }
     }
     
@@ -107,7 +113,10 @@ public enum LightType {
             let lightAngleScale = 1.0 / max(0.001, (cosInner - cosOuter));
             let lightAngleOffset = -cosOuter * lightAngleScale;
             gpuLight.extraData = vec4(lightAngleScale, lightAngleOffset, 0, 0)
-            
+        case let .SphereArea(radius):
+            gpuLight.extraData = vec4(radius, 0, 0, 0)
+        case let .DiskArea(radius):
+            gpuLight.extraData = vec4(radius, 0, 0, 0)
         default:
             break
         }
@@ -187,6 +196,8 @@ enum LightTypeFlag : UInt32 {
     case Point = 0
     case Directional = 1
     case Spot = 2
+    case SphereArea = 3
+    case DiskArea = 4
 }
 
 

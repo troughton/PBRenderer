@@ -6,7 +6,8 @@
 layout(location = 0) out uint gBuffer0;
 layout(location = 1) out vec4 gBuffer1;
 layout(location = 2) out vec4 gBuffer2;
-layout(location = 3) out float gBufferDepth;
+layout(location = 3) out vec4 gBuffer3;
+layout(location = 4) out float gBufferDepth;
 
 in vec3 vertexNormal;
 
@@ -23,5 +24,6 @@ void main() {
     gBuffer0 = out0;
     gBuffer1 = out1;
     gBuffer2 = out2;
+    gBuffer3 = vec4(0);
     gBufferDepth = gl_FragCoord.z;
 }
