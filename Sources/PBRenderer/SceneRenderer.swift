@@ -70,6 +70,14 @@ final class GBufferPass {
         attachment3.loadAction = .Clear
         attachment3.storeAction = .Store
         
+        let rgba16Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
+        let attachment4Texture = Texture(textureWithDescriptor: rgba16Descriptor)
+        
+        var attachment4 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+        attachment4.texture = attachment4Texture
+        attachment4.loadAction = .Clear
+        attachment4.storeAction = .Store
+        
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT32F, width: Int(width), height: Int(height), mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
@@ -89,7 +97,7 @@ final class GBufferPass {
         }
 
         
-        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, depthAttachmentAsColour], depthAttachment: depthAttachment, stencilAttachment: nil)
+        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, attachment4, depthAttachmentAsColour], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     func renderNode(_ node: SceneNode, camera: Camera, shader: Shader) {
@@ -373,7 +381,7 @@ public final class SceneRenderer {
         glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
-        let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<3]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
+        let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<4]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
         
         
