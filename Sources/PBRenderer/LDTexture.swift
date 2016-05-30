@@ -14,6 +14,7 @@ enum LDTextureShaderProperty : String, ShaderProperty {
     case Image = "image"
     case Resolution = "resolution"
     case Roughness = "roughness"
+    case ValueMultiplier = "valueMultiplier"
     
     var name: String {
         return self.rawValue
@@ -84,7 +85,9 @@ final class LDTexture {
             PipelineState(viewport: viewport, framebuffer: specularFramebuffers[0], shader: LDTexture.specularBaseLevelShader, depthStencilState: depthStencilState)
         )
         
-        for framebuffer in specularFramebuffers.dropFirst() {
+        for (i, framebuffer) in specularFramebuffers.enumerated().dropFirst() {
+            let mipLevelSize = resolution / Int(1 << i)
+            let viewport = Rectangle(x: 0, y: 0, width: GLint(mipLevelSize), height: GLint(mipLevelSize))
             specularPipelineStates.append(
                 PipelineState(viewport: viewport, framebuffer: framebuffer, shader: LDTexture.specularMipmapShader, depthStencilState: depthStencilState)
             )
@@ -129,19 +132,20 @@ final class LDTexture {
         return framebuffers
     }
     
-    private func fillDiffuseFromCubeMap(_ texture: Texture) {
+    private func fillDiffuseFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
         //Algorithm: for each face, compute the terms.
         
+        texture.bindToIndex(0)
         self.diffusePipelineState.renderPass { (framebuffer, shader) in
             shader.setUniform(GLint(0), forProperty: LDTextureShaderProperty.Image)
-            texture.bindToIndex(0)
+            shader.setUniform(valueMultiplier, forProperty: LDTextureShaderProperty.ValueMultiplier)
             
             GLMesh.fullScreenQuad.render()
         }
         
     }
     
-    private func fillSpecularMipmapsFromCubeMap(_ texture: Texture) {
+    private func fillSpecularMipmapsFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
         //Algorithm: for each face, for each mip level, compute the terms.
         
         texture.bindToIndex(0)
@@ -150,7 +154,8 @@ final class LDTexture {
             
             state.renderPass({ (framebuffer, shader) in
                 shader.setUniform(GLint(0), forProperty: LDTextureShaderProperty.Image)
-                shader.setUniform(framebuffer.width, forProperty: LDTextureShaderProperty.Resolution)
+                shader.setUniform(GLint(texture.descriptor.width), forProperty: LDTextureShaderProperty.Resolution)
+                shader.setUniform(valueMultiplier, forProperty: LDTextureShaderProperty.ValueMultiplier)
                 
                 let mip = Float(mipLevel) / Float(self.specularTexture.descriptor.mipmapLevelCount)
                 let perceptuallyLinearRoughness = mip * mip
@@ -164,31 +169,34 @@ final class LDTexture {
         }
     }
     
-    private func fillSpecularBaseLevelFromCubeMap(_ texture: Texture) {
+    private func fillSpecularBaseLevelFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
+        
+        
+        texture.bindToIndex(0)
         
         self.specularPipelineStates[0].renderPass { (framebuffer, shader) in
             shader.setUniform(GLint(0), forProperty: LDTextureShaderProperty.Image)
-            texture.bindToIndex(0)
+            shader.setUniform(valueMultiplier, forProperty: LDTextureShaderProperty.ValueMultiplier)
             
             GLMesh.fullScreenQuad.render()
         }
     }
     
-    static func fillLDTexturesFromCubeMaps(textures: [LDTexture], cubeMaps: [Texture]) {
+    static func fillLDTexturesFromCubeMaps(textures: [LDTexture], cubeMaps: [Texture], valueMultipliers: [Float]) {
         
         
         LDTexture.sampler.bindToIndex(0)
         
-        for (texture, cubeMap) in zip(textures, cubeMaps) {
-            texture.fillDiffuseFromCubeMap(cubeMap)
+        for ((texture, valueMultiplier), cubeMap) in zip(zip(textures, valueMultipliers), cubeMaps) {
+            texture.fillDiffuseFromCubeMap(cubeMap, valueMultiplier: valueMultiplier)
         }
         
-        for (texture, cubeMap) in zip(textures, cubeMaps) {
-            texture.fillSpecularBaseLevelFromCubeMap(cubeMap)
+        for ((texture, valueMultiplier), cubeMap) in zip(zip(textures, valueMultipliers), cubeMaps)  {
+            texture.fillSpecularBaseLevelFromCubeMap(cubeMap, valueMultiplier: valueMultiplier)
         }
         
-        for (texture, cubeMap) in zip(textures, cubeMaps) {
-            texture.fillSpecularMipmapsFromCubeMap(cubeMap)
+        for ((texture, valueMultiplier), cubeMap) in zip(zip(textures, valueMultipliers), cubeMaps)  {
+            texture.fillSpecularMipmapsFromCubeMap(cubeMap, valueMultiplier: valueMultiplier)
         }
     }
     

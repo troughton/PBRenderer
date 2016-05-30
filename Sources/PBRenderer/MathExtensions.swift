@@ -9,6 +9,12 @@
 import Foundation
 import SGLMath
 
+extension Quaternion {
+    public static var identity : Quaternion {
+        return Quaternion(1, 0, 0, 0)
+    }
+}
+
 /** multiple must be a power of two. http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number */
 func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
     assert(multiple > 0 && ((multiple & (multiple - 1)) == 0));

@@ -85,7 +85,7 @@ final class Song : NSObject, AVAudioPlayerDelegate {
     
     var beatNumber : Double {
         let currentTime = self.audioPlayer.currentTime
-        return currentTime * 128.0/60.0  // self.musicSequence.get(currentTime, MusicSequenceGetBeatsForSeconds)
+        return currentTime * 96.0/60.0  // self.musicSequence.get(currentTime, MusicSequenceGetBeatsForSeconds)
     }
     
     func update() {

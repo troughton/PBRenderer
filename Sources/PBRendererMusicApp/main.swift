@@ -15,7 +15,43 @@ let song = try! Song(audioFilePath: Process.arguments[2], midiFilePath: Process.
 func randomFloat() -> Float {
     return Float(arc4random())/Float(UInt32.max)
 }
+    
+    enum Instrument {
+        case DrivingChords
+        case SoftChordsElectricPiano
+        case HighMotif
+        case Drums
+        case Kick
+        case Snare
+        case MainMelody
+        case SecondMelody
+        case LowBass
+        
+        static func instrumentForTrackNumber(_ trackNumber: Int) -> Instrument {
+            if trackNumber < 15 {
+                return .DrivingChords
+            } else if trackNumber < 21 {
+                return .SoftChordsElectricPiano
+            } else if trackNumber < 25 {
+                return .Drums
+            } else if trackNumber < 29 {
+                return .Kick
+            } else if trackNumber < 30 {
+                return .Snare
+            } else if trackNumber < 41 {
+                return .MainMelody
+            } else if trackNumber < 59 {
+                return .HighMotif
+            } else if trackNumber < 65 {
+                return .SecondMelody
+            } else {
+                return .LowBass
+            }
+        }
+    }
 
+    let highMotifNotes = [81, 83, 86, 88]
+    
 final class AudioVisualManager : SongDelegate {
     let scene: Scene
     let camera : Camera
@@ -29,43 +65,32 @@ final class AudioVisualManager : SongDelegate {
         self.scene = Scene(fromCollada: collada)
         self.camera = scene.flattenedScene.flatMap { $0.cameras.first }.first!
         
-        for node in scene.flattenedScene where !node.lights.isEmpty {
-            for light in node.lights {
-                light.intensity = 0.0
-            }
-        }
+        self.scene.flattenedScene.forEach { $0.lights.forEach { $0.intensity = 0 } }
+        
     }
     
     func processEvent(_ event: MIDIEventType, onTrack track: Int, beatNumber: Double) {
-        print("Event \(event) occured on track \(track)")
         
         if case let .noteMessage(noteMessage) = event {
-            if let lightNode = self.scene.idsToNodes["_pointLight\(noteMessage.note)"] {
-                lightNode.lights.forEach { $0.intensity = 2.0 }
+            let instrument = Instrument.instrumentForTrackNumber(track)
+            print("Note \(noteMessage.note) playing for \(noteMessage.duration) beats on instrument \(instrument)")
+            
+            switch instrument {
+            case .HighMotif:
+                processHighMotifEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .DrivingChords:
+                processDrivingChordsEvent(event, scene: self.scene, beatNumber: beatNumber)
+            default:
+                break;
             }
-        }
+            
+       }
     }
     
     func update() {
         let beatNumber = song.beatNumber
+        AnimationSystem.tick(currentBeat: beatNumber)
         
-        let plane = self.scene.idsToNodes["_pPlane1"]!
-        
-        if beatNumber - lastMaterialChangeBeat >= 0.25 {
-            for material in plane.materials.values {
-                material.withElement({ material in
-                    material.smoothness = randomFloat()
-                })
-            }
-            lastMaterialChangeBeat = beatNumber
-        }
-        
-        self.camera.sceneNode.transform.translation += vec3(0, 0, 0.01)
-        
-        if beatNumber >= 24.0 {
-            let rotation = quat(angle: 0.001, axis: normalize(vec3(randomFloat(), randomFloat(), randomFloat())))
-            plane.transform.rotation *= rotation
-        }
     }
 }
 

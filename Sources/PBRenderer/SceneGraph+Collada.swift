@@ -56,7 +56,7 @@ extension Scene {
                         outerCutoff += max(0, Float(penumbra)!) * 0.5
                     }
                     
-                    type = .Spot(innerCutoff: radians(degrees: falloffDegrees),
+                    type = .Spot(innerCutoff: radians(degrees: falloffDegrees * 0.5),
                                  outerCutoff: radians(degrees: outerCutoff))
                     colourAndIntensity = vec3(colour)
                 case .Ambient(_):

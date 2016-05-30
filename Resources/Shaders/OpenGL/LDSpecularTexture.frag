@@ -12,6 +12,7 @@ uniform int resolution;
 uniform float roughness;
 
 uniform samplerCube image;
+uniform float valueMultiplier;
 
 const uint sampleCount = 32;
 
@@ -58,7 +59,7 @@ vec4 integrateSpecularCubeLD(vec3 V, vec3 N, float roughness) {
             float omegaS = 1.0 / (sampleCount * pdf);
             float omegaP = 4.0 * PI / (6.0 * resolution * resolution);
             float sampleMipLevel = clamp(0.5 * log2(omegaS/omegaP), 0, 8);
-            vec4 Li = textureLod(image, L, sampleMipLevel);
+            vec4 Li = textureLod(image, L, sampleMipLevel) * valueMultiplier;
             
             accBrdf += Li.rgb * NdotL;
             accBrdfWeight += NdotL;
@@ -69,22 +70,20 @@ vec4 integrateSpecularCubeLD(vec3 V, vec3 N, float roughness) {
 }
 
 void main() {
-    vec3 direction0 = cubeMapFaceUVToDirection(uv, 0);
+    
+    vec3 direction0, direction1, direction2, direction3, direction4, direction5;
+    cubeMapFaceUVsToDirections(uv, direction0, direction1, direction2, direction3, direction4, direction5);
+    
     out0 = integrateSpecularCubeLD(direction0, direction0, roughness);
     
-    vec3 direction1 = cubeMapFaceUVToDirection(uv, 1);
     out1 = integrateSpecularCubeLD(direction1, direction1, roughness);
     
-    vec3 direction2 = cubeMapFaceUVToDirection(uv, 2);
     out2 = integrateSpecularCubeLD(direction2, direction2, roughness);
     
-    vec3 direction3 = cubeMapFaceUVToDirection(uv, 3);
     out3 = integrateSpecularCubeLD(direction3, direction3, roughness);
     
-    vec3 direction4 = cubeMapFaceUVToDirection(uv, 4);
     out4 = integrateSpecularCubeLD(direction4, direction4, roughness);
     
-    vec3 direction5 = cubeMapFaceUVToDirection(uv, 5);
     out5 = integrateSpecularCubeLD(direction5, direction5, roughness);
 }
 

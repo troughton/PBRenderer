@@ -67,7 +67,7 @@ final class CameraControl : WindowInputDelegate {
         let pitchQuat = quat(angle: self.pitch, axis: vec3(1, 0, 0))
         let yawQuat = quat(angle: self.yaw, axis: vec3(0, 1, 0))
         
-        self.camera.sceneNode.transform.rotation = self.baseRotation * yawQuat * pitchQuat
+        self.camera.sceneNode.transform.rotation = /*self.baseRotation * */yawQuat * pitchQuat
     }
 }
 
@@ -95,6 +95,7 @@ func main() {
     
     let scene = Scene(fromCollada: collada)
     let camera = scene.flattenedScene.flatMap { $0.cameras.first }.first!
+    camera.sceneNode.transform.rotation = quat.identity
     
     mainWindow.dimensions = PBWindow.Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)
     

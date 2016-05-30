@@ -106,6 +106,10 @@ public final class Camera {
     public let zFar: Float
     public let aspectRatio : Float
     
+    public var aperture : Float = 16
+    public var shutterTime : Float = 1.0/100.0
+    public var ISO : Float = 100
+    
     init(id: String?, name: String?, projectionMatrix: mat4, zNear: Float, zFar: Float, aspectRatio: Float) {
         self.id = id
         self.name = name
@@ -113,6 +117,27 @@ public final class Camera {
         self.zNear = zNear
         self.zFar = zFar
         self.aspectRatio = aspectRatio
+    }
+    
+    var EV100 : Float {
+//        EV number is defined as: 2^EV_s = N^2 / t and EV_s = EV_100 + log2(S/100)
+//      This gives
+//        EV_s = log2(N^2 / t)
+//        EV_100 + log2(S/100) = log2(N^2 / t)
+//        EV_100 = log2(N^2 / t) - log2(S/100)
+//        EV_100 = log2(N^2 / t . 100 / S)
+        return log2(self.aperture * self.aperture / shutterTime * 100 / self.ISO)
+    }
+    
+    var exposure : Float {
+        // Compute the maximum luminance possible with H_sbs sensitivity //maxLum=78/( S*q )*N^2/t
+        //  maxLum = 78 / (S * q) * N^2 / t
+        //         = 78 / (S * q) * 2^EV_100
+        //         = 78 / (100 * 0.65) * 2^EV_100
+        //         = 1.2 * 2^EV
+        //Reference: http://en.wikipedia.org/wiki/Film_speed
+        let maxLuminance = 1.2 * pow(2.0, self.EV100)
+        return 1.0 / maxLuminance
     }
 }
 

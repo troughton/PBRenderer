@@ -17,6 +17,9 @@ import OpenCL
 final class GBufferPass {
     
     var gBufferPassState : PipelineState
+    let diffuseLDSampler = Sampler()
+    let dfgSampler = Sampler()
+    let specularLDSampler = Sampler()
     
     init(pixelDimensions: PBWindow.Size) {
         
@@ -37,6 +40,16 @@ final class GBufferPass {
         pipelineState.cullMode = GL_BACK
         
         self.gBufferPassState = pipelineState
+        
+        self.diffuseLDSampler.minificationFilter = GL_LINEAR
+        self.diffuseLDSampler.magnificationFilter = GL_LINEAR
+        
+        self.specularLDSampler.minificationFilter = GL_LINEAR_MIPMAP_LINEAR
+        self.specularLDSampler.magnificationFilter = GL_LINEAR
+        
+        self.dfgSampler.minificationFilter = GL_LINEAR
+        self.dfgSampler.wrapS = GL_CLAMP_TO_EDGE
+        self.dfgSampler.wrapT = GL_CLAMP_TO_EDGE
     }
     
     func resize(newPixelDimensions width: GLint, _ height: GLint) {
@@ -110,7 +123,9 @@ final class GBufferPass {
         let normalTransform = (node.transform.worldToNodeMatrix).upperLeft.transpose
         
         shader.setMatrix(modelToClip, forProperty: BasicShaderProperty.ModelToClipMatrix)
+        shader.setMatrix(node.transform.nodeToWorldMatrix, forProperty: BasicShaderProperty.ModelToWorldMatrix)
         shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToWorldMatrix)
+        
         
         let materialBlockIndex = 0
         
@@ -127,9 +142,27 @@ final class GBufferPass {
         }
     }
     
-    func renderScene(_ scene: Scene, camera: Camera) -> (colourTextures: [Texture], depthTexture: Texture) {
+    func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture) -> (colourTextures: [Texture], depthTexture: Texture) {
+        let dfg = DFGTexture.defaultTexture //this will generate it the first time, so we need to call it outside of the render pass method.
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
+            
+            dfg.texture.bindToIndex(0)
+            self.dfgSampler.bindToIndex(0)
+            shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.DFGTexture)
+            
+            environmentMap.diffuseTexture.bindToIndex(1)
+            self.diffuseLDSampler.bindToIndex(1)
+            shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.DiffuseLDTexture)
+            
+            environmentMap.specularTexture.bindToIndex(2)
+            self.specularLDSampler.bindToIndex(2)
+            shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.SpecularLDTexture)
+            shader.setUniform(GLint(environmentMap.specularTexture.descriptor.mipmapLevelCount - 1), forProperty: GBufferShaderProperty.LDMipMaxLevel)
+            
+            
+            let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz
+            shader.setUniform(cameraPositionWorld.x, cameraPositionWorld.y, cameraPositionWorld.z, forProperty: BasicShaderProperty.CameraPositionWorld)
             
             for node in scene.nodes {
                 self.renderNode(node, camera: camera, shader: shader)
@@ -256,7 +289,7 @@ final class LightAccumulationPass {
         self.kernel.setArgument(lightCount, index: kernelIndex)
         
         kernelIndex += 1
-        var cameraToWorldMatrix = camera.sceneNode.transform.nodeToWorldMatrix;
+        let cameraToWorldMatrix = camera.sceneNode.transform.nodeToWorldMatrix;
         self.kernel.setArgument(cameraToWorldMatrix, index: kernelIndex)
         
         var err = clEnqueueAcquireGLObjects(self.commandQueue, cl_uint(glObjects.count), &glObjects, 0, nil, nil);
@@ -340,19 +373,14 @@ public final class SceneRenderer {
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, openCLContext: clContext, openCLDevice: clDeviceID)
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
-        self.envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath("/Users/Thomas/Downloads/stpeters_cross.hdr")
+       let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "beach_cross.hdr"))
         
-        var query : GLuint = 0
-        glGenQueries(1, &query)
-        
-        let dfgTexture = DFGTexture.defaultTexture
         self.envMapLD = LDTexture(resolution: 256)
-        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLD], cubeMaps: [envMapTexture])
+        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLD], cubeMaps: [envMapTexture], valueMultipliers: [2.0])
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
     }
     var envMapLD : LDTexture
-    var envMapTexture : Texture
     
     func framebufferDidResize(width: Int32, height: Int32) {
         self.gBufferPass.resize(newPixelDimensions: width, height)
@@ -360,32 +388,31 @@ public final class SceneRenderer {
         self.finalPass.resize(newPixelDimensions: width, height)
     }
     
-    var timingQuery : GLuint? = nil
+//    var timingQuery : GLuint? = nil
     
     public func renderScene(_ scene: Scene, camera: Camera) {
+//        
+//        var timeElapsed = GLuint(0)
+//        
+//        if let query = timingQuery {
+//            glGetQueryObjectuiv(query, GL_QUERY_RESULT, &timeElapsed)
+//            let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
+//            print(String(format: "Elapsed frame time: %.2fms", timeElapsedMillis))
+//        } else {
+//            var query : GLuint = 0
+//            glGenQueries(1, &query)
+//            self.timingQuery = query
+//        }
         
         
-        var timeElapsed = GLuint(0)
-        
-        if let query = timingQuery {
-            glGetQueryObjectuiv(query, GL_QUERY_RESULT, &timeElapsed)
-            let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
-            print(String(format: "Elapsed frame time: %.2fms", timeElapsedMillis))
-        } else {
-            var query : GLuint = 0
-            glGenQueries(1, &query)
-            self.timingQuery = query
-        }
-        
-        
-        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
-        
-        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
+//        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
+//
+        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: self.envMapLD)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<4]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
         
         
-        glEndQuery(GLenum(GL_TIME_ELAPSED))
+//        glEndQuery(GLenum(GL_TIME_ELAPSED))
     }
     
 }

@@ -24,15 +24,81 @@ typedef struct LightData {
     float2 padding;
 } LightData;
 
-float3 decode(float2);
-float3 decode(float2 enc) {
-    float2 fenc = enc*4-2;
-    float f = dot(fenc,fenc);
-    float g = native_sqrt(1-f/4);
+float3 decodeStereographic(float2 enc);
+float3 decodeStereographic(float2 enc) {
+    float3 nn =
+        (float3)(enc, 0) * (float3)(2.f, 2.f, 2.f) +
+        (float3)(-1.f, -1.f, 1.f);
+    float g = native_divide(2.0f, dot(nn, nn));
     float3 n;
-    n.xy = fenc*g;
-    n.z = 1-f/2;
+    n.xy = g*nn.xy;
+    n.z = g - 1;
     return n;
+}
+
+#define BasisIndexPositiveX 0
+#define BasisIndexPositiveY 1
+#define BasisIndexPositiveZ 2
+#define BasisIndexNegativeX 3
+#define BasisIndexNegativeY 4
+#define BasisIndexNegativeZ 5
+
+__constant const float3 positiveXT = (float3)(0, 0, 1);
+__constant const float3 positiveXB = (float3)(1, 0, 0);
+__constant const float3 positiveXN = (float3)(0, 1, 0);
+
+__constant const float3 positiveYT = (float3)(1, 0, 0);
+__constant const float3 positiveYB = (float3)(0, 0, 1);
+__constant const float3 positiveYN = (float3)(0, 1, 0);
+
+__constant const float3 positiveZT = (float3)(1, 0, 0);
+__constant const float3 positiveZB = (float3)(0, 1, 0);
+__constant const float3 positiveZN = (float3)(0, 0, 1);
+
+__constant const float3 negativeXT = (float3)(0, 0, -1);
+__constant const float3 negativeXB = (float3)(1, 0, 0);
+__constant const float3 negativeXN = (float3)(0, 1, 0);
+
+__constant const float3 negativeYT = (float3)(1, 0, 0);
+__constant const float3 negativeYB = (float3)(0, 0, -1);
+__constant const float3 negativeYN = (float3)(0, 1, 0);
+
+__constant const float3 negativeZT = (float3)(1, 0, 0);
+__constant const float3 negativeZB = (float3)(0, 1, 0);
+__constant const float3 negativeZN = (float3)(0, 0, -1);
+
+float3 decode(float2, int);
+float3 decode(float2 enc, int basis) {
+    float3 normal = decodeStereographic(enc);
+    //The normal will be within 90 degrees in x and y of (0, 0, 1)
+    
+    float3 output;
+    switch (basis) {
+        case BasisIndexPositiveX:
+            output = normal.zxy;
+            break;
+        case BasisIndexPositiveY:
+            output = normal.xzy;
+            break;
+        case BasisIndexPositiveZ:
+            output = normal;
+            break;
+        case BasisIndexNegativeX:
+            output = normal.zxy;
+            output.x *= -1;
+            break;
+        case BasisIndexNegativeY:
+            output = normal.xzy;
+            output.y *= -1;
+            break;
+        case BasisIndexNegativeZ:
+            output = normal;
+            output.z *= -1;
+            break;
+        default:
+            break;
+    }
+    return output;
 }
 
 MaterialData decodeDataFromGBuffers(float3*, uint, float4, float4);
@@ -42,9 +108,11 @@ MaterialData decodeDataFromGBuffers(float3 *N, uint gBuffer0, float4 gBuffer1, f
     uint nX = (gBuffer0 >> 22) & 0b1111111111;
     uint nY = (gBuffer0 >> 12) & 0b1111111111;
     uint smoothness = (gBuffer0 >> 2) & 0b1111111111;
+    
+    int basisIndex = as_int(gBuffer1.a);
     float2 encodedNormal = (float2)(nX * divideFactor, nY * divideFactor);
-    encodedNormal = encodedNormal * 2.f - 1.f;
-    *N = decode(encodedNormal);
+    *N = decode(encodedNormal, basisIndex);
+    
     
     MaterialData data;
     data.smoothness = (float)(smoothness * divideFactor);
@@ -270,11 +338,11 @@ float3 epilogueLighting(float3 color, float exposureMultiplier) {
 }
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
-                           uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
+                           uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float4 gBuffer3, float gBufferDepth,
                              __global LightData *lights, int lightCount, float2 u, float16 cameraToWorldMatrix);
 
 float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
-                             uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float gBufferDepth,
+                             uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float4 gBuffer3, float gBufferDepth,
                              __global LightData *lights, int lightCount,float2 uv, float16 cameraToWorldMatrix) {
 
     float4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
@@ -299,7 +367,9 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, &lights[i]);
     }
     
-    float3 epilogue = epilogueLighting(lightAccumulation, 100.f);
+    lightAccumulation += gBuffer3.xyz;
+    
+    float3 epilogue = epilogueLighting(lightAccumulation, 1.f);
         
     return epilogue;
 }

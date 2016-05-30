@@ -52,29 +52,44 @@ vec3 ImportanceSampleGGX(vec2 Xi, float roughness, vec3 N) {
     return TangentX * H.x + TangentY * H.y + N * H.z;
 }
 
+void cubeMapFaceUVsToDirections(vec2 uv, out vec3 direction0, out vec3 direction1, out vec3 direction2, out vec3 direction3, out vec3 direction4, out vec3 direction5) {
+    
+    vec2 scaledUV = (uv - vec2(0.5)) * 2;
+    scaledUV.y *= -1.f;
+    vec3 direction;
+    
+            direction0 = vec3(1.f, scaledUV.y, -scaledUV.x);
+            direction1 = vec3(-1.f, scaledUV.y, scaledUV.x);
+            direction2 = vec3(scaledUV.x, 1.f, -scaledUV.y);
+            direction3 = vec3(scaledUV.x, -1.f, scaledUV.y);
+            direction4 = vec3(scaledUV.x, scaledUV.y, 1.f);
+            direction5 = vec3(-scaledUV.x, scaledUV.y, -1.f);
+}
+
 vec3 cubeMapFaceUVToDirection(vec2 uv, int face) {
     
     vec2 scaledUV = (uv - vec2(0.5)) * 2;
+    scaledUV.y *= -1.f;
     vec3 direction;
     
     switch (face) {
         case 0: //GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-            direction = vec3(1.f, scaledUV.x, scaledUV.y);
+            direction = vec3(1.f, scaledUV.y, -scaledUV.x);
             break;
-        case 1: //GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-            direction = vec3(scaledUV.x, 1.f, scaledUV.y);
+        case 1: //GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+            direction = vec3(-1.f, scaledUV.y, scaledUV.x);
             break;
-        case 2: //GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-            direction = vec3(scaledUV.x, scaledUV.y, 1.f);
+        case 2: //GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+            direction = vec3(scaledUV.x, 1.f, -scaledUV.y);
             break;
-        case 3: //GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-            direction = vec3(-1.f, scaledUV.x, scaledUV.y);
-            break;
-        case 4: //GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+        case 3: //GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
             direction = vec3(scaledUV.x, -1.f, scaledUV.y);
             break;
+        case 4: //GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+            direction = vec3(scaledUV.x, scaledUV.y, 1.f);
+            break;
         case 5: //GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-            direction = vec3(scaledUV.x, scaledUV.y, -1.f);
+            direction = vec3(-scaledUV.x, scaledUV.y, -1.f);
             break;
         default:
             break;

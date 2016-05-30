@@ -205,6 +205,9 @@ struct PipelineState {
     }
     
     func applyState() {
+        
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)
+            
         if cullMode == GL_NONE {
             glDisable(GL_CULL_FACE)
         } else {

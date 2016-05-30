@@ -171,15 +171,13 @@ public final class Light {
         self.backingGPULight = backingGPULight
         self.colour = colour
         self.falloffRadius = falloffRadius
-        self.intensity = intensity
         
         self.backingGPULight.withElement { gpuLight in
             let radiusSquared = self.falloffRadius * self.falloffRadius
             let inverseRadiusSquared = 1.0 / radiusSquared
             gpuLight.inverseSquareAttenuationRadius = inverseRadiusSquared
             
-            gpuLight.colour = self.colour.rgbColour
-            
+            gpuLight.colourAndIntensity = vec4(self.colour.rgbColour, intensity)
             self.type.fillGPULight(gpuLight: &gpuLight)
         }
     }
@@ -215,7 +213,7 @@ struct GPULight {
             return self.colourAndIntensity.rgb
         }
         set (newColour) {
-            self.colourAndIntensity.rgb = newColour
+            self.colourAndIntensity.rgb = normalize(newColour)
         }
     }
     

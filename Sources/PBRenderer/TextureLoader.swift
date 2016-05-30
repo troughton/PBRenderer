@@ -67,14 +67,16 @@ final class TextureLoader {
             
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
-            memcpy(frontFace?.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            for i in 0..<cubeWidth {
+                memcpy(frontFace?.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+            }
         }
         
         let topFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
         defer { free(topFace) }
         
         for i in 0..<cubeWidth {
-            let row = i
+            let row = cubeWidth - 1 - i
             let centreOffset = cubeWidth
             
             let sourceIndex = row * Int(width) + centreOffset
@@ -90,7 +92,10 @@ final class TextureLoader {
             
             let sourceIndex = row * Int(width)
             let destinationIndex = cubeWidth * i
-            memcpy(leftFace?.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            
+            for i in 0..<cubeWidth {
+                memcpy(leftFace?.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+            }
         }
         
         let rightFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
@@ -101,14 +106,16 @@ final class TextureLoader {
             
             let sourceIndex = row * Int(width) + 2 * cubeWidth
             let destinationIndex = cubeWidth * i
-            memcpy(rightFace?.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            for i in 0..<cubeWidth {
+                memcpy(rightFace?.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+            }
         }
         
         let bottomFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
         defer { free(bottomFace) }
         
         for i in 0..<cubeWidth {
-            let row = 2 * cubeWidth + i
+            let row = 3 * cubeWidth - 1 - i
             let centreOffset = cubeWidth
             
             let sourceIndex = row * Int(width) + centreOffset

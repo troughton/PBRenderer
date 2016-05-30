@@ -3,9 +3,8 @@
 #include "Sampling.glsl"
 #include "BRDF.glsl"
 
+in vec2 uv;
 out vec4 colour;
-
-uniform int textureSize;
 
 vec4 integrateDFGOnly(float NdotV, float roughness) { //bad results for high NdotV – also test results for diffuse lighting direction with only one face of the cubemap.
     
@@ -61,9 +60,8 @@ vec4 integrateDFGOnly(float NdotV, float roughness) { //bad results for high Ndo
 }
 
 void main() {
-    float sizeDivide = 1.f / (textureSize - 1);
-    float NdotV = gl_FragCoord.x * sizeDivide;
-    float roughness = gl_FragCoord.y * sizeDivide;
+    float NdotV = uv.x;
+    float roughness = uv.y;
     
     colour = integrateDFGOnly(NdotV, roughness);
 }

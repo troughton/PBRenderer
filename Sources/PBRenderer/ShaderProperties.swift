@@ -15,6 +15,11 @@ enum GBufferShaderProperty : String, ShaderProperty {
     case GBuffer3 = "gBuffer3Texture"
     case GBufferDepth = "gBufferDepthTexture"
     
+    case DiffuseLDTexture = "diffuseLD"
+    case SpecularLDTexture = "specularLD"
+    case DFGTexture = "dfg"
+    case LDMipMaxLevel = "ldMipMaxLevel"
+    
     var name : String {
         return self.rawValue
     }
@@ -41,6 +46,8 @@ enum CompositionPassShaderProperty: String, ShaderProperty {
 enum BasicShaderProperty : String, ShaderProperty {
     case ModelToClipMatrix = "modelToClipMatrix"
     case NormalModelToWorldMatrix = "normalModelToWorldMatrix"
+    case CameraPositionWorld = "cameraPositionWorld"
+    case ModelToWorldMatrix = "modelToWorldMatrix"
     case ModelToCameraMatrix = "modelToCameraMatrix"
     case Material
     
