@@ -36,11 +36,9 @@ private let glOffsetAlignment : GLint = {
 
 private func typeSize<U>(_ type: U.Type, bufferType: SGLOpenGL.GLenum) -> Int {
     var typeSize = sizeof(U)
-    if bufferType == GL_UNIFORM_BUFFER {
-        typeSize = roundUpToNearestMultiple(numToRound: typeSize, of: Int(glOffsetAlignment))
-    } else {
-        if typeSize == 0 { typeSize = 1 }
-    }
+
+    if typeSize == 0 { typeSize = 1 }
+
     return typeSize
 }
 
@@ -59,19 +57,10 @@ private final class GPUBufferImpl {
         let contents = UnsafeMutablePointer<UInt8>(calloc(1, self.capacityInBytes))!
         _contents = contents
         
-        let elementSize = typeSize(T.self, bufferType: bufferBinding)
-        
         if let data = data {
-            if bufferBinding == GL_UNIFORM_BUFFER {
-                
-                for (i, value) in data.enumerated() {
-                    UnsafeMutablePointer<T>(_contents.advanced(by: i * elementSize)).pointee = value
-                }
-            } else {
                 data.withUnsafeBufferPointer({ (buffer) -> Void in
                     memcpy(contents, buffer.baseAddress!, capacityInBytes)
                 })
-            }
         }
         
         var uniformBlockRef = GLuint(0)
@@ -143,7 +132,9 @@ private final class GPUBufferImpl {
     }
     
     func bindToUniformBlockIndex(_ index: Int, byteOffset: Int = 0) {
-        glBindBufferRange(GL_UNIFORM_BUFFER, GLuint(index), _glBuffer, byteOffset, self.capacityInBytes - byteOffset)
+
+        assert(self.bufferBinding != GL_UNIFORM_BUFFER || byteOffset % Int(glOffsetAlignment) == 0, "For uniform blocks, the byte offset must be a multiple of GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT")
+        glBindBufferRange(GL_UNIFORM_BUFFER, GLuint(index), _glBuffer, byteOffset, roundUpToNearestMultiple(numToRound: self.capacityInBytes - byteOffset, of: Int(glOffsetAlignment)))
     }
 
 }
@@ -239,39 +230,14 @@ public final class GPUBuffer<T> {
     
     subscript(_ range: Range<Int>) -> [T] {
         get {
-            if _internalBuffer.bufferBinding == GL_UNIFORM_BUFFER {
-                let elementSize = typeSize(T.self, bufferType: _internalBuffer.bufferBinding)
-                var data = [T]()
-                
-                for index in range.lowerBound..<range.upperBound {
-                    data.append(UnsafeMutablePointer<T>(_internalBuffer._contents.advanced(by: index * elementSize)).pointee)
-                }
-                
-                return data
-                
-            } else {
-                return [T](UnsafeMutableBufferPointer(start: UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.lowerBound), count: range.count))
-            }
+            return [T](UnsafeMutableBufferPointer(start: UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.lowerBound), count: range.count))
         }
         set(newValue) {
             assert(range.count == newValue.count)
-            
-            if _internalBuffer.bufferBinding == GL_UNIFORM_BUFFER {
-                let elementSize = typeSize(T.self, bufferType: _internalBuffer.bufferBinding)
-               
-                let base = _internalBuffer._contents.advanced(by: elementSize * range.lowerBound)
-                
-                for (i, value) in newValue.enumerated() {
-                    UnsafeMutablePointer<T>(base.advanced(by: i * elementSize)).pointee = value
-                }
-                
-            } else {
-            
                 newValue.withUnsafeBufferPointer { (toCopy) -> Void in
                     let destination = UnsafeMutablePointer<T>(_internalBuffer._contents).advanced(by: range.lowerBound)
                     memcpy(destination, toCopy.baseAddress!, range.count * sizeof(T))
                 }
-            }
         }
     }
     
@@ -312,5 +278,9 @@ public final class GPUBuffer<T> {
     public func bindToUniformBlockIndex(_ index: Int, elementOffset: Int = 0) {
         let elementSize = typeSize(T.self, bufferType: _internalBuffer.bufferBinding)
         _internalBuffer.bindToUniformBlockIndex(index, byteOffset: elementSize * elementOffset)
+    }
+    
+    var offsetAlignment : Int {
+        return roundUpToNearestMultiple(numToRound: typeSize(T.self, bufferType: _internalBuffer.bufferBinding), of: Int(glOffsetAlignment))
     }
 }

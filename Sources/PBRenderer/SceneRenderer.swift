@@ -131,7 +131,14 @@ final class GBufferPass {
         
         for mesh in node.meshes {
             if let materialName = mesh.materialName, let material = node.materials[materialName] {
-                material.bindToUniformBlockIndex(materialBlockIndex)
+                let materialBuffer = material.buffer
+                
+                
+                let materialBufferOffset = material.bufferIndex / 16 //material is 48 bytes, we need 256 byte alignment, lowest common multiple is 768 bytes, and we can fit 16 materials into 768 bytes
+                let indexInBuffer = material.bufferIndex % 16
+                
+                materialBuffer.bindToUniformBlockIndex(materialBlockIndex, elementOffset: materialBufferOffset)
+                shader.setUniform(GLint(indexInBuffer), forProperty: GBufferShaderProperty.MaterialIndex)
             }
             
             mesh.render()

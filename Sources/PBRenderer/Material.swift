@@ -18,6 +18,7 @@ public struct Material {
     public var smoothness : Float = 0.5
     public var metalMask : Float = 0
     public var reflectance : Float = 0.5
+    private var padding : Float = 0.0
     
     public var f0 : Float {
         return 0.16 * reflectance * reflectance

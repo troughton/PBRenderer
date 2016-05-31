@@ -6,14 +6,6 @@ out vec4 outputColour;
 in vec2 uv;
 in vec3 cameraDirection;
 
-uniform sampler2D gBuffer0Texture;
-uniform sampler2D gBuffer1Texture;
-uniform sampler2D gBuffer2Texture;
-uniform sampler2D gBufferDepthTexture;
-
-uniform vec2 depthRange;
-uniform vec3 matrixTerms;
-
 vec4 calculateCameraSpacePositionFromWindowZ(float windowZ,
                                                vec2 uv,
                                                vec2 nearPlane,
@@ -32,13 +24,11 @@ void fill_array4(inout int array[4], ivec4 src)
     array[3] = src.w;
 }
 
-#define LightGridElements 131072 //32MB buffer, matching what's on the CPU side.
-
 uniform sampler1D lightGrid;
 
 #define ClusteredGridScale 16
 
-vec3 calculateLightingClustered(LightData lights[], vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePosition, vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, MaterialRenderingData material) {
+vec3 calculateLightingClustered(Lights lights, vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePosition, vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, MaterialRenderingData material) {
     uvec3 grid = uvec3(2 * ClusteredGridScale, 1 * ClusteredGridScale, 8 * ClusteredGridScale);
     
     vec2 screenPosition = uv;
@@ -60,7 +50,7 @@ vec3 calculateLightingClustered(LightData lights[], vec2 cameraNearFar, vec2 uv,
         int lightIndex = (lightIndexBlock[(k & 7)>>1] >> ((k&1)<<4)) & 0xFFFF;
         if ((k & 7) == 7) { fill_array4(lightIndexBlock, ivec4(texelFetch(lightGrid, light_index++))); } //Follow the linked list through all of the tiles in this cluster.
         
-        LightData light = lights[lightIndex];
+        LightData light = lights.lights[lightIndex];
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, material);
     
     //    [flatten] if (mUI.visualizeLightCount)
@@ -75,7 +65,7 @@ vec3 calculateLightingClustered(LightData lights[], vec2 cameraNearFar, vec2 uv,
 
 vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
                              uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2, float gBufferDepth,
-                             __global LightData *lights, vec2 uv, mat4 cameraToWorldMatrix) {
+                             Lights lights, vec2 uv, mat4 cameraToWorldMatrix) {
     
     vec4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
     vec3 worldSpacePosition = cameraToWorldMatrix * cameraSpacePosition;
@@ -95,18 +85,31 @@ vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
     
     return epilogue;
 }
+    
+#define MAX_NUM_TOTAL_LIGHTS 8192
+    
+layout (std140) uniform Lights {
+    LightData lights[MAX_NUM_TOTAL_LIGHTS];
+};
+    
+uniform vec4 nearPlaneAndProjectionTerms
+uniform vec2 cameraNearFar,
+sampler2D gBuffer0Texture;
+sampler2D gBuffer1Texture;
+sampler2D gBuffer2Texture;
+sampler2D gBufferDepthTexture;
+    
+uniform mat4 cameraToWorldMatrix;
+    
 
 void main() {
-    float gBufferDepth = texture(gBufferDepthTexture, uv).r;
-    vec4 gBuffer0 = texture(gBuffer0Texture, uv);
-    vec4 gBuffer1 = texture(gBuffer1Texture, uv);
-    vec4 gBuffer2 = texture(gBuffer2Texture, uv);
+    float gBufferDepth = texelFetch(gBufferDepthTexture, gl_FragCoord.xy).r;
+    vec4 gBuffer0 = texelFetch(gBuffer0Texture, gl_FragCoord.xy);
+    vec4 gBuffer1 = texelFetch(gBuffer1Texture, gl_FragCoord.xy);
+    vec4 gBuffer2 = texelFetch(gBuffer2Texture, gl_FragCoord.xy);
     
-    vec3 normal = normalize(decode(gBuffer0.xy));
+    vec3 lightAccumulation = lightAccumulationPass(nearPlaneAndProjectionTerms, cameraNearFar, gBuffer0, gBuffer1, gBuffer2, gBufferDepth,
+                                                   lights, uv, cameraToWorldMatrix);
     
-    MaterialData data = decodeMaterialFromGBuffers(gBuffer0, gBuffer1, gBuffer2);
-    
-    vec3 cameraSpacePosition = CalculateCameraSpacePositionFromWindow(gBufferDepth, cameraDirection, depthRange, matrixTerms);
-    
-    outputColour = vec4(max(dot(normal, vec3(0, 0, 1)), 0) * data.baseColour, 1);
+    outputColour = vec4(lightAccumulation, 1);
 }

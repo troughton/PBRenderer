@@ -74,7 +74,7 @@ vec2 encode (vec3 n, out int basis) {
 
 vec3 decodeStereographic(vec2 enc) {
     vec3 nn =
-    vec3(enc, 0) * (float3)(2.f, 2.f, 0.f) +
+    vec3(enc, 0) * vec3(2.f, 2.f, 0.f) +
     vec3(-1.f, -1.f, 1.f);
     float g = 2.0f / dot(nn, nn);
     vec3 n;
@@ -94,25 +94,25 @@ vec3 decode(vec2 enc, float basis) {
     vec3 normal = decodeStereographic(enc);
     //The normal will be within 90 degrees in x and y of (0, 0, 1)
     
-    vec3 output;
+    vec3 outNormal;
     
     if (basis < BasisIndexPositiveX + 0.5f) {
-        output = normal.zxy;
+        outNormal = normal.zxy;
     } else if (basis < BasisIndexPositiveY + 0.5f) {
-        output = normal.xzy;
+        outNormal = normal.xzy;
     } else if (basis < BasisIndexPositiveZ + 0.5f) {
-        output = normal;
+        outNormal = normal;
     } else if (basis < BasisIndexNegativeX + 0.5f) {
-        output = normal.zxy;
-        output.x *= -1;
+        outNormal = normal.zxy;
+        outNormal.x *= -1;
     } else if (basis < BasisIndexNegativeY + 0.5f) {
-        output = normal.xzy;
-        output.y *= -1;
+        outNormal = normal.xzy;
+        outNormal.y *= -1;
     } else {
-        output = normal;
-        output.z *= -1;
+        outNormal = normal;
+        outNormal.z *= -1;
     }
-    return output;
+    return outNormal;
 }
 
 
@@ -136,9 +136,9 @@ void encodeDataToGBuffers(in MaterialData data, in vec3 normal, inout uint gBuff
 MaterialData decodeDataFromGBuffers(out vec3 N, uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2) {
     const float divideFactor = 0.0009775171065f; // 1 / 1023
     
-    uint nX = (gBuffer0 >> 22) & 0b1111111111;
-    uint nY = (gBuffer0 >> 12) & 0b1111111111;
-    uint smoothness = (gBuffer0 >> 2) & 0b1111111111;
+    uint nX = (gBuffer0 >> 22) & 0x3FFu; //bitmask of 10 bits.
+    uint nY = (gBuffer0 >> 12) & 0x3FFu;
+    uint smoothness = (gBuffer0 >> 2) & 0x3FFu;
     
     float basisIndex = gBuffer1.a * 8.0;
     vec2 encodedNormal = vec2(nX * divideFactor, nY * divideFactor);
@@ -146,8 +146,8 @@ MaterialData decodeDataFromGBuffers(out vec3 N, uint gBuffer0, vec4 gBuffer1, ve
     
     
     MaterialData data;
-    data.smoothness = (float)(smoothness * divideFactor);
-    data.baseColour = gBuffer1.xyz;
+    data.smoothness = float(smoothness * divideFactor);
+    data.baseColour = vec4(gBuffer1.xyz, 1);
     data.metalMask = gBuffer2.y;
     data.reflectance = gBuffer2.z;
     

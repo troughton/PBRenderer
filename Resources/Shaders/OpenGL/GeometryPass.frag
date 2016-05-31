@@ -14,19 +14,23 @@ in vec3 vertexNormal;
 
 uniform bool useEnvironmentMap;
 
+#define MaxMaterialCount 16
+
 layout(std140) uniform Material {
-    MaterialData material;
+    MaterialData materials[MaxMaterialCount];
 };
 
-vec3 evaluateEnvironmentMap(vec3 N, vec3 V, float perceptuallyLinearRoughness, float roughness, vec3 albedo, vec3 f0, float f90) {
+uniform int materialIndex;
+
+vec3 evaluateEnvironmentMap(vec3 N, vec3 V, MaterialRenderingData material) {
     
     if (useEnvironmentMap) {
     
         float NdotV = dot(N, V);
         vec3 R = reflect(-V, N);
     
-        vec3 result = evaluateIBLDiffuse(N, V, NdotV, roughness) * albedo;
-        result += evaluateIBLSpecular(N, R, NdotV, perceptuallyLinearRoughness, roughness, f0, f90);
+        vec3 result = evaluateIBLDiffuse(N, V, NdotV, material.roughness) * material.albedo;
+        result += evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90);
         return result;
         
     } else {
@@ -38,17 +42,15 @@ void main() {
     vec3 N = normalize(vertexNormal);
     vec3 V = normalize(worldSpaceViewDirection);
     
-    vec3 albedo;
-    vec3 f0;
-    float f90;
-    float linearRoughness;
-    evaluateMaterialData(material, albedo, f0, f90, linearRoughness);
+    MaterialData material = materials[materialIndex];
+    
+    MaterialRenderingData renderingMaterial = evaluateMaterialData(material);
     
     uint out0 = 0;
     vec4 out1 = vec4(0);
     vec4 out2 = vec4(0);
     
-    vec3 radiosity = evaluateEnvironmentMap(N, V, linearRoughness, linearRoughness * linearRoughness, albedo, f0, f90) + material.emissive.rgb;
+    vec3 radiosity = evaluateEnvironmentMap(N, V, renderingMaterial) + material.emissive.rgb;
     vec4 out3 = vec4(radiosity, 0);
     
     encodeDataToGBuffers(material, N, out0, out1, out2);

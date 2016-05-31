@@ -342,11 +342,6 @@ float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData 
         __global LightData *light = &lights[lightIndex];
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
         
-        if (lightIndex == 0) {
-            lightAccumulation += (float3)(0.2f, 0.f, 0.f);
-        } else if (lightIndex == 1) {
-            lightAccumulation += (float3)(0.f, 0.2f, 0.f);
-        }
     }
     
 //    [flatten] if (mUI.visualizeLightCount)
@@ -387,7 +382,7 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms, float2 cameraNe
 
     lightAccumulation += gBuffer3.xyz;
     
-    float3 epilogue = epilogueLighting(lightAccumulation, 1.f);
+    float3 epilogue = epilogueLighting(lightAccumulation, 100.f);
         
     return epilogue;
 }
