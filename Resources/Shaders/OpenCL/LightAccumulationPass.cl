@@ -329,13 +329,60 @@ float3 epilogueLighting(float3 color, float exposureMultiplier) {
     return color * exposureMultiplier;
 }
 
-float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
-                           uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float4 gBuffer3, float gBufferDepth,
-                             __global LightData *lights, int lightCount, float2 u, float16 cameraToWorldMatrix);
+void fill_array4(__private int *array, int4 src);
+void fill_array4(__private int *array, int4 src)
+{
+    array[0] = src.x;
+    array[1] = src.y;
+    array[2] = src.z;
+    array[3] = src.w;
+}
 
-float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
+#define ClusteredGridScale 16
+float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData *lights, float2 cameraNearFar, float2 uv, float3 cameraSpacePosition, float3 worldSpacePosition, float3 V, float3 N, float NdotV, float3 albedo, float3 f0, float f90, float linearRoughness);
+float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData *lights, float2 cameraNearFar, float2 uv, float3 cameraSpacePosition, float3 worldSpacePosition, float3 V, float3 N, float NdotV, float3 albedo, float3 f0, float f90, float linearRoughness) {
+    uint3 grid = (uint3)(2 * ClusteredGridScale, 1 * ClusteredGridScale, 8 * ClusteredGridScale);
+    
+    float2 screenPosition = uv;
+    float zPosition = (-cameraSpacePosition.z - cameraNearFar.x) / (cameraNearFar.y - cameraNearFar.x);
+    
+    uint3 clusterPosition = (uint3)((uint)(screenPosition.x * grid.x), (uint)(screenPosition.y * grid.y), (uint)(zPosition * grid.z));
+    uint cluster_index = (clusterPosition.y * grid.x + clusterPosition.x) * grid.z + clusterPosition.z;
+    
+    int lightIndexBlock[4];
+    fill_array4(lightIndexBlock, (int4)lightGrid[cluster_index]);
+    
+    int list_size = lightIndexBlock[0] & 255;
+    int list_index = lightIndexBlock[0] >> 8;
+    int light_count = list_size;
+    
+    float3 lightAccumulation = (float3)(0.0f, 0.0f, 0.0f);
+    
+    for (int k = 2; k < list_size + 2; k++) {
+        int lightIndex = (lightIndexBlock[(k & 7)>>1] >> ((k&1)<<4)) & 0xFFFF;
+        if ((k & 7) == 7) { fill_array4(lightIndexBlock, (int4)lightGrid[list_index++]); }
+        
+        __global LightData *light = &lights[lightIndex];
+        lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
+    }
+    
+//    [flatten] if (mUI.visualizeLightCount)
+//    {
+//        lit = (float(light_count) * rcp(255.0f)).xxx;
+//    }
+    
+    lightAccumulation = (float3)(light_count == 0 ? 1 : 0, light_count == 1 ? 1 : 0, light_count == 2 ? 1 : 0);
+    
+    return lightAccumulation;
+}
+
+float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms, float2 cameraNearFar,
+                           uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float4 gBuffer3, float gBufferDepth,
+                             __global LightData *lights, __global uint4 *lightGrid, float2 uv, float16 cameraToWorldMatrix);
+
+float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms, float2 cameraNearFar,
                              uint gBuffer0, float4 gBuffer1, float4 gBuffer2, float4 gBuffer3, float gBufferDepth,
-                             __global LightData *lights, int lightCount,float2 uv, float16 cameraToWorldMatrix) {
+                             __global LightData *lights, __global uint4 *lightGrid, float2 uv, float16 cameraToWorldMatrix) {
 
     float4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
     float3 worldSpacePosition = multiplyMatrixVector(cameraToWorldMatrix, cameraSpacePosition).xyz;
@@ -353,12 +400,8 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms,
     float3 V = native_normalize(multiplyMatrixVector(cameraToWorldMatrix, (float4)(-cameraSpacePosition.xyz, 0)).xyz);
     float NdotV = fabs(dot(N, V)) + 1e-5f; //bias the result to avoid artifacts
     
-    float3 lightAccumulation = (float3)(0, 0, 0);
-    
-    for (int i = 0; i < lightCount; i++) {
-        lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, &lights[i]);
-    }
-    
+    float3 lightAccumulation = calculateLightingClustered(lightGrid, lights, cameraNearFar, uv, cameraSpacePosition.xyz, worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness);
+
     lightAccumulation += gBuffer3.xyz;
     
     float3 epilogue = epilogueLighting(lightAccumulation, 1.f);

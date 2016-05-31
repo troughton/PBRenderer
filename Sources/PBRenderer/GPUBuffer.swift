@@ -138,40 +138,40 @@ private final class GPUBufferImpl {
 
 public class GPUBufferElement<T> {
     public let buffer : GPUBuffer<T>
-    private let _bufferIndex : Int
+    public let bufferIndex : Int
     
     private init(viewOfIndex index: Int, onBuffer buffer: GPUBuffer<T>) {
-        _bufferIndex = index
+        bufferIndex = index
         self.buffer = buffer
     }
     
     public func withElement<U>(_ function: @noescape (inout T) throws -> U) rethrows -> U {
-        var element = self.buffer[_bufferIndex]
+        var element = self.buffer[bufferIndex]
         
         let result = try function(&element)
         
-        self.buffer[_bufferIndex] = element
-        self.buffer.didModifyRange(_bufferIndex..<_bufferIndex + 1)
+        self.buffer[bufferIndex] = element
+        self.buffer.didModifyRange(bufferIndex..<bufferIndex + 1)
         
         return result
     }
     
     public func withElementNoUpdate<U>(_ function: @noescape (inout T) throws -> U) rethrows -> U {
-        var element = self.buffer[_bufferIndex]
+        var element = self.buffer[bufferIndex]
         
         let result = try function(&element)
         
-        self.buffer[_bufferIndex] = element
+        self.buffer[bufferIndex] = element
         
         return result
     }
     
     var readOnlyElement : T {
-        return self.buffer[_bufferIndex]
+        return self.buffer[bufferIndex]
     }
     
     func bindToUniformBlockIndex(_ index: Int) {
-        self.buffer.bindToUniformBlockIndex(index, elementOffset: _bufferIndex)
+        self.buffer.bindToUniformBlockIndex(index, elementOffset: bufferIndex)
     }
 }
 
@@ -207,6 +207,10 @@ public final class GPUBuffer<T> {
         get {
             return GPUBufferElement(viewOfIndex: index, onBuffer: self)
         }
+    }
+    
+    var contents : UnsafeMutablePointer<T> {
+        return UnsafeMutablePointer<T>(self._internalBuffer._contents)
     }
     
     func copyToIndex(_ index: Int, value: UnsafePointer<T>, sizeInBytes: Int) {

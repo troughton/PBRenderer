@@ -94,7 +94,7 @@ func main() {
     guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
     
     let scene = Scene(fromCollada: collada)
-    let camera = scene.flattenedScene.flatMap { $0.cameras.first }.first!
+    let camera = scene.cameras.first!
     camera.sceneNode.transform.rotation = quat.identity
     
     mainWindow.dimensions = PBWindow.Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)

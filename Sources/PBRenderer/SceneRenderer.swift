@@ -186,6 +186,9 @@ final class LightAccumulationPass {
     let commandQueue : cl_command_queue
     let kernel : OpenCLKernel
     
+    var lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB
+    var lightGridBuilder = LightGridBuilder()
+    
     init(pixelDimensions: PBWindow.Size, openCLContext: cl_context, openCLDevice: cl_device_id) {
         
         self.clContext = openCLContext
@@ -240,6 +243,8 @@ final class LightAccumulationPass {
     
     func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
         
+        self.setupLightGrid(camera: camera, lights: scene.lights)
+        
         var glObjects = [cl_mem?]()
         var kernelIndex = 0
         
@@ -260,6 +265,11 @@ final class LightAccumulationPass {
         let nearPlaneAndProjectionTerms = vec4(nearPlane.x, nearPlane.y, projectionA, projectionB)
         
         self.kernel.setArgument(nearPlaneAndProjectionTerms, index: kernelIndex)
+        kernelIndex += 1
+        
+        let cameraNearAndFar = vec2(camera.zNear, camera.zFar)
+        
+        self.kernel.setArgument(cameraNearAndFar, index: kernelIndex)
         kernelIndex += 1
         
         for buffer in gBufferColours {
@@ -290,10 +300,14 @@ final class LightAccumulationPass {
         
         kernelIndex += 1
         
-        let lightCount = Int32(scene.lightBuffer.capacity)
-        self.kernel.setArgument(lightCount, index: kernelIndex)
+        let lightGridCL = self.lightGridBuffer.openCLMemory(clContext: clContext, flags: cl_mem_flags(CL_MEM_READ_ONLY))
+        clRetainMemObject(lightGridCL.memory)
+        glObjects.append(lightGridCL.memory)
+        
+        self.kernel.setArgument(lightGridCL.memory, index: kernelIndex)
         
         kernelIndex += 1
+        
         let cameraToWorldMatrix = camera.sceneNode.transform.nodeToWorldMatrix;
         self.kernel.setArgument(cameraToWorldMatrix, index: kernelIndex)
         
@@ -318,6 +332,18 @@ final class LightAccumulationPass {
         }
         
         return self.lightAccumulationTexture
+    }
+    
+    func setupLightGrid(camera: Camera, lights: [Light]) {
+        let clusteredGridScale = 16
+        self.lightGridBuilder.reset(dim: LightGridDimensions(width: 2 * clusteredGridScale, height: clusteredGridScale, depth: 8 * clusteredGridScale))
+        
+        self.lightGridBuilder.clearAllFragments()
+        RasterizeLights(builder: self.lightGridBuilder, viewerCamera: camera, lights: lights)
+        
+        assert(sizeof(LightGridEntry) == 16)
+        self.lightGridBuilder.buildAndUpload(gpuBuffer: self.lightGridBuffer.contents, bufferSize: self.lightGridBuffer.capacity * sizeof(LightGridEntry))
+        self.lightGridBuffer.didModify()
     }
 }
 
@@ -408,7 +434,6 @@ public final class SceneRenderer {
 //            self.timingQuery = query
 //        }
         
-        
 //        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
 //
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: nil)
@@ -418,5 +443,7 @@ public final class SceneRenderer {
         
 //        glEndQuery(GLenum(GL_TIME_ELAPSED))
     }
+    
+
     
 }

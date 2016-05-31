@@ -43,7 +43,7 @@ public final class Scene {
         self.idsToNodes = dictionary
     }
 
-    public var flattenedScene : [SceneNode] {
+    private var flattenedScene : [SceneNode] {
         var nodes = [SceneNode]()
         var stack = [SceneNode]()
         
@@ -56,6 +56,24 @@ public final class Scene {
             nodes.append(node)
         }
         return nodes
+    }
+    
+    public var lights : [Light] {
+        var lights = [Light]()
+        
+        for node in self.flattenedScene {
+            lights.append(contentsOf: node.lights)
+        }
+        return lights
+    }
+    
+    public var cameras : [Camera] {
+        var cameras = [Camera]()
+        
+        for node in self.flattenedScene {
+            cameras.append(contentsOf: node.cameras)
+        }
+        return cameras
     }
 }
 
