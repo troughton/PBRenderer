@@ -23,6 +23,10 @@ func roundUpToNearestMultiple(numToRound: Int, of multiple: Int) -> Int {
     return (numToRound + multiple - 1) & notTerm;
 }
 
+public func lerp<T : ArithmeticType>(from: T, to: T, percentage: T) -> T {
+    return from + (to - from) * percentage
+}
+
 func clamp<T : ArithmeticType>(_ x: T, min: T, max: T) -> T {
     if x < min {
         return min

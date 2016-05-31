@@ -34,15 +34,15 @@ func randomFloat() -> Float {
                 return .SoftChordsElectricPiano
             } else if trackNumber < 25 {
                 return .Drums
-            } else if trackNumber < 29 {
+            } else if trackNumber < 42 {
                 return .Kick
-            } else if trackNumber < 30 {
+            } else if trackNumber < 50 {
                 return .Snare
-            } else if trackNumber < 41 {
+            } else if trackNumber < 61 {
                 return .MainMelody
-            } else if trackNumber < 59 {
+            } else if trackNumber < 79 {
                 return .HighMotif
-            } else if trackNumber < 65 {
+            } else if trackNumber < 85 {
                 return .SecondMelody
             } else {
                 return .LowBass
@@ -80,6 +80,10 @@ final class AudioVisualManager : SongDelegate {
                 processHighMotifEvent(event, scene: self.scene, beatNumber: beatNumber)
             case .DrivingChords:
                 processDrivingChordsEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .Kick:
+                processKickEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .Snare:
+                processSnareEvent(event, scene: self.scene, beatNumber: beatNumber)
             default:
                 break;
             }
@@ -115,12 +119,18 @@ func main() {
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
+    song.update()
+    avManager.update()
+    
     mainWindow.registerForUpdate { (window, deltaTime) in
+        
         if !song.isPlaying {
             song.play()
         }
+        
         song.update()
         avManager.update()
+        
         sceneRenderer.renderScene(avManager.scene, camera: avManager.camera)
     }
     

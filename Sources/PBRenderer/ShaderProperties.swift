@@ -15,6 +15,7 @@ enum GBufferShaderProperty : String, ShaderProperty {
     case GBuffer3 = "gBuffer3Texture"
     case GBufferDepth = "gBufferDepthTexture"
     
+    case UseEnvironmentMap = "useEnvironmentMap"
     case DiffuseLDTexture = "diffuseLD"
     case SpecularLDTexture = "specularLD"
     case DFGTexture = "dfg"

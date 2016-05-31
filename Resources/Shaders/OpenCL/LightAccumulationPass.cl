@@ -27,7 +27,7 @@ typedef struct LightData {
 float3 decodeStereographic(float2 enc);
 float3 decodeStereographic(float2 enc) {
     float3 nn =
-        (float3)(enc, 0) * (float3)(2.f, 2.f, 2.f) +
+        (float3)(enc, 0) * (float3)(2.f, 2.f, 0.f) +
         (float3)(-1.f, -1.f, 1.f);
     float g = native_divide(2.0f, dot(nn, nn));
     float3 n;
@@ -67,36 +67,28 @@ __constant const float3 negativeZT = (float3)(1, 0, 0);
 __constant const float3 negativeZB = (float3)(0, 1, 0);
 __constant const float3 negativeZN = (float3)(0, 0, -1);
 
-float3 decode(float2, int);
-float3 decode(float2 enc, int basis) {
+float3 decode(float2, float);
+float3 decode(float2 enc, float basis) {
     float3 normal = decodeStereographic(enc);
     //The normal will be within 90 degrees in x and y of (0, 0, 1)
     
     float3 output;
-    switch (basis) {
-        case BasisIndexPositiveX:
-            output = normal.zxy;
-            break;
-        case BasisIndexPositiveY:
-            output = normal.xzy;
-            break;
-        case BasisIndexPositiveZ:
-            output = normal;
-            break;
-        case BasisIndexNegativeX:
-            output = normal.zxy;
-            output.x *= -1;
-            break;
-        case BasisIndexNegativeY:
-            output = normal.xzy;
-            output.y *= -1;
-            break;
-        case BasisIndexNegativeZ:
-            output = normal;
-            output.z *= -1;
-            break;
-        default:
-            break;
+    
+    if (basis < BasisIndexPositiveX + 0.5) {
+        output = normal.zxy;
+    } else if (basis < BasisIndexPositiveY + 0.5) {
+        output = normal.xzy;
+    } else if (basis < BasisIndexPositiveZ + 0.5) {
+        output = normal;
+    } else if (basis < BasisIndexNegativeX + 0.5) {
+        output = normal.zxy;
+        output.x *= -1;
+    } else if (basis < BasisIndexNegativeY + 0.5) {
+        output = normal.xzy;
+        output.y *= -1;
+    } else {
+        output = normal;
+        output.z *= -1;
     }
     return output;
 }
@@ -109,7 +101,7 @@ MaterialData decodeDataFromGBuffers(float3 *N, uint gBuffer0, float4 gBuffer1, f
     uint nY = (gBuffer0 >> 12) & 0b1111111111;
     uint smoothness = (gBuffer0 >> 2) & 0b1111111111;
     
-    int basisIndex = as_int(gBuffer1.a);
+    float basisIndex = gBuffer1.a * 8.0;
     float2 encodedNormal = (float2)(nX * divideFactor, nY * divideFactor);
     *N = decode(encodedNormal, basisIndex);
     

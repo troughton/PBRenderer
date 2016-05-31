@@ -22,6 +22,9 @@ enum LDTextureShaderProperty : String, ShaderProperty {
 }
 
 final class LDTexture {
+    
+    static let emptyTexture = LDTexture(resolution: 128)
+    
     let resolution : Int
     let diffuseTexture : Texture
     let specularTexture : Texture

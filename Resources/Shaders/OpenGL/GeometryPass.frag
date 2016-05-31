@@ -12,18 +12,26 @@ layout(location = 3) out vec4 gBuffer3;
 in vec3 worldSpaceViewDirection;
 in vec3 vertexNormal;
 
+uniform bool useEnvironmentMap;
+
 layout(std140) uniform Material {
     MaterialData material;
 };
 
 vec3 evaluateEnvironmentMap(vec3 N, vec3 V, float perceptuallyLinearRoughness, float roughness, vec3 albedo, vec3 f0, float f90) {
     
-    float NdotV = dot(N, V);
-    vec3 R = reflect(-V, N);
+    if (useEnvironmentMap) {
     
-    vec3 result = evaluateIBLDiffuse(N, V, NdotV, roughness) * albedo;
-    result += evaluateIBLSpecular(N, R, NdotV, perceptuallyLinearRoughness, roughness, f0, f90);
-    return result;
+        float NdotV = dot(N, V);
+        vec3 R = reflect(-V, N);
+    
+        vec3 result = evaluateIBLDiffuse(N, V, NdotV, roughness) * albedo;
+        result += evaluateIBLSpecular(N, R, NdotV, perceptuallyLinearRoughness, roughness, f0, f90);
+        return result;
+        
+    } else {
+        return vec3(0);
+    }
 }
 
 void main() {
@@ -39,7 +47,9 @@ void main() {
     uint out0 = 0;
     vec4 out1 = vec4(0);
     vec4 out2 = vec4(0);
-    vec4 out3 = vec4(evaluateEnvironmentMap(N, V, linearRoughness, linearRoughness * linearRoughness, albedo, f0, f90), 0);
+    
+    vec3 radiosity = evaluateEnvironmentMap(N, V, linearRoughness, linearRoughness * linearRoughness, albedo, f0, f90) + material.emissive.rgb;
+    vec4 out3 = vec4(radiosity, 0);
     
     encodeDataToGBuffers(material, N, out0, out1, out2);
     gBuffer0 = out0;

@@ -5,6 +5,8 @@
 //  Created by Thomas Roughton on 29/05/16.
 //
 //
+#if os(OSX)
+
 
 import Foundation
 
@@ -55,3 +57,5 @@ final class AnimationSystem {
         self.animationsToRemove.removeAll(keepingCapacity: true)
     }
 }
+
+#endif

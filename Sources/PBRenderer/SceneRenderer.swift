@@ -142,23 +142,28 @@ final class GBufferPass {
         }
     }
     
-    func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture) -> (colourTextures: [Texture], depthTexture: Texture) {
+    func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture?) -> (colourTextures: [Texture], depthTexture: Texture) {
         let dfg = DFGTexture.defaultTexture //this will generate it the first time, so we need to call it outside of the render pass method.
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             
-            dfg.texture.bindToIndex(0)
-            self.dfgSampler.bindToIndex(0)
-            shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.DFGTexture)
+            shader.setUniform(GLint(environmentMap != nil ? 1 : 0), forProperty: GBufferShaderProperty.UseEnvironmentMap)
             
-            environmentMap.diffuseTexture.bindToIndex(1)
-            self.diffuseLDSampler.bindToIndex(1)
-            shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.DiffuseLDTexture)
+            let environmentMap = environmentMap ?? LDTexture.emptyTexture
+                
+                
+                dfg.texture.bindToIndex(0)
+                self.dfgSampler.bindToIndex(0)
+                shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.DFGTexture)
             
-            environmentMap.specularTexture.bindToIndex(2)
-            self.specularLDSampler.bindToIndex(2)
-            shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.SpecularLDTexture)
-            shader.setUniform(GLint(environmentMap.specularTexture.descriptor.mipmapLevelCount - 1), forProperty: GBufferShaderProperty.LDMipMaxLevel)
+                environmentMap.diffuseTexture.bindToIndex(1)
+                self.diffuseLDSampler.bindToIndex(1)
+                shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.DiffuseLDTexture)
+            
+                environmentMap.specularTexture.bindToIndex(2)
+                self.specularLDSampler.bindToIndex(2)
+                shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.SpecularLDTexture)
+                shader.setUniform(GLint(environmentMap.specularTexture.descriptor.mipmapLevelCount - 1), forProperty: GBufferShaderProperty.LDMipMaxLevel)
             
             
             let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz
@@ -373,14 +378,13 @@ public final class SceneRenderer {
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, openCLContext: clContext, openCLDevice: clDeviceID)
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
-       let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "beach_cross.hdr"))
-        
-        self.envMapLD = LDTexture(resolution: 256)
-        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLD], cubeMaps: [envMapTexture], valueMultipliers: [2.0])
+//       let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "stpeters_cross.hdr"))
+//        
+//        self.envMapLD = LDTexture(resolution: 256)
+//        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLD], cubeMaps: [envMapTexture], valueMultipliers: [2.0])
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
     }
-    var envMapLD : LDTexture
     
     func framebufferDidResize(width: Int32, height: Int32) {
         self.gBufferPass.resize(newPixelDimensions: width, height)
@@ -407,7 +411,7 @@ public final class SceneRenderer {
         
 //        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
 //
-        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: self.envMapLD)
+        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: nil)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<4]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
         

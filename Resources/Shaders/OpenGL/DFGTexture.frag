@@ -6,7 +6,7 @@
 in vec2 uv;
 out vec4 colour;
 
-vec4 integrateDFGOnly(float NdotV, float roughness) { //bad results for high NdotV – also test results for diffuse lighting direction with only one face of the cubemap.
+vec4 integrateDFGOnly(float NdotV, float roughness) {
     
     const uint sampleCount = 1024;
     

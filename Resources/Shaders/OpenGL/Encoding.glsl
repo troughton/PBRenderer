@@ -84,8 +84,8 @@ void encodeDataToGBuffers(in MaterialData data, in vec3 normal, inout uint gBuff
     
     gBuffer0 = (nX << 22) | (nY << 12) | (smoothness << 2);
     
-    gBuffer1.rgb = data.baseColour;
-    gBuffer1.a = intBitsToFloat(basisIndex);
+    gBuffer1.rgb = data.baseColour.rgb;
+    gBuffer1.a = basisIndex / 8.0;
     gBuffer2.g = data.metalMask;
     gBuffer2.b = data.reflectance;
 }
@@ -93,7 +93,7 @@ void encodeDataToGBuffers(in MaterialData data, in vec3 normal, inout uint gBuff
 MaterialData decodeMaterialFromGBuffers(vec4 gBuffer0, vec4 gBuffer1, vec4 gBuffer2) {
     MaterialData data;
     data.smoothness = gBuffer0.b;
-    data.baseColour = gBuffer1.rgb;
+    data.baseColour = vec4(gBuffer1.rgb, 1);
     data.metalMask = gBuffer2.g;
     data.reflectance = gBuffer2.b;
     

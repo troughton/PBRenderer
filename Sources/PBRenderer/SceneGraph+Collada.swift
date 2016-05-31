@@ -113,11 +113,11 @@ extension Scene {
                     
                     if let diffuse = materialParams.diffuse {
                         if case let .color(_, colour) = diffuse {
-                            material.baseColour = vec4(colour).xyz
+                            material.baseColour = vec4(colour)
                             
                             if _isDebugAssertConfiguration() && clamp(material.baseColour, 0, 1) != material.baseColour {
                                 print("Warning: material colour should be in the range [0, 1]")
-                                material.baseColour = clamp(material.baseColour, vec3(0), vec3(1))
+                                material.baseColour = clamp(material.baseColour, vec4(0), vec4(1))
                             }
                         }
                     }

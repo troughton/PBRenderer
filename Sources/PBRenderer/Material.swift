@@ -12,7 +12,8 @@ import SGLMath
 //See p13 of Moving Frostbite to PBR course notes
 public struct Material {
     
-    public var baseColour : vec3 = vec3(0.5)
+    public var baseColour : vec4 = vec4(0.5)
+    public var emissive : vec4 = vec4(0)
     
     public var smoothness : Float = 0.5
     public var metalMask : Float = 0

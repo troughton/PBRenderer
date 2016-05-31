@@ -5,7 +5,7 @@
 uniform samplerCube image;
 uniform float valueMultiplier;
 
-const uint sampleCount = 256;
+const uint sampleCount = 32;
 
 in vec2 uv;
 layout(location = 0) out vec4 out0;
