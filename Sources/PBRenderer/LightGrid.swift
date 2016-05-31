@@ -169,7 +169,7 @@ final class LightGridBuilder {
         coverageLists[cellIndex].append(coverage)
     }
     
-    func buildAndUpload(gpuBuffer: UnsafeMutablePointer<Void>?, bufferSize: Int) {
+    func buildAndUpload(gpuBuffer: UnsafeMutablePointer<Void>, bufferSize: Int) {
         tempBuffer.reserveCapacity(bufferSize + 256 * 1024); // 256 KB margin: max allocation per cell
         
         let tempBufferPtr = tempBuffer.withUnsafeMutableBufferPointer { return $0 }
@@ -183,19 +183,20 @@ final class LightGridBuilder {
                 for z in 0..<dim.depth / 4 {
                     self.buildFlatEntries(x: x, y: y, z: z);
                     
-                    if let gpuBuffer = gpuBuffer {
+                    let size = allocatedBytes - uploadedBytes
+                    if size > 0 {
                         memcpy(gpuBuffer.advanced(by: uploadedBytes), tempBufferPtr.baseAddress?.advanced(by: uploadedBytes), allocatedBytes - uploadedBytes);
+                        
+                        uploadedBytes = allocatedBytes;
+                        
+                        assert(allocatedBytes <= bufferSize, "gpu buffer not big enough");
                     }
-                    uploadedBytes = allocatedBytes;
                     
-                    assert(allocatedBytes <= bufferSize, "gpu buffer not big enough");
                 }
             }
         }
         
-        if (gpuBuffer != nil) {
-            memcpy(gpuBuffer, tempBufferPtr.baseAddress, headerBytes);
-        }
+        memcpy(gpuBuffer, tempBufferPtr.baseAddress, headerBytes);
     }
     
 }

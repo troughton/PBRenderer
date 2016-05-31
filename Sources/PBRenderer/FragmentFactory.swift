@@ -132,6 +132,7 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
     
     var lightPositionView = camera.sceneNode.transform.worldToNodeMatrix * light.sceneNode.transform.worldSpacePosition
     lightPositionView.z *= -1;
+    lightPositionView.y *= -1;
     // compute view space quad
     var clipRegion = ComputeClipRegion(lightPosView: lightPositionView.xyz, lightRadius: light.falloffRadius, cameraProj: mCameraProj, cameraNearFar: mCameraNearFar)
     clipRegion = (clipRegion + vec4(1.0, 1.0, 1.0, 1.0)) * 0.5; // map coordinates to [0..1]
@@ -158,13 +159,13 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
     if (intZBounds.1 >= dim.depth) { intZBounds.1 = dim.depth - 1; }
     
     var y = intClipRegion.1 / 4
-    var x = intClipRegion.0 / 4
-    var z = intZBounds.0 / 4
-    
-    
     
     while y <= intClipRegion.3 / 4 {
+        
+        var x = intClipRegion.0 / 4
         while x <= intClipRegion.2 / 4 {
+            
+            var z = intZBounds.0 / 4
             while z <= intZBounds.1 / 4 {
                 let x1 = clamp(intClipRegion.0 - x * 4, min: 0, max: 3);
                 let x2 = clamp(intClipRegion.2 - x * 4, min: 0, max: 3);
@@ -174,8 +175,6 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
                 let z2 = clamp(intZBounds.1 - z * 4, min: 0, max: 3);
         
                 let coverage = fragmentFactory.coverage(x1: x1, x2: x2, y1: y1, y2: y2, z1: z1, z2: z2);
-        
-                print("Pushing fragment at cell index \(x), \(y), \(z)")
                 
                 builder.pushFragment(cellIndex: dim.cellIndex(x: x, y: y, z: z), lightIndex: Int32(lightIndex), coverage: coverage);
                 z += 1
@@ -186,6 +185,9 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
     }
 }
 
+private var fragments = [Fragment]()
+
+//Requires that all lights be in a single buffer
 func RasterizeLights(builder: LightGridBuilder, viewerCamera: Camera, lights: [Light]) {
     
     let fragmentFactory = FragmentFactory()
@@ -198,53 +200,61 @@ func RasterizeLights(builder: LightGridBuilder, viewerCamera: Camera, lights: [L
 //    camera.near = viewerCamera->GetFarClip();
 //    camera.proj11 = mCameraProj._11;
 //    camera.proj22 = mCameraProj._22;
-//    
-//    bool simd = true;
-//    
-//    if (simd)
-//    {
-//        vector<ispc::LightBounds> bounds;
-//        bounds.resize(lightCount);
-//        LightGridDimensions dim = builder->dimensions();
-//        ispc::LightGridDimensions* pdim = (ispc::LightGridDimensions*)&dim;
+    
+//    #if os(OSX)
+//        //We expect the simd path to be faster – Swift on Linux doesn't support the simd module yet, which SGLMath makes use of.
+//
+//        var bounds = [LightBounds](repeating: LightBounds(), count: lights.count)
+//
+//        let lightPositions = lights.map { (light) -> vec3 in
+//            var lightPositionView = viewerCamera.sceneNode.transform.worldToNodeMatrix * light.sceneNode.transform.worldSpacePosition
+//            lightPositionView.z *= -1;
+//            lightPositionView.y *= -1;
+//            return lightPositionView.xyz
+//        }
 //        
-//        ispc::CoarseRasterizeLights((ispc::PointLight*)lights, &bounds[0], lightCount, &camera, pdim);
+//        let dim = builder.dim
 //        
-//        // static to avoid large re-allocations
-//        static vector<ispc::Fragment> fragments;
-//        fragments.resize(0);
+//        CoarseRasterizeLights(lights: lights, lightPositions: lightPositions, bounds: &bounds, camera: viewerCamera, dim: dim)
 //        
-//        for (int lightIndex = 0; lightIndex < lightCount; lightIndex++)
-//        {
-//            ispc::LightBounds region = bounds[lightIndex];
+//        
+//        fragments.removeAll(keepingCapacity: true)
+//        
+//        for (i, region) in bounds.enumerated() {
 //            
-//            for (int y = region.p1[1] / 4; y <= region.p2[1] / 4; y++)
-//            for (int x = region.p1[0] / 4; x <= region.p2[0] / 4; x++)
-//            for (int z = region.p1[2] / 4; z <= region.p2[2] / 4; z++)
-//            {
-//                ispc::Fragment fragment;
-//                fragment.cellIndex = dim.cellIndex(x, y, z);
-//                fragment.lightIndex = lightIndex;
-//                fragments.push_back(fragment);
+//            var y = region.p1.1 / 4
+//            while y <= region.p2.1 / 4 {
+//                var x = region.p1.0 / 4
+//                while x <= region.p2.0 / 4 {
+//                    var z = region.p1.2 / 4
+//                    
+//                    while z <= region.p2.2 / 4 {
+//                        
+//                        let fragment = Fragment(cellIndex: dim.cellIndex(x: x, y: y, z: z), lightIndex: i)
+//                        fragments.append(fragment)
+//                        
+//                        z += 1
+//                    }
+//                    
+//                    
+//                    x += 1
+//                }
+//                
+//                
+//                y += 1
 //            }
 //        }
 //        
-//        int fragCount = (int)fragments.size();
-//        ispc::FineRasterizeLights((ispc::PointLight*)lights, &fragments[0], fragCount, &camera, pdim);
+//        FineRasterizeLights(lights: lights, lightPositions: lightPositions, fragments: &fragments, camera: viewerCamera, lightGridBuilder: builder);
 //        
-//        for (int fragIndex = 0; fragIndex < fragCount; fragIndex++)
-//        {
-//            ispc::Fragment fragment = fragments[fragIndex];
-//            
-//            builder->pushFragment(fragment.cellIndex, fragment.lightIndex, fragment.coverage);
+//        for fragment in fragments {
+//            builder.pushFragment(cellIndex: fragment.cellIndex, lightIndex: Int32(lights[fragment.lightIndex].backingGPULight.bufferIndex), coverage: fragment.coverage)
 //        }
-//    }
-//    else
-//    {
+//        #else
         // warning: scalar version does coarser (AABB) culling
-    for light in lights {
-        let lightIndex = light.backingGPULight.bufferIndex
+        for light in lights {
+            let lightIndex = light.backingGPULight.bufferIndex
             GenerateLightFragments(fragmentFactory: fragmentFactory, builder: builder, camera: viewerCamera, light: light, lightIndex: lightIndex);
         }
-//    }
+//    #endif
 }

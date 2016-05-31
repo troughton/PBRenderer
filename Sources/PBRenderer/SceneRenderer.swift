@@ -341,9 +341,9 @@ final class LightAccumulationPass {
         self.lightGridBuilder.clearAllFragments()
         RasterizeLights(builder: self.lightGridBuilder, viewerCamera: camera, lights: lights)
         
-        assert(sizeof(LightGridEntry) == 16)
-        self.lightGridBuilder.buildAndUpload(gpuBuffer: self.lightGridBuffer.contents, bufferSize: self.lightGridBuffer.capacity * sizeof(LightGridEntry))
-        self.lightGridBuffer.didModify()
+        self.lightGridBuffer.asMappedBuffer({ (lightGridBuffer) -> Void in
+            self.lightGridBuilder.buildAndUpload(gpuBuffer: lightGridBuffer!, bufferSize: self.lightGridBuffer.capacity * sizeof(LightGridEntry))
+        }, usage: GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_INVALIDATE_RANGE_BIT)
     }
 }
 
@@ -436,6 +436,7 @@ public final class SceneRenderer {
         
 //        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
 //
+        
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: nil)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: [Texture](gBuffers[0..<4]), gBufferDepth: OpenCLDepthTextureSupported ? gBufferDepth : gBuffers.last!)
         self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)

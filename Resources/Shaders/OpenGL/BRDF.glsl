@@ -3,9 +3,10 @@
  ***********************************/
 
 #include "Utilities.glsl"
+#include "MaterialData.glsl"
 
 vec3 F_Schlick(vec3 f0, float f90, float u) {
-    return f0 + (f90 - f0) * pow(1.f - u, 5.f);
+    return f0 + (f90 - f0) * exp2((-5.55473f * u - 6.98316f) * u);  //native_powr(1.f - u, 5.f);
 }
 
 float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH, float linearRoughness);
@@ -38,22 +39,20 @@ float D_GGX(float NdotH, float m) {
 }
 
 
-vec3 BRDF(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, vec3 albedo, vec3 f0, float f90, float linearRoughness) {
-    
-    float roughness = linearRoughness * linearRoughness;
+vec3 BRDF(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingData material) {
     
     vec3 H = normalize(V + L);
     float LdotH = saturate(dot(L, H));
     float NdotH = saturate(dot(N, H));
     
     //Specular
-    vec3 F = F_Schlick(f0, f90, LdotH);
-    float Vis = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
-    float D = D_GGX(NdotH, roughness);
-    vec3 Fr = D * F * Vis / PI;
+    vec3 F = F_Schlick(material.f0, material.f90, LdotH);
+    float Vis = V_SmithGGXCorrelated(NdotV, NdotL, material.roughness);
+    float D = D_GGX(NdotH, material.roughness);
+    vec3 Fr = D * F * Vis * INV_PI;
     
     //Diffuse
-    float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, linearRoughness) / PI;
+    float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, material.linearRoughness) * INV_PI;
     
-    return Fd * albedo + Fr;
+    return Fd * material.albedo + Fr;
 }

@@ -58,12 +58,12 @@ void cubeMapFaceUVsToDirections(vec2 uv, out vec3 direction0, out vec3 direction
     scaledUV.y *= -1.f;
     vec3 direction;
     
-            direction0 = vec3(1.f, scaledUV.y, -scaledUV.x);
-            direction1 = vec3(-1.f, scaledUV.y, scaledUV.x);
-            direction2 = vec3(scaledUV.x, 1.f, -scaledUV.y);
-            direction3 = vec3(scaledUV.x, -1.f, scaledUV.y);
-            direction4 = vec3(scaledUV.x, scaledUV.y, 1.f);
-            direction5 = vec3(-scaledUV.x, scaledUV.y, -1.f);
+    direction0 = vec3(1.f, scaledUV.y, -scaledUV.x);
+    direction1 = vec3(-1.f, scaledUV.y, scaledUV.x);
+    direction2 = vec3(scaledUV.x, 1.f, -scaledUV.y);
+    direction3 = vec3(scaledUV.x, -1.f, scaledUV.y);
+    direction4 = vec3(scaledUV.x, scaledUV.y, 1.f);
+    direction5 = vec3(-scaledUV.x, scaledUV.y, -1.f);
 }
 
 vec3 cubeMapFaceUVToDirection(vec2 uv, int face) {

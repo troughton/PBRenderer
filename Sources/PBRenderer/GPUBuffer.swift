@@ -114,6 +114,18 @@ private final class GPUBufferImpl {
         glDeleteBuffers(1, &glBuffer)
     }
     
+    func asMappedBuffer<U>(_ function: @noescape (UnsafeMutablePointer<Void>?) throws -> U, range: Range<Int>, usage: GLbitfield) rethrows -> U {
+        glBindBuffer(bufferBinding, _glBuffer)
+        let pointer = glMapBufferRange(bufferBinding, GLintptr(range.lowerBound), GLsizeiptr(range.count), usage)
+        
+        let result = try function(pointer)
+        
+        glUnmapBuffer(bufferBinding)
+        glBindBuffer(bufferBinding, 0)
+        
+        return result
+    }
+    
     func didModifyRange(_ range: Range<Int>) {
         glBindBuffer(bufferBinding, _glBuffer)
         glBufferSubData(target: bufferBinding, offset: range.lowerBound, size: range.count, data: _contents.advanced(by: range.lowerBound))
@@ -217,6 +229,12 @@ public final class GPUBuffer<T> {
         let elementSize = typeSize(T.self, bufferType: _internalBuffer.bufferBinding)
         let destinationPtr = UnsafeMutablePointer<T>(_internalBuffer._contents.advanced(by: index * elementSize))
         memcpy(destinationPtr, value, sizeInBytes)
+    }
+    
+    func asMappedBuffer<U>(_ function: @noescape (UnsafeMutablePointer<Void>?) throws -> U, range: Range<Int>? = nil, usage: GLbitfield) rethrows -> U {
+        let range = range ?? 0..<self.capacity
+        let elementSize = typeSize(T.self, bufferType: _internalBuffer.bufferBinding)
+        return try self._internalBuffer.asMappedBuffer(function, range: (range.lowerBound * elementSize)..<(range.upperBound * elementSize), usage: usage)
     }
     
     subscript(_ range: Range<Int>) -> [T] {

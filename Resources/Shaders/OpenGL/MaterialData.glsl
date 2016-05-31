@@ -1,6 +1,6 @@
 #include "Utilities.glsl"
 
-struct MaterialData {
+layout(std140) struct MaterialData {
     vec4 baseColour;
     vec4 emissive;
     float smoothness;
@@ -8,10 +8,23 @@ struct MaterialData {
     float reflectance;
 };
 
-void evaluateMaterialData(in MaterialData data, out vec3 albedo, out vec3 f0, out float f90, out float linearRoughness) {
+struct MaterialRenderingData {
+    vec3 albedo;
+    vec3 f0;
+    float f90;
+    float linearRoughness;
+    float roughness;
+};
+
+MaterialRenderingData evaluateMaterialData(in MaterialData data) {
+    MaterialRenderingData outData;
+    
     vec3 diffuseF0 = vec3(0.16 + data.reflectance * data.reflectance);
-    albedo = mix(data.baseColour.rgb, vec3(0), data.metalMask);
-    f0 = mix(diffuseF0, data.baseColour.rgb, data.metalMask);
-    f90 = saturate(50.0 * dot(f0, vec3(0.33)));
-    linearRoughness = 1 - data.smoothness;
+    outData.albedo = mix(data.baseColour.rgb, vec3(0), data.metalMask);
+    outData.f0 = mix(diffuseF0, data.baseColour.rgb, data.metalMask);
+    outData.f90 = saturate(50.0 * dot(f0, vec3(0.33)));
+    outData.linearRoughness = 1 - data.smoothness;
+    outData.roughness = outData.linearRoughness * outData.linearRoughness;
+    
+    return outData;
 }

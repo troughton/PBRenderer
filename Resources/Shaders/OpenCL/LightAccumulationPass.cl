@@ -43,29 +43,6 @@ float3 decodeStereographic(float2 enc) {
 #define BasisIndexNegativeY 4
 #define BasisIndexNegativeZ 5
 
-__constant const float3 positiveXT = (float3)(0, 0, 1);
-__constant const float3 positiveXB = (float3)(1, 0, 0);
-__constant const float3 positiveXN = (float3)(0, 1, 0);
-
-__constant const float3 positiveYT = (float3)(1, 0, 0);
-__constant const float3 positiveYB = (float3)(0, 0, 1);
-__constant const float3 positiveYN = (float3)(0, 1, 0);
-
-__constant const float3 positiveZT = (float3)(1, 0, 0);
-__constant const float3 positiveZB = (float3)(0, 1, 0);
-__constant const float3 positiveZN = (float3)(0, 0, 1);
-
-__constant const float3 negativeXT = (float3)(0, 0, -1);
-__constant const float3 negativeXB = (float3)(1, 0, 0);
-__constant const float3 negativeXN = (float3)(0, 1, 0);
-
-__constant const float3 negativeYT = (float3)(1, 0, 0);
-__constant const float3 negativeYB = (float3)(0, 0, -1);
-__constant const float3 negativeYN = (float3)(0, 1, 0);
-
-__constant const float3 negativeZT = (float3)(1, 0, 0);
-__constant const float3 negativeZB = (float3)(0, 1, 0);
-__constant const float3 negativeZN = (float3)(0, 0, -1);
 
 float3 decode(float2, float);
 float3 decode(float2 enc, float basis) {
@@ -74,16 +51,16 @@ float3 decode(float2 enc, float basis) {
     
     float3 output;
     
-    if (basis < BasisIndexPositiveX + 0.5) {
+    if (basis < BasisIndexPositiveX + 0.5f) {
         output = normal.zxy;
-    } else if (basis < BasisIndexPositiveY + 0.5) {
+    } else if (basis < BasisIndexPositiveY + 0.5f) {
         output = normal.xzy;
-    } else if (basis < BasisIndexPositiveZ + 0.5) {
+    } else if (basis < BasisIndexPositiveZ + 0.5f) {
         output = normal;
-    } else if (basis < BasisIndexNegativeX + 0.5) {
+    } else if (basis < BasisIndexNegativeX + 0.5f) {
         output = normal.zxy;
         output.x *= -1;
-    } else if (basis < BasisIndexNegativeY + 0.5) {
+    } else if (basis < BasisIndexNegativeY + 0.5f) {
         output = normal.xzy;
         output.y *= -1;
     } else {
@@ -360,10 +337,16 @@ float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData 
     
     for (int k = 2; k < list_size + 2; k++) {
         int lightIndex = (lightIndexBlock[(k & 7)>>1] >> ((k&1)<<4)) & 0xFFFF;
-        if ((k & 7) == 7) { fill_array4(lightIndexBlock, (int4)lightGrid[list_index++]); }
+        if ((k & 7) == 7) { fill_array4(lightIndexBlock, (int4)lightGrid[list_index++]); } //Follow the linked list through all of the tiles in this cluster.
         
         __global LightData *light = &lights[lightIndex];
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, albedo, f0, f90, linearRoughness, light);
+        
+        if (lightIndex == 0) {
+            lightAccumulation += (float3)(0.2f, 0.f, 0.f);
+        } else if (lightIndex == 1) {
+            lightAccumulation += (float3)(0.f, 0.2f, 0.f);
+        }
     }
     
 //    [flatten] if (mUI.visualizeLightCount)
@@ -371,7 +354,7 @@ float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData 
 //        lit = (float(light_count) * rcp(255.0f)).xxx;
 //    }
     
-    lightAccumulation = (float3)(light_count == 0 ? 1 : 0, light_count == 1 ? 1 : 0, light_count == 2 ? 1 : 0);
+//    lightAccumulation += (float3)(light_count == 0 ? 0.1 : 0, light_count == 1 ? 0.1 : 0, light_count == 2 ? 0.1 : 0);
     
     return lightAccumulation;
 }

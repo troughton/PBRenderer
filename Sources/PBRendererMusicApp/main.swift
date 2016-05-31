@@ -63,9 +63,9 @@ final class AudioVisualManager : SongDelegate {
         guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
         
         self.scene = Scene(fromCollada: collada)
-        self.camera = scene.flattenedScene.flatMap { $0.cameras.first }.first!
+        self.camera = scene.cameras.first!
         
-        self.scene.flattenedScene.forEach { $0.lights.forEach { $0.intensity = 0 } }
+        self.scene.lights.forEach { $0.intensity = 0 }
         
     }
     
