@@ -158,7 +158,7 @@ public final class Camera {
         //         = 78 / (100 * 0.65) * 2^EV_100
         //         = 1.2 * 2^EV
         //Reference: http://en.wikipedia.org/wiki/Film_speed
-        let maxLuminance = 1.2 * pow(2.0, self.EV100)
+        let maxLuminance = 1.2 * exp2f(self.EV100)
         return 1.0 / maxLuminance
     }
 }

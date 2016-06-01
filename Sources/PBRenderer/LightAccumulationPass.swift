@@ -84,7 +84,7 @@ final class LightAccumulationPass {
     
     func setupLightGrid(camera: Camera, lights: [Light]) {
         let clusteredGridScale = 16
-        self.lightGridBuilder.reset(dim: LightGridDimensions(width: 2 * clusteredGridScale, height: clusteredGridScale, depth: 8 * clusteredGridScale))
+        self.lightGridBuilder.reset(dim: LightGridDimensions(width: 2 * clusteredGridScale, height: clusteredGridScale, depth: 4 * clusteredGridScale))
         
         self.lightGridBuilder.clearAllFragments()
         RasterizeLights(builder: self.lightGridBuilder, viewerCamera: camera, lights: lights)
@@ -104,6 +104,7 @@ final class LightAccumulationPass {
         case GBufferDepthTexture = "gBufferDepthTexture"
         case Lights = "LightList"
         case CameraToWorldMatrix = "cameraToWorldMatrix"
+        case Exposure = "exposure"
         
         var name : String {
             return self.rawValue
@@ -155,6 +156,8 @@ final class LightAccumulationPass {
             self.lightGridTexture.bindToIndex(4)
             defer { self.lightGridTexture.unbindFromIndex(4) }
             shader.setUniform(GLint(4), forProperty: LightAccumulationShaderProperty.LightGrid)
+            
+            shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             
             shader.setMatrix(camera.transform.nodeToWorldMatrix, forProperty: LightAccumulationShaderProperty.CameraToWorldMatrix)
             

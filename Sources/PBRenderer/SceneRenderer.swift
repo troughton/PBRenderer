@@ -162,6 +162,8 @@ final class GBufferPass {
                 shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.SpecularLDTexture)
                 shader.setUniform(GLint(environmentMap.specularTexture.descriptor.mipmapLevelCount - 1), forProperty: GBufferShaderProperty.LDMipMaxLevel)
             
+            shader.setUniform(camera.exposure, forProperty: GBufferShaderProperty.Exposure)
+            
             
             let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz
             shader.setUniform(cameraPositionWorld.x, cameraPositionWorld.y, cameraPositionWorld.z, forProperty: BasicShaderProperty.CameraPositionWorld)

@@ -3,6 +3,7 @@
 #include "Encoding.glsl"
 #include "MaterialData.glsl"
 #include "LightProbe.glsl"
+#include "Camera.glsl"
 
 layout(location = 0) out uint gBuffer0;
 layout(location = 1) out vec4 gBuffer1;
@@ -38,6 +39,8 @@ vec3 evaluateEnvironmentMap(vec3 N, vec3 V, MaterialRenderingData material) {
     }
 }
 
+uniform float exposure;
+
 void main() {
     vec3 N = normalize(vertexNormal);
     vec3 V = normalize(worldSpaceViewDirection);
@@ -51,7 +54,7 @@ void main() {
     vec4 out2 = vec4(0);
     
     vec3 radiosity = evaluateEnvironmentMap(N, V, renderingMaterial) + material.emissive.rgb;
-    vec4 out3 = vec4(radiosity, 0);
+    vec4 out3 = vec4(epilogueLighting(radiosity, exposure), 0);
     
     encodeDataToGBuffers(material, N, out0, out1, out2);
     gBuffer0 = out0;

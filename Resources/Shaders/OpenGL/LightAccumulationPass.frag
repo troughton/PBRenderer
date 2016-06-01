@@ -4,7 +4,7 @@
 #include "Lighting.glsl"
 #include "Camera.glsl"
 
-#define MAX_NUM_TOTAL_LIGHTS 128
+#define MAX_NUM_TOTAL_LIGHTS 512
 
 layout(std140) uniform LightList {
     LightData lights[MAX_NUM_TOTAL_LIGHTS];
@@ -36,7 +36,7 @@ uniform usamplerBuffer lightGrid;
 #define ClusteredGridScale 16
 
 vec3 calculateLightingClustered(vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePosition, vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, MaterialRenderingData material) {
-    uvec3 grid = uvec3(2 * ClusteredGridScale, 1 * ClusteredGridScale, 8 * ClusteredGridScale);
+    uvec3 grid = uvec3(2 * ClusteredGridScale, 1 * ClusteredGridScale, 4 * ClusteredGridScale);
     
     vec2 screenPosition = uv;
     float zPosition = (-cameraSpacePosition.z - cameraNearFar.x) / (cameraNearFar.y - cameraNearFar.x);
@@ -71,6 +71,9 @@ vec3 calculateLightingClustered(vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePos
     return lightAccumulation;
 }
 
+
+uniform float exposure;
+
 vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
                              uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2, float gBufferDepth,
                              vec2 uv, mat4 cameraToWorldMatrix) {
@@ -89,7 +92,7 @@ vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
     
     vec3 lightAccumulation = calculateLightingClustered(cameraNearFar, uv, cameraSpacePosition.xyz, worldSpacePosition, V, N, NdotV, renderingMaterial);
     
-    vec3 epilogue = epilogueLighting(lightAccumulation, 100.f);
+    vec3 epilogue = epilogueLighting(lightAccumulation, exposure);
     
     return epilogue;
 }
@@ -101,6 +104,7 @@ uniform usampler2D gBuffer0Texture;
 uniform sampler2D gBuffer1Texture;
 uniform sampler2D gBuffer2Texture;
 uniform sampler2D gBufferDepthTexture;
+
     
 uniform mat4 cameraToWorldMatrix;
 

@@ -318,7 +318,7 @@ void fill_array4(__private int *array, int4 src)
 #define ClusteredGridScale 16
 float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData *lights, float2 cameraNearFar, float2 uv, float3 cameraSpacePosition, float3 worldSpacePosition, float3 V, float3 N, float NdotV, float3 albedo, float3 f0, float f90, float linearRoughness);
 float3 calculateLightingClustered(__global uint4* lightGrid, __global LightData *lights, float2 cameraNearFar, float2 uv, float3 cameraSpacePosition, float3 worldSpacePosition, float3 V, float3 N, float NdotV, float3 albedo, float3 f0, float f90, float linearRoughness) {
-    uint3 grid = (uint3)(2 * ClusteredGridScale, 1 * ClusteredGridScale, 8 * ClusteredGridScale);
+    uint3 grid = (uint3)(2 * ClusteredGridScale, 1 * ClusteredGridScale, 4 * ClusteredGridScale);
     
     float2 screenPosition = uv;
     float zPosition = (-cameraSpacePosition.z - cameraNearFar.x) / (cameraNearFar.y - cameraNearFar.x);

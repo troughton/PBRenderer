@@ -23,6 +23,8 @@ enum GBufferShaderProperty : String, ShaderProperty {
     case DFGTexture = "dfg"
     case LDMipMaxLevel = "ldMipMaxLevel"
     
+    case Exposure = "exposure"
+    
     var name : String {
         return self.rawValue
     }

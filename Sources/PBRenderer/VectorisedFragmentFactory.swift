@@ -56,11 +56,19 @@ func GenerateLightBounds(light: Light, lightPositionView: vec3, box: inout Light
 
 func CoarseRasterizeLights(lights: [Light], lightPositions: [vec3], bounds: inout [LightBounds], camera: Camera, dim: LightGridDimensions)
 {
-    for idx in 0..<lights.count {
-        var box = LightBounds()
-        GenerateLightBounds(light: lights[idx], lightPositionView: lightPositions[idx], box: &box, camera: camera, dim: dim)
-        bounds[idx] = box
+    let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)!
+    let group = dispatch_group_create()!
+    
+    bounds.withUnsafeMutableBufferPointer { (bounds) -> Void in
+        for idx in 0..<lights.count {
+            dispatch_group_async(group, queue) {
+                var box = LightBounds()
+                GenerateLightBounds(light: lights[idx], lightPositionView: lightPositions[idx], box: &box, camera: camera, dim: dim)
+                bounds[idx] = box
+            }
+        }
     }
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 }
 
 struct Fragment {
@@ -87,9 +95,9 @@ func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, came
         let z = cz * 4 + zz;
         
         let cameraZDiff = camera.zFar - camera.zNear
-        let divisor = Float(dim.depth) * cameraZDiff
-        let minZ = Float(z - 0) / divisor + camera.zNear;
-        let maxZ = Float(z + 1) / divisor + camera.zNear;
+        let divisor = Float(dim.depth)
+        let minZ = Float(z - 0) / divisor * cameraZDiff + camera.zNear;
+        let maxZ = Float(z + 1) / divisor * cameraZDiff + camera.zNear;
         
         let centerZ = (minZ + maxZ) * 0.5;
         let normalZ = centerZ - lightPosition.z;
@@ -184,11 +192,20 @@ func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, came
 
 func FineRasterizeLights(lights: [Light], lightPositions: [vec3], fragments: inout [Fragment], camera: Camera, lightGridBuilder: LightGridBuilder)
 {
+    let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)!
+    let group = dispatch_group_create()!
     
-    for idx in 0..<fragments.count {
-        let lightIndex = fragments[idx].lightIndex
-        let light = lights[lightIndex]
-        let lightPosition = lightPositions[lightIndex]
-        fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadius, camera: camera, lightGrid: lightGridBuilder)
+    fragments.withUnsafeMutableBufferPointer { (fragments) -> () in
+        
+        for idx in 0..<fragments.count {
+            dispatch_group_async(group, queue) {
+                let lightIndex = fragments[idx].lightIndex
+                let light = lights[lightIndex]
+                let lightPosition = lightPositions[lightIndex]
+                fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadius, camera: camera, lightGrid: lightGridBuilder)
+            }
+        }
     }
+    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 }
