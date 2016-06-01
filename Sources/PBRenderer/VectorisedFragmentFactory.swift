@@ -6,6 +6,8 @@
 //
 //
 
+#if os(OSX)
+
 import Foundation
 import simd
 import SGLMath
@@ -84,11 +86,8 @@ struct Fragment {
     }
 }
 
-func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, camera: Camera, lightGrid: LightGridBuilder) -> UInt64
+    func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, cameraProj11: Float, cameraProj22: Float, cameraZNear: Float, cameraZFar: Float, lightGrid: LightGridBuilder) -> UInt64
 {
-    
-    let cameraProj11 = camera.projectionMatrix[0][0]
-    let cameraProj22 = camera.projectionMatrix[1][1]
     
     let dim = lightGrid.dim
     let cz = cellIndex % (dim.depth / 4);
@@ -100,10 +99,10 @@ func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, came
         // Z
         let z = cz * 4 + zz;
         
-        let cameraZDiff = camera.zFar - camera.zNear
+        let cameraZDiff = cameraZFar - cameraZNear
         let divisor = Float(dim.depth)
-        let minZ = Float(z - 0) / divisor * cameraZDiff + camera.zNear;
-        let maxZ = Float(z + 1) / divisor * cameraZDiff + camera.zNear;
+        let minZ = Float(z - 0) / divisor * cameraZDiff + cameraZNear;
+        let maxZ = Float(z + 1) / divisor * cameraZDiff + cameraZNear;
         
         let centerZ = (minZ + maxZ) * 0.5;
         let normalZ = centerZ - lightPosition.z;
@@ -199,6 +198,10 @@ func FineRasterizeLights(lights: [Light], lightPositions: [vec3], fragments: ino
     let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)!
     let group = dispatch_group_create()!
     
+    
+    let cameraProj11 = camera.projectionMatrix[0][0]
+    let cameraProj22 = camera.projectionMatrix[1][1]
+    
     fragments.withUnsafeMutableBufferPointer { (fragments) -> () in
         
         for idx in 0..<fragments.count {
@@ -206,10 +209,14 @@ func FineRasterizeLights(lights: [Light], lightPositions: [vec3], fragments: ino
                 let lightIndex = fragments[idx].lightIndex
                 let light = lights[lightIndex]
                 let lightPosition = lightPositions[lightIndex]
-                fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadius, camera: camera, lightGrid: lightGridBuilder)
+                fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadius,
+                                                          cameraProj11: cameraProj11, cameraProj22: cameraProj22, cameraZNear: camera.zNear, cameraZFar: camera.zFar,
+                                                          lightGrid: lightGridBuilder)
             }
         }
     }
     
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 }
+
+#endif

@@ -15,7 +15,7 @@ final class LightAccumulationPass {
     
     var pipelineState : PipelineState
     
-    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB
+    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 16, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //16MB
     let lightGridBuilder = LightGridBuilder()
     let lightGridTexture : Texture
     
