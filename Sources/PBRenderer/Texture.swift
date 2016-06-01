@@ -340,6 +340,11 @@ class Texture {
         glBindTexture(descriptor.textureType, _glTexture)
     }
     
+    func unbindFromIndex(_ index: Int) {
+        glActiveTexture(GL_TEXTURE0 + index)
+        glBindTexture(descriptor.textureType, 0)
+    }
+    
     func bindToFramebuffer(_ framebuffer: SGLOpenGL.GLenum, attachment: SGLOpenGL.GLenum, mipmapLevel: Int, textureSlice: Int, depthPlane: Int) {
         
         if let glTexture = _glTexture {

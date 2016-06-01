@@ -80,4 +80,8 @@ final class Sampler {
     func bindToIndex(_ index: Int) {
         glBindSampler(GLuint(index), self.glSampler)
     }
+    
+    func unbindFromIndex(_ index: Int) {
+        glBindSampler(GLuint(index), self.glSampler)
+    }
 }

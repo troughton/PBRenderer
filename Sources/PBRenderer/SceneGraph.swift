@@ -116,6 +116,10 @@ public final class SceneNode {
 public final class Camera {
     public var sceneNode : SceneNode! = nil
     
+    public var transform : Transform {
+        return self.sceneNode.transform
+    }
+    
     public let id : String?
     public let name: String?
     

@@ -7,7 +7,7 @@
 #include "Utilities.glsl"
 #include "BRDF.glsl"
 
-struct LightData {
+layout(std140) struct LightData {
     vec4 colourAndIntensity;
     vec4 worldSpacePosition;
     vec4 worldSpaceDirection;
@@ -48,11 +48,11 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness) {
     // Simple linear approximation
     float lerpFactor = (1 - roughness);
     
-    return native_normalize(mix(N, R, lerpFactor));
+    return normalize(mix(N, R, lerpFactor));
 }
 
 float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr) {
-    float sinTheta = native_sqrt(1.0f - cosTheta * cosTheta);
+    float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
     
     float illuminance = 0.0f;
     // Note: Following test is equivalent to the original formula.
@@ -148,7 +148,7 @@ vec3 evaluatePunctualLight(vec3 worldSpacePosition,
         
         if (light.lightTypeFlag == LightTypeSpot) {
             
-            float2 lightAngleScaleAndOffset = light.extraData.xy;
+            vec2 lightAngleScaleAndOffset = light.extraData.xy;
             
             attenuation *= getAngleAtt(L, lightDirectionWorld, lightAngleScaleAndOffset.x, lightAngleScaleAndOffset.y);
         }
@@ -169,7 +169,7 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
                         vec3 V, vec3 N, float NdotV,
                         MaterialRenderingData material,
                         LightData light) {
-    switch (light->lightTypeFlag) {
+    switch (light.lightTypeFlag) {
         case LightTypePoint:
         case LightTypeDirectional:
         case LightTypeSpot:

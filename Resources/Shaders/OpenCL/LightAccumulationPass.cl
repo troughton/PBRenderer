@@ -382,7 +382,7 @@ float3 lightAccumulationPass(float4 nearPlaneAndProjectionTerms, float2 cameraNe
 
     lightAccumulation += gBuffer3.xyz;
     
-    float3 epilogue = epilogueLighting(lightAccumulation, 100.f);
+    float3 epilogue = epilogueLighting(lightAccumulation, 1.f);
         
     return epilogue;
 }

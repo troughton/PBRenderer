@@ -93,7 +93,7 @@ vec3 decodeStereographic(vec2 enc) {
 vec3 decode(vec2 enc, float basis) {
     vec3 normal = decodeStereographic(enc);
     //The normal will be within 90 degrees in x and y of (0, 0, 1)
-    
+
     vec3 outNormal;
     
     if (basis < BasisIndexPositiveX + 0.5f) {
@@ -141,7 +141,7 @@ MaterialData decodeDataFromGBuffers(out vec3 N, uint gBuffer0, vec4 gBuffer1, ve
     uint smoothness = (gBuffer0 >> 2) & 0x3FFu;
     
     float basisIndex = gBuffer1.a * 8.0;
-    vec2 encodedNormal = vec2(nX * divideFactor, nY * divideFactor);
+    vec2 encodedNormal = vec2(float(nX) * divideFactor, float(nY) * divideFactor);
     N = decode(encodedNormal, basisIndex);
     
     

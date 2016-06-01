@@ -2,10 +2,7 @@
 
 uniform sampler2D lightAccumulationBuffer;
 
-in vec2 uv;
-
 out vec4 finalColour;
-
 
 float A = 0.15;
 float B = 0.50;
@@ -24,6 +21,6 @@ vec3 Uncharted2Tonemap(vec3 x) {
 }
 
 void main() {
-    vec4 lightAccumulation = texture(lightAccumulationBuffer, uv);
+    vec4 lightAccumulation = texelFetch(lightAccumulationBuffer, ivec2(gl_FragCoord.xy), 0);
     finalColour = vec4(Uncharted2Tonemap(lightAccumulation.xyz), lightAccumulation.w);
 }

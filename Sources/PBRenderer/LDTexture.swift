@@ -139,6 +139,7 @@ final class LDTexture {
         //Algorithm: for each face, compute the terms.
         
         texture.bindToIndex(0)
+        defer { texture.unbindFromIndex(0) }
         self.diffusePipelineState.renderPass { (framebuffer, shader) in
             shader.setUniform(GLint(0), forProperty: LDTextureShaderProperty.Image)
             shader.setUniform(valueMultiplier, forProperty: LDTextureShaderProperty.ValueMultiplier)
@@ -152,6 +153,7 @@ final class LDTexture {
         //Algorithm: for each face, for each mip level, compute the terms.
         
         texture.bindToIndex(0)
+        defer { texture.unbindFromIndex(0) }
         
         for (mipLevel, state) in self.specularPipelineStates.enumerated().dropFirst() {
             
@@ -176,6 +178,7 @@ final class LDTexture {
         
         
         texture.bindToIndex(0)
+        defer { texture.unbindFromIndex(0) }
         
         self.specularPipelineStates[0].renderPass { (framebuffer, shader) in
             shader.setUniform(GLint(0), forProperty: LDTextureShaderProperty.Image)
@@ -189,6 +192,7 @@ final class LDTexture {
         
         
         LDTexture.sampler.bindToIndex(0)
+        defer { LDTexture.sampler.unbindFromIndex(0) }
         
         for ((texture, valueMultiplier), cubeMap) in zip(zip(textures, valueMultipliers), cubeMaps) {
             texture.fillDiffuseFromCubeMap(cubeMap, valueMultiplier: valueMultiplier)
