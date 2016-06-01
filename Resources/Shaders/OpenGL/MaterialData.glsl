@@ -1,11 +1,12 @@
 #include "Utilities.glsl"
 
-layout(std140) struct MaterialData {
+struct MaterialData {
     vec4 baseColour;
     vec4 emissive;
     float smoothness;
     float metalMask;
     float reflectance;
+    float padding;
 };
 
 struct MaterialRenderingData {

@@ -9,6 +9,7 @@
 import Foundation
 
 enum GBufferShaderProperty : String, ShaderProperty {
+    case Materials = "materials"
     case GBuffer0 = "gBuffer0Texture"
     case GBuffer1 = "gBuffer1Texture"
     case GBuffer2 = "gBuffer2Texture"

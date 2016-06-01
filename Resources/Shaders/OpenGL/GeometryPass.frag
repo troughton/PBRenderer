@@ -5,6 +5,8 @@
 #include "LightProbe.glsl"
 #include "Camera.glsl"
 
+layout(std140) uniform;
+
 layout(location = 0) out uint gBuffer0;
 layout(location = 1) out vec4 gBuffer1;
 layout(location = 2) out vec4 gBuffer2;
@@ -15,13 +17,22 @@ in vec3 vertexNormal;
 
 uniform bool useEnvironmentMap;
 
-#define MaxMaterialCount 16
-
-layout(std140) uniform Material {
-    MaterialData materials[MaxMaterialCount];
-};
-
+uniform samplerBuffer materials;
 uniform int materialIndex;
+
+MaterialData materialAtIndex(int materialIndex) {
+    int indexInBuffer = 3 * materialIndex;
+    MaterialData data;
+    data.baseColour = texelFetch(materials, indexInBuffer);
+    data.emissive = texelFetch(materials, indexInBuffer + 1);
+    
+    vec4 extraData = texelFetch(materials, indexInBuffer + 2);
+    data.smoothness = extraData.x;
+    data.metalMask = extraData.y;
+    data.reflectance = extraData.z;
+    
+    return data;
+}
 
 vec3 evaluateEnvironmentMap(vec3 N, vec3 V, MaterialRenderingData material) {
     
@@ -45,7 +56,7 @@ void main() {
     vec3 N = normalize(vertexNormal);
     vec3 V = normalize(worldSpaceViewDirection);
     
-    MaterialData material = materials[materialIndex];
+    MaterialData material = materialAtIndex(materialIndex);
     
     MaterialRenderingData renderingMaterial = evaluateMaterialData(material);
     

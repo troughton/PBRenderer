@@ -110,19 +110,10 @@ final class GBufferPass {
         shader.setMatrix(node.transform.nodeToWorldMatrix, forProperty: BasicShaderProperty.ModelToWorldMatrix)
         shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToWorldMatrix)
         
-        
-        let materialBlockIndex = 0
-        
         for mesh in node.meshes {
             if let materialName = mesh.materialName, let material = node.materials[materialName] {
-                let materialBuffer = material.buffer
                 
-                
-                let materialBufferOffset = material.bufferIndex / 16 //material is 48 bytes, we need 256 byte alignment, lowest common multiple is 768 bytes, and we can fit 16 materials into 768 bytes
-                let indexInBuffer = material.bufferIndex % 16
-                
-                materialBuffer.bindToUniformBlockIndex(materialBlockIndex, elementOffset: materialBufferOffset)
-                shader.setUniform(GLint(indexInBuffer), forProperty: GBufferShaderProperty.MaterialIndex)
+                shader.setUniform(GLint(material.bufferIndex), forProperty: GBufferShaderProperty.MaterialIndex)
             }
             
             mesh.render()
@@ -135,6 +126,8 @@ final class GBufferPass {
     
     func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture?) -> (colourTextures: [Texture], depthTexture: Texture) {
         let dfg = DFGTexture.defaultTexture //this will generate it the first time, so we need to call it outside of the render pass method.
+        
+        let materialTexture = Texture(buffer: scene.materialBuffer, internalFormat: GL_RGBA32F)
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             
@@ -164,6 +157,9 @@ final class GBufferPass {
             
             shader.setUniform(camera.exposure, forProperty: GBufferShaderProperty.Exposure)
             
+            
+            materialTexture.bindToIndex(3)
+            shader.setUniform(GLint(3), forProperty: GBufferShaderProperty.Materials)
             
             let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz
             shader.setUniform(cameraPositionWorld.x, cameraPositionWorld.y, cameraPositionWorld.z, forProperty: BasicShaderProperty.CameraPositionWorld)
