@@ -101,7 +101,7 @@ final class LightAccumulationPass {
         case GBuffer1Texture = "gBuffer1Texture"
         case GBuffer2Texture = "gBuffer2Texture"
         case GBufferDepthTexture = "gBufferDepthTexture"
-        case Lights = "LightList"
+        case Lights = "lights"
         case CameraToWorldMatrix = "cameraToWorldMatrix"
         case Exposure = "exposure"
         
@@ -114,28 +114,9 @@ final class LightAccumulationPass {
         
         self.setupLightGrid(camera: camera, lights: scene.lights)
         
+        let lightTexture = Texture(buffer: scene.lightBuffer, internalFormat: GL_RGBA32F)
+        
         self.pipelineState.renderPass { (framebuffer, shader) in
-            
-//            layout (std140) uniform Lights {
-//                LightData lights[MAX_NUM_TOTAL_LIGHTS];
-//            };
-//            
-//            uniform vec4 nearPlaneAndProjectionTerms
-//            uniform vec2 cameraNearFar,
-//            sampler2D gBuffer0Texture;
-//            sampler2D gBuffer1Texture;
-//            sampler2D gBuffer2Texture;
-//            sampler2D gBufferDepthTexture;
-//            
-//            uniform mat4 cameraToWorldMatrix;
-//            
-//            uniform sampler1D lightGrid;
-
-            let lightBufferIndex = 0
-            scene.lightBuffer.bindToUniformBlockIndex(lightBufferIndex, elementOffset: 0)
-            
-            shader.setUniformBlockBindingPoints(forProperties: [LightAccumulationShaderProperty.Lights])
-            
             
             gBufferColours[1].bindToIndex(1)
             defer { gBufferColours[1].unbindFromIndex(1) }
@@ -157,6 +138,11 @@ final class LightAccumulationPass {
             gBufferColours[0].bindToIndex(5)
             defer { gBufferColours[0].unbindFromIndex(5) }
             shader.setUniform(GLint(5), forProperty: LightAccumulationShaderProperty.GBuffer0Texture)
+            
+            lightTexture.bindToIndex(6)
+            defer { lightTexture.unbindFromIndex(6) }
+            shader.setUniform(GLint(6), forProperty: LightAccumulationShaderProperty.Lights)
+            
             
             shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             

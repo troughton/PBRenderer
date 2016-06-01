@@ -6,9 +6,23 @@
 
 #define MAX_NUM_TOTAL_LIGHTS 512
 
-layout(std140) uniform LightList {
-    LightData lights[MAX_NUM_TOTAL_LIGHTS];
-};
+uniform samplerBuffer lights;
+
+LightData lightAtIndex(int lightIndex) {
+    int indexInBuffer = 5 * lightIndex;
+    LightData data;
+    
+    data.colourAndIntensity = texelFetch(lights, indexInBuffer);
+    data.worldSpacePosition = texelFetch(lights, indexInBuffer + 1);
+    data.worldSpaceDirection  = texelFetch(lights, indexInBuffer + 2);
+    data.extraData = texelFetch(lights, indexInBuffer + 3);
+    
+    vec4 typeAndRadius = texelFetch(lights, indexInBuffer + 4);
+    data.lightTypeFlag = floatBitsToUint(typeAndRadius.x);
+    data.inverseSquareAttenuationRadius = typeAndRadius.y;
+    
+    return data;
+}
 
 out vec4 outputColour;
 in vec2 uv;
@@ -57,7 +71,7 @@ vec3 calculateLightingClustered(vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePos
         int lightIndex = (lightIndexBlock[(k & 7)>>1] >> ((k&1)<<4)) & 0xFFFF;
         if ((k & 7) == 7) { fill_array4(lightIndexBlock, ivec4(texelFetch(lightGrid, list_index++))); } //Follow the linked list through all of the tiles in this cluster.
         
-        LightData light = lights[lightIndex];
+        LightData light = lightAtIndex(lightIndex);
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, material, light);
     }
     
@@ -66,7 +80,6 @@ vec3 calculateLightingClustered(vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePos
     //        lit = (float(light_count) * rcp(255.0f)).xxx;
     //    }
     
-    //    lightAccumulation += (float3)(light_count == 0 ? 0.1 : 0, light_count == 1 ? 0.1 : 0, light_count == 2 ? 0.1 : 0);
     
     return lightAccumulation;
 }

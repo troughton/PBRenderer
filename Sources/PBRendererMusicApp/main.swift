@@ -65,6 +65,9 @@ final class AudioVisualManager : SongDelegate {
         self.scene = Scene(fromCollada: collada)
         self.camera = scene.cameras.first!
         
+        self.camera.shutterTime = 1.0
+        self.camera.aperture = 1.0
+        
         self.scene.lights.forEach { $0.intensity = 0 }
         
     }

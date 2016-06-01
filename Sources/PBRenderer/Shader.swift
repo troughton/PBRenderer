@@ -176,7 +176,7 @@ extension Shader {
     
         var status : GLint = 0
         glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-        if (status == GL_FALSE) {
+       // if (status == GL_FALSE) {
             var infoLogLength : GLint = 0
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
     
@@ -201,9 +201,14 @@ extension Shader {
             let numberedText = splitText.enumerated().reduce("", combine: { (text, line) -> String in
                 return text + String(line.offset) + ":\t" + line.element + "\n"
             })
+        
+        if (status == GL_FALSE) {
             
             fatalError("Compile failure in \(strShaderType) shader:\n\(errorString)\nShader is:\n\(numberedText)")
+        } else if !errorString.isEmpty {
+            print("Compile status:\n\(errorString)")
         }
+       // }
         return shader;
     }
 }
