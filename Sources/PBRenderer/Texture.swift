@@ -50,7 +50,7 @@ struct TextureDescriptor {
     /** The description of the texture usage.
      When configuring a Texture object you should always aim to determine and set specific texture usages; do not rely on the .Unknown value for the best performance.
      For example, set the descriptor’s usage value to .RenderTarget if you already know that you intend to use the resulting texture as a render target. This may significantly improve your app’s performance (with certain hardware). */
-    let usage : TextureUsage
+    var usage : TextureUsage
     
     init(textureType: SGLOpenGL.GLenum, pixelFormat: SGLOpenGL.GLenum, width: Int, height: Int, depth: Int = 1, mipmapLevelCount: UInt = 1, arrayLength: Int = 1, multisampleCount: Int = 1, usage : TextureUsage = .ShaderRead) {
         self.textureType = textureType
@@ -248,10 +248,10 @@ class Texture {
             glGenRenderbuffers(1, &texture)
             _renderBuffer = texture
             
-            glBindBuffer(GL_RENDERBUFFER, _renderBuffer)
+            glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer)
             
             glRenderbufferStorageMultisample(GL_RENDERBUFFER, descriptor.multisampleCount == 1 ? 0 : GLsizei(descriptor.multisampleCount), descriptor.pixelFormat, GLsizei(descriptor.width), GLsizei(descriptor.height))
-            glBindBuffer(GL_RENDERBUFFER, 0)
+            glBindRenderbuffer(GL_RENDERBUFFER, 0)
             return
         } else {
             _renderBuffer = nil

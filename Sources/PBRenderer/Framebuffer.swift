@@ -38,6 +38,7 @@ protocol RenderPassAttachment {
 struct RenderPassColourAttachment : RenderPassAttachment {
     var clearColour : vec4
     
+    var isEnabled : Bool = true
     var texture : Texture?
     var mipmapLevel : Int = 0
     var textureSlice : UInt = 0
@@ -214,7 +215,7 @@ public class Framebuffer {
         
         if _glFramebuffer != nil {
             let drawBuffers : [GLenum] = self.colourAttachments.enumerated().flatMap { (i, attachment) in
-                if let _ = attachment {
+                if let attachment = attachment where attachment.isEnabled {
                     return GL_COLOR_ATTACHMENT0 + i
                 } else { return nil }
             }

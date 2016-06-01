@@ -54,8 +54,10 @@ final class LightAccumulationPass {
         colourAttachment.storeAction = .Store
         colourAttachment.blendState = blendState
         
-        let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false)
+        var depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false)
+        depthDescriptor.usage = .RenderTarget
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
+    
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.loadAction = .Clear
         depthAttachment.storeAction = .Store
@@ -134,9 +136,6 @@ final class LightAccumulationPass {
             
             shader.setUniformBlockBindingPoints(forProperties: [LightAccumulationShaderProperty.Lights])
             
-            gBufferColours[0].bindToIndex(5)
-            defer { gBufferColours[0].unbindFromIndex(5) }
-            shader.setUniform(GLint(5), forProperty: LightAccumulationShaderProperty.GBuffer0Texture)
             
             gBufferColours[1].bindToIndex(1)
             defer { gBufferColours[1].unbindFromIndex(1) }
@@ -146,13 +145,18 @@ final class LightAccumulationPass {
             defer { gBufferColours[2].unbindFromIndex(2) }
             shader.setUniform(GLint(2), forProperty: LightAccumulationShaderProperty.GBuffer2Texture)
             
-            gBufferDepth.bindToIndex(3)
-            defer { gBufferColours[3].unbindFromIndex(3) }
-            shader.setUniform(GLint(3), forProperty: LightAccumulationShaderProperty.GBufferDepthTexture)
+            gBufferDepth.bindToIndex(0)
+            defer { gBufferColours[3].unbindFromIndex(0) }
+            shader.setUniform(GLint(0), forProperty: LightAccumulationShaderProperty.GBufferDepthTexture)
             
             self.lightGridTexture.bindToIndex(4)
             defer { self.lightGridTexture.unbindFromIndex(4) }
             shader.setUniform(GLint(4), forProperty: LightAccumulationShaderProperty.LightGrid)
+            
+            
+            gBufferColours[0].bindToIndex(5)
+            defer { gBufferColours[0].unbindFromIndex(5) }
+            shader.setUniform(GLint(5), forProperty: LightAccumulationShaderProperty.GBuffer0Texture)
             
             shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             
