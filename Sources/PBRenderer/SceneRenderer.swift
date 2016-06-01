@@ -252,6 +252,7 @@ public final class SceneRenderer {
     
     func framebufferDidResize(width: Int32, height: Int32) {
         let lightAccumulationTexture = SceneRenderer.lightAccumulationTexture(width: width, height: height)
+        
         self.gBufferPass.resize(newPixelDimensions: width, height, lightAccumulationTexture: lightAccumulationTexture)
         self.lightAccumulationPass.resize(newPixelDimensions: width, height, lightAccumulationTexture: lightAccumulationTexture)
         self.finalPass.resize(newPixelDimensions: width, height)

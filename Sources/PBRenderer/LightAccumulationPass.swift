@@ -13,7 +13,6 @@ import SGLOpenGL
 
 final class LightAccumulationPass {
     
-    var lightAccumulationTexture : Texture
     var pipelineState : PipelineState
     
     let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB
@@ -21,8 +20,6 @@ final class LightAccumulationPass {
     let lightGridTexture : Texture
     
     init(pixelDimensions: PBWindow.Size, lightAccumulationTexture: Texture) {
-        
-        self.lightAccumulationTexture = lightAccumulationTexture
         
         let framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationTexture: lightAccumulationTexture)
         
@@ -172,6 +169,6 @@ final class LightAccumulationPass {
             GLMesh.fullScreenQuad.render()
         }
         
-        return self.lightAccumulationTexture
+        return self.pipelineState.framebuffer.colourAttachments[0]!.texture!
     }
 }

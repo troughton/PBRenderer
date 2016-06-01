@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import simd
 import SGLMath
 
 struct LightBounds
@@ -14,6 +15,7 @@ struct LightBounds
     var p1 : (Int, Int, Int) = (0, 0, 0)
     var p2 : (Int, Int, Int) = (0, 0, 0)
 };
+
 
 func GenerateLightBounds(light: Light, lightPositionView: vec3, box: inout LightBounds, camera: Camera, dim: LightGridDimensions) {
     // compute view space quad
@@ -84,6 +86,10 @@ struct Fragment {
 
 func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, camera: Camera, lightGrid: LightGridBuilder) -> UInt64
 {
+    
+    let cameraProj11 = camera.projectionMatrix[0][0]
+    let cameraProj22 = camera.projectionMatrix[1][1]
+    
     let dim = lightGrid.dim
     let cz = cellIndex % (dim.depth / 4);
     let cx = (cellIndex / (dim.depth / 4)) % (dim.width / 4);
@@ -106,16 +112,15 @@ func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, came
         let min_d1Z = -d0Z + normalZ * minZ;
         let min_d2Z = -d0Z + normalZ * maxZ;
         
-        let cameraProj11 = camera.projectionMatrix[0][0]
         // X
         let minZmulX = 2.0 / Float(dim.width) * minZ / cameraProj11;
         let minZaddX = -minZ / cameraProj11;
         let maxZmulX = 2.0 / Float(dim.width) * maxZ / cameraProj11;
         let maxZaddX = -maxZ / cameraProj11;
         
-        var min_d1X = vec4(0);
-        var min_d2X = vec4(0);
-        var normal2X = vec4(0);
+        var min_d1X = float4(0)
+        var min_d2X = float4(0)
+        var normal2X = float4(0)
         
         for xx in 0...3 {
             let x = cx * 4 + xx;
@@ -134,7 +139,6 @@ func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, came
             normal2X[xx] = normalX * normalX;
         }
         
-        let cameraProj22 = camera.projectionMatrix[1][1]
         
         // Y
         let minZmulY = -2.0 / Float(dim.height) * minZ / cameraProj22
@@ -142,9 +146,9 @@ func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, came
         let maxZmulY = -2.0 / Float(dim.height) * maxZ / cameraProj22
         let maxZaddY = maxZ / cameraProj22
         
-        var min_d1Y = vec4(0);
-        var min_d2Y = vec4(0);
-        var normal2Y = vec4(0);
+        var min_d1Y = float4(0)
+        var min_d2Y = float4(0)
+        var normal2Y = float4(0)
         
         for yy in 0...3 {
             let y = cy * 4 + yy;
