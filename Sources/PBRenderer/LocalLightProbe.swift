@@ -18,6 +18,7 @@ public final class LocalLightProbe {
     public let resolution : Int
     
     private let colourAttachments : [RenderPassColourAttachment]
+    private let sceneRenderers : [SceneRenderer]
     
     public init(resolution: Int) {
         let cubeMapDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: resolution, height: resolution, mipmapped: true)
@@ -38,11 +39,11 @@ public final class LocalLightProbe {
             colourAttachment.textureSlice = slice
             return colourAttachment
         }
+        
+        self.sceneRenderers = self.colourAttachments.map { SceneRenderer(lightProbeRendererWithLightAccumulationAttachment: $0) }
     }
     
     func renderSceneToCubeMap(_ scene: Scene, atPosition worldSpacePosition: vec3, zNear: Float, zFar: Float) -> Float {
-        
-        let warningWeShouldntBeRenderingSpecular = true //See p61 of the Frostbite notes
         
         let projectionMatrix = SGLMath.perspective(Float(M_PI_2), 1.0, zNear, zFar)
         
@@ -54,8 +55,7 @@ public final class LocalLightProbe {
         
         let _ = SceneNode(id: nil, name: nil, transform: transform, cameras: [camera])
         
-        for (i, colourAttachment) in self.colourAttachments.enumerated() {
-            let sceneRenderer = SceneRenderer(lightProbeRendererWithLightAccumulationAttachment: colourAttachment)
+        for (i, sceneRenderer) in self.sceneRenderers.enumerated() {
             
             switch (i + GL_TEXTURE_CUBE_MAP_POSITIVE_X) {
             case GL_TEXTURE_CUBE_MAP_POSITIVE_X:

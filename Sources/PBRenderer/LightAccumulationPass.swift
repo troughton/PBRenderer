@@ -14,10 +14,8 @@ import SGLOpenGL
 final class LightAccumulationPass {
     
     var pipelineState : PipelineState
-    
-    static let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 16, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //16MB
+
     static let lightGridBuilder = LightGridBuilder()
-    static let lightGridTexture : Texture = Texture(buffer: lightGridBuffer, internalFormat: GL_RGBA32UI)
     
     static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
     static let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LightAccumulationPass.frag"))
@@ -80,9 +78,7 @@ final class LightAccumulationPass {
         LightAccumulationPass.lightGridBuilder.clearAllFragments()
         RasterizeLights(builder: LightAccumulationPass.lightGridBuilder, viewerCamera: camera, lights: lights)
         
-        LightAccumulationPass.lightGridBuffer.asMappedBuffer({ (lightGridBuffer) -> Void in
-            LightAccumulationPass.lightGridBuilder.buildAndUpload(gpuBuffer: lightGridBuffer!, bufferSize: LightAccumulationPass.lightGridBuffer.capacity * sizeof(LightGridEntry))
-            }, usage: GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_INVALIDATE_RANGE_BIT)
+        LightAccumulationPass.lightGridBuilder.buildAndUpload()
     }
     
     enum LightAccumulationShaderProperty : String, ShaderProperty {
@@ -122,8 +118,8 @@ final class LightAccumulationPass {
             defer { gBufferColours[3].unbindFromIndex(0) }
             shader.setUniform(GLint(0), forProperty: LightAccumulationShaderProperty.GBufferDepthTexture)
             
-            LightAccumulationPass.lightGridTexture.bindToIndex(4)
-            defer { LightAccumulationPass.lightGridTexture.unbindFromIndex(4) }
+            LightAccumulationPass.lightGridBuilder.lightGridTexture.bindToIndex(4)
+            defer { LightAccumulationPass.lightGridBuilder.lightGridTexture.unbindFromIndex(4) }
             shader.setUniform(GLint(4), forProperty: LightAccumulationShaderProperty.LightGrid)
             
             

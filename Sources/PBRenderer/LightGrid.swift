@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SGLOpenGL
 
 struct LightGridEntry {
     let sizeAndLink : UInt32; // uint8 size, uint24 link
@@ -40,9 +41,14 @@ final class LightGridBuilder {
     var dim = LightGridDimensions(width: 0, height: 0, depth: 0)
     private var lightIndexLists = [[Int32]]()
     private var coverageLists = [[UInt64]]()
-    private var tempBuffer = [UInt8]()
     private var allocatedBytes : size_t = 0
     
+    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
+    let lightGridTexture : Texture
+    
+    init() {
+        self.lightGridTexture = Texture(buffer: lightGridBuffer, internalFormat: GL_RGBA32UI)
+    }
     
     let fineIndexTable =
         [
@@ -77,12 +83,9 @@ final class LightGridBuilder {
                 let z = _z * 4 + zz;
                 
                 let headerIndex = (y*dim.width + x)*dim.depth + z;
-                let entryPtr = tempBuffer.withUnsafeMutableBufferPointer({ (tempBuffer) -> UnsafeMutablePointer<UInt32>  in
-                    let element = tempBuffer.baseAddress?.advanced(by: 16 * headerIndex)
-                    return UnsafeMutablePointer<UInt32>(element!)
-                })
+                let element = lightGridBuffer.contents.advanced(by: headerIndex)
                 
-                entryPtr.pointee = 0; // list size: 0
+                UnsafeMutablePointer<UInt32>(element).pointee = 0; // list size: 0
             }
             return;
         }
@@ -110,14 +113,9 @@ final class LightGridBuilder {
             
             let headerIndex = (y*dim.width + x)*dim.depth + z;
             
-            let entryPtr = tempBuffer.withUnsafeMutableBufferPointer({ (tempBuffer) -> UnsafeMutablePointer<UInt32>  in
-                let element = tempBuffer.baseAddress?.advanced(by: 16 * headerIndex)
-                return UnsafeMutablePointer<UInt32>(element!)
-            })
-            let tailPtr = tempBuffer.withUnsafeMutableBufferPointer({ (tempBuffer) -> UnsafeMutablePointer<UInt16>  in
-                let element = tempBuffer.baseAddress?.advanced(by: allocatedBytes)
-                return UnsafeMutablePointer<UInt16>(element!)
-            })
+            let entryPtr = UnsafeMutablePointer<UInt32>(lightGridBuffer.contents.advanced(by: headerIndex))
+            
+            let tailPtr = UnsafeMutablePointer<UInt16>(UnsafeMutablePointer<UInt8>(lightGridBuffer.contents).advanced(by: allocatedBytes))
             
             let fineIndex = self.getFineIndex(xx, yy) * 4 + zz;
             let mask = 1 << fineIndex;
@@ -170,34 +168,20 @@ final class LightGridBuilder {
         coverageLists[cellIndex].append(coverage)
     }
     
-    func buildAndUpload(gpuBuffer: UnsafeMutablePointer<Void>, bufferSize: Int) {
-        tempBuffer.reserveCapacity(bufferSize + 256 * 1024); // 256 KB margin: max allocation per cell
-        
-        let tempBufferPtr = tempBuffer.withUnsafeMutableBufferPointer { return $0 }
+    func buildAndUpload() {
         
         let headerBytes = self.cellCount * 64 * 16; // uint4: 16 bytes per entry
-        allocatedBytes = headerBytes;
-        var uploadedBytes = headerBytes;
+        self.allocatedBytes = headerBytes;
         
         for y in 0..<dim.height/4 {
             for x in 0..<dim.width/4 {
                 for z in 0..<dim.depth / 4 {
                     self.buildFlatEntries(x: x, y: y, z: z);
-                    
-                    let size = allocatedBytes - uploadedBytes
-                    if size > 0 {
-                        memcpy(gpuBuffer.advanced(by: uploadedBytes), tempBufferPtr.baseAddress?.advanced(by: uploadedBytes), allocatedBytes - uploadedBytes);
-                        
-                        uploadedBytes = allocatedBytes;
-                        
-                        assert(allocatedBytes <= bufferSize, "gpu buffer not big enough");
-                    }
-                    
                 }
             }
         }
         
-        memcpy(gpuBuffer, tempBufferPtr.baseAddress, headerBytes);
+        self.lightGridBuffer.didModifyRange(0..<self.allocatedBytes/sizeof(LightGridEntry))
     }
     
 }

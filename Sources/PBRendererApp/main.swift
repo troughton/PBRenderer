@@ -115,8 +115,27 @@ func main() {
     var show_another_window = false;
     var clear_color = vec3(114, 144, 154);
     
-    let lightProbe = LocalLightProbe(resolution: 2048)
+    
+    let lightProbe = LocalLightProbe(resolution: 256)
     lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
+    
+    var query : GLuint = 0
+    glGenQueries(1, &query)
+    let timingQuery = query
+    
+    glBeginQuery(GLenum(GL_TIME_ELAPSED), timingQuery)
+    
+    lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
+    
+    glEndQuery(GLenum(GL_TIME_ELAPSED))
+    
+    var timeElapsed = GLuint(0)
+    
+    glGetQueryObjectuiv(query, GL_QUERY_RESULT, &timeElapsed)
+    let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
+    print(String(format: "Elapsed time to generate light probe: %.2fms", timeElapsedMillis))
+    
+    
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)

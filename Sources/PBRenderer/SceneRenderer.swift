@@ -16,9 +16,27 @@ import CPBRendererLibs
 final class GBufferPass {
     
     var gBufferPassState : PipelineState
-    let diffuseLDSampler = Sampler()
-    let dfgSampler = Sampler()
-    let specularLDSampler = Sampler()
+    static let diffuseLDSampler : Sampler = {
+        let sampler = Sampler()
+        sampler.minificationFilter = GL_LINEAR
+        sampler.magnificationFilter = GL_LINEAR
+        return sampler
+    }()
+    
+    static let dfgSampler : Sampler = {
+        let sampler = Sampler()
+        sampler.minificationFilter = GL_LINEAR
+        sampler.wrapS = GL_CLAMP_TO_EDGE
+        sampler.wrapT = GL_CLAMP_TO_EDGE
+        return sampler
+    }()
+    
+    static let specularLDSampler : Sampler = {
+        let sampler = Sampler()
+        sampler.minificationFilter = GL_LINEAR_MIPMAP_LINEAR
+        sampler.magnificationFilter = GL_LINEAR
+        return sampler
+    }()
     
     init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment) {
         
@@ -38,16 +56,7 @@ final class GBufferPass {
         pipelineState.cullMode = GL_BACK
         
         self.gBufferPassState = pipelineState
-        
-        self.diffuseLDSampler.minificationFilter = GL_LINEAR
-        self.diffuseLDSampler.magnificationFilter = GL_LINEAR
-        
-        self.specularLDSampler.minificationFilter = GL_LINEAR_MIPMAP_LINEAR
-        self.specularLDSampler.magnificationFilter = GL_LINEAR
-        
-        self.dfgSampler.minificationFilter = GL_LINEAR
-        self.dfgSampler.wrapS = GL_CLAMP_TO_EDGE
-        self.dfgSampler.wrapT = GL_CLAMP_TO_EDGE
+
     }
     
     func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) {
@@ -135,20 +144,20 @@ final class GBufferPass {
                 
                 dfg.texture.bindToIndex(0)
                 defer { dfg.texture.unbindFromIndex(0) }
-                self.dfgSampler.bindToIndex(0)
-            defer { self.dfgSampler.unbindFromIndex(0) }
+                GBufferPass.dfgSampler.bindToIndex(0)
+            defer { GBufferPass.dfgSampler.unbindFromIndex(0) }
                 shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.DFGTexture)
             
                 environmentMap.diffuseTexture.bindToIndex(1)
             defer { environmentMap.diffuseTexture.unbindFromIndex(1) }
-                self.diffuseLDSampler.bindToIndex(1)
-            defer { self.diffuseLDSampler.unbindFromIndex(1) }
+                GBufferPass.diffuseLDSampler.bindToIndex(1)
+            defer { GBufferPass.diffuseLDSampler.unbindFromIndex(1) }
                 shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.DiffuseLDTexture)
             
                 environmentMap.specularTexture.bindToIndex(2)
             defer { environmentMap.specularTexture.unbindFromIndex(2) }
-                self.specularLDSampler.bindToIndex(2)
-            defer { self.specularLDSampler.unbindFromIndex(2) }
+                GBufferPass.specularLDSampler.bindToIndex(2)
+            defer { GBufferPass.specularLDSampler.unbindFromIndex(2) }
                 shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.SpecularLDTexture)
                 shader.setUniform(GLint(environmentMap.specularTexture.descriptor.mipmapLevelCount - 1), forProperty: GBufferShaderProperty.LDMipMaxLevel)
             

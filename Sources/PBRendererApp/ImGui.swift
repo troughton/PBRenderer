@@ -90,7 +90,7 @@ func ImGui_ImplGlfw_RenderDrawLists(draw_data: inout ImDrawData) {
     for n in 0..<draw_data.CmdListsCount
     {
         let cmd_list = draw_data.CmdLists.advanced(by: Int(n)).pointee!
-        var idx_buffer_offset : UnsafePointer<ImDrawIdx>? = nil;
+        var idx_buffer_offset = 0;
         
         glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
         glBufferData(GL_ARRAY_BUFFER, Int(cmd_list.pointee.VtxBuffer.Size) * sizeof(ImDrawVert), cmd_list.pointee.VtxBuffer.Data, GL_STREAM_DRAW);
@@ -108,9 +108,9 @@ func ImGui_ImplGlfw_RenderDrawLists(draw_data: inout ImDrawData) {
             {
                 glBindTexture(GL_TEXTURE_2D, GLuint(unsafeBitCast(pcmd.pointee.TextureId, to: intptr_t.self)));
                 glScissor(GLint(pcmd.pointee.ClipRect.x), GLint(Float(fb_height) - pcmd.pointee.ClipRect.w), GLint(pcmd.pointee.ClipRect.z - pcmd.pointee.ClipRect.x), GLint(pcmd.pointee.ClipRect.w - pcmd.pointee.ClipRect.y));
-                glDrawElements(GL_TRIANGLES, GLsizei(pcmd.pointee.ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer_offset);
+                glDrawElements(GL_TRIANGLES, GLsizei(pcmd.pointee.ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, UnsafePointer<ImDrawIdx>(bitPattern:  idx_buffer_offset * sizeof(ImDrawIdx)));
             }
-            idx_buffer_offset = idx_buffer_offset?.advanced(by: Int(pcmd.pointee.ElemCount));
+            idx_buffer_offset += Int(pcmd.pointee.ElemCount);
         }
     }
     
