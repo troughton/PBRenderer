@@ -43,7 +43,7 @@ final class LightGridBuilder {
     private var coverageLists = [[UInt64]]()
     private var allocatedBytes : size_t = 0
     
-    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
+    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
     let lightGridTexture : Texture
     
     init() {
@@ -180,7 +180,7 @@ final class LightGridBuilder {
                 }
             }
         }
-        
+        self.lightGridBuffer.orphanBuffer()
         self.lightGridBuffer.didModifyRange(0..<self.allocatedBytes/sizeof(LightGridEntry))
     }
     

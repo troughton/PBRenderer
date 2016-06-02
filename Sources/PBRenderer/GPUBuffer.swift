@@ -49,6 +49,7 @@ private final class GPUBufferImpl {
     
     private var _contents : UnsafeMutablePointer<UInt8>
     private let _glBuffer : GLuint
+    private let usage : SGLOpenGL.GLenum
     
     init<T>(capacityInBytes: Int, data: [T]? = nil, bufferBinding : SGLOpenGL.GLenum, accessFrequency: GPUBufferAccessFrequency, accessType: GPUBufferAccessType) {
         self.capacityInBytes = capacityInBytes
@@ -91,8 +92,16 @@ private final class GPUBufferImpl {
             usage = GL_DYNAMIC_COPY
         }
         
+        self.usage = usage
+        
         glBufferData(bufferBinding, self.capacityInBytes, data, usage);
         
+        glBindBuffer(bufferBinding, 0)
+    }
+    
+    func orphanBuffer() {
+        glBindBuffer(bufferBinding, _glBuffer);
+        glBufferData(bufferBinding, self.capacityInBytes, nil, usage);
         glBindBuffer(bufferBinding, 0)
     }
     
@@ -239,6 +248,10 @@ public final class GPUBuffer<T> {
                     memcpy(destination, toCopy.baseAddress!, range.count * sizeof(T))
                 }
         }
+    }
+    
+    public func orphanBuffer() {
+        self._internalBuffer.orphanBuffer()
     }
     
     public func didModify() {

@@ -49,22 +49,6 @@ func ImGui_ImplGlfw_RenderDrawLists(draw_data: inout ImDrawData) {
     
     ImDrawData_ScaleClipRects(&draw_data, io.DisplayFramebufferScale);
     
-    // Backup GL state
-    var last_program = GLint(0); glGetIntegerv(GL_CURRENT_PROGRAM, &last_program);
-    var last_texture = GLint(0); glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-    var last_array_buffer = GLint(0); glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-    var last_element_array_buffer = GLint(0); glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &last_element_array_buffer);
-    var last_vertex_array = GLint(0); glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
-    var last_blend_src = GLint(0); glGetIntegerv(GL_BLEND_SRC, &last_blend_src);
-    var last_blend_dst = GLint(0); glGetIntegerv(GL_BLEND_DST, &last_blend_dst);
-    var last_blend_equation_rgb = GLint(0); glGetIntegerv(GL_BLEND_EQUATION_RGB, &last_blend_equation_rgb);
-    var last_blend_equation_alpha = GLint(0); glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &last_blend_equation_alpha);
-    var last_viewport = [GLint](repeating: 0, count: 4); glGetIntegerv(GL_VIEWPORT, &last_viewport);
-    let last_enable_blend = glIsEnabled(GL_BLEND);
-    let last_enable_cull_face = glIsEnabled(GL_CULL_FACE);
-    let last_enable_depth_test = glIsEnabled(GL_DEPTH_TEST);
-    let last_enable_scissor_test = glIsEnabled(GL_SCISSOR_TEST);
-    
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
@@ -113,20 +97,6 @@ func ImGui_ImplGlfw_RenderDrawLists(draw_data: inout ImDrawData) {
             idx_buffer_offset += Int(pcmd.pointee.ElemCount);
         }
     }
-    
-    // Restore modified GL state
-    glUseProgram(GLuint(last_program));
-    glBindTexture(GL_TEXTURE_2D, GLuint(last_texture));
-    glBindVertexArray(GLuint(last_vertex_array));
-    glBindBuffer(GL_ARRAY_BUFFER, GLuint(last_array_buffer));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLuint(last_element_array_buffer));
-    glBlendEquationSeparate(last_blend_equation_rgb, last_blend_equation_alpha);
-    glBlendFunc(last_blend_src, last_blend_dst);
-    if (last_enable_blend) {  glEnable(GL_BLEND); } else { glDisable(GL_BLEND); }
-    if (last_enable_cull_face) { glEnable(GL_CULL_FACE); } else { glDisable(GL_CULL_FACE); }
-    if (last_enable_depth_test) {glEnable(GL_DEPTH_TEST); } else { glDisable(GL_DEPTH_TEST); }
-    if (last_enable_scissor_test) { glEnable(GL_SCISSOR_TEST); } else { glDisable(GL_SCISSOR_TEST); }
-    glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
 }
 //
 //func ImGui_ImplGlfwGL3_GetClipboardText() ->
