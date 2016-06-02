@@ -70,6 +70,19 @@ final class AudioVisualManager : SongDelegate {
         
         self.scene.lights.forEach { $0.intensity = 0 }
         
+        for i in 1...6 {
+            let backgroundAreaLightPlane = scene.namesToNodes["BackgroundAreaLightPlane\(i)"]!
+            let materialElement = backgroundAreaLightPlane.materials.values.first!
+            
+            materialElement.withElement({ material in
+                material.baseColour = vec4(0, 0, 0, 1)
+                material.emissive = vec4(0)
+                material.smoothness = 0
+                material.metalMask = 0
+            })
+            
+        }
+        
     }
     
     func processEvent(_ event: MIDIEventType, onTrack track: Int, beatNumber: Double) {
@@ -87,6 +100,12 @@ final class AudioVisualManager : SongDelegate {
                 processKickEvent(event, scene: self.scene, beatNumber: beatNumber)
             case .Snare:
                 processSnareEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .Drums:
+                processDrumEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .MainMelody:
+                processMainMelodyEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .LowBass:
+                processLowBassEvent(event, scene: self.scene, beatNumber: beatNumber)
             default:
                 break;
             }

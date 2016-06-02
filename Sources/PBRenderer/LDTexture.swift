@@ -21,15 +21,15 @@ enum LDTextureShaderProperty : String, ShaderProperty {
     }
 }
 
-final class LDTexture {
+public final class LDTexture {
     
-    static let emptyTexture = LDTexture(resolution: 128)
+    static let emptyTexture = LDTexture(specularResolution: 128)
     
-    let resolution : Int
+    let diffuseResolution = 16
+    let specularResolution : Int
     let diffuseTexture : Texture
     let specularTexture : Texture
     
-    private let depthTextures : [Texture]
     private var diffusePipelineState : PipelineState! = nil
     private var specularPipelineStates : [PipelineState]! = nil
     
@@ -57,39 +57,34 @@ final class LDTexture {
         return sampler
     }()
     
-    init(resolution: Int) {
-        self.resolution = resolution
+    init(specularResolution: Int) {
+        self.specularResolution = specularResolution
         
-        let diffuseCubeDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGB16F, width: resolution, height: resolution, mipmapped: false)
+        let diffuseCubeDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGB16F, width: self.diffuseResolution, height: self.diffuseResolution, mipmapped: false)
         self.diffuseTexture = Texture(textureWithDescriptor: diffuseCubeDescriptor)
         
-        let specularMipMapCount = UInt(log2(Double(resolution)) - 3)
-        let specularCubeDescriptor = TextureDescriptor(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: GL_RGB16F, width: resolution, height: resolution, depth: 1, mipmapLevelCount: specularMipMapCount, arrayLength: 1, multisampleCount: 1)
+        let specularMipMapCount = UInt(log2(Double(specularResolution)) - 3)
+        let specularCubeDescriptor = TextureDescriptor(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: GL_RGB16F, width: specularResolution, height: specularResolution, depth: 1, mipmapLevelCount: specularMipMapCount, arrayLength: 1, multisampleCount: 1)
         self.specularTexture = Texture(textureWithDescriptor: specularCubeDescriptor)
         
         
-        self.depthTextures = (0..<specularMipMapCount).map { (mipLevel) -> Texture in
-            let mipLevelSize = resolution / Int(1 << mipLevel)
-            
-            let depthTextureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(mipLevelSize), height: Int(mipLevelSize), mipmapped: false)
-            return Texture(textureWithDescriptor: depthTextureDescriptor)
-        }
-        
-        let diffuseFramebuffer = self.generateDiffuseFramebuffer(resolution: resolution)
-        let specularFramebuffers = self.generateSpecularFramebuffers(resolution: resolution)
+        let diffuseFramebuffer = self.generateDiffuseFramebuffer(resolution: diffuseResolution)
+        let specularFramebuffers = self.generateSpecularFramebuffers(resolution: specularResolution)
         
         let depthStencilState = DepthStencilState()
-        let viewport = Rectangle(x: 0, y: 0, width: GLint(resolution), height: GLint(resolution))
+        let diffuseViewport = Rectangle(x: 0, y: 0, width: GLint(diffuseResolution), height: GLint(diffuseResolution))
         
-        self.diffusePipelineState = PipelineState(viewport: viewport, framebuffer: diffuseFramebuffer, shader: LDTexture.diffuseShader, depthStencilState: depthStencilState)
+        self.diffusePipelineState = PipelineState(viewport: diffuseViewport, framebuffer: diffuseFramebuffer, shader: LDTexture.diffuseShader, depthStencilState: depthStencilState)
+        
+        let specularViewport = Rectangle(x: 0, y: 0, width: GLint(specularResolution), height: GLint(specularResolution))
         
         var specularPipelineStates = [PipelineState]()
         specularPipelineStates.append(
-            PipelineState(viewport: viewport, framebuffer: specularFramebuffers[0], shader: LDTexture.specularBaseLevelShader, depthStencilState: depthStencilState)
+            PipelineState(viewport: specularViewport, framebuffer: specularFramebuffers[0], shader: LDTexture.specularBaseLevelShader, depthStencilState: depthStencilState)
         )
         
         for (i, framebuffer) in specularFramebuffers.enumerated().dropFirst() {
-            let mipLevelSize = resolution / Int(1 << i)
+            let mipLevelSize = specularResolution / Int(1 << i)
             let viewport = Rectangle(x: 0, y: 0, width: GLint(mipLevelSize), height: GLint(mipLevelSize))
             specularPipelineStates.append(
                 PipelineState(viewport: viewport, framebuffer: framebuffer, shader: LDTexture.specularMipmapShader, depthStencilState: depthStencilState)
@@ -108,13 +103,22 @@ final class LDTexture {
             return attachment
         }
     
+        var depthTextureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(diffuseResolution), height: Int(diffuseResolution), mipmapped: false)
+        depthTextureDescriptor.usage = .RenderTarget
+        let diffuseDepthTexture = Texture(textureWithDescriptor: depthTextureDescriptor)
+        
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
-        depthAttachment.texture = self.depthTextures.first!
+        depthAttachment.texture = diffuseDepthTexture
         
         return Framebuffer(width: Int32(resolution), height: Int32(resolution), colourAttachments: colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     private func generateSpecularFramebuffers(resolution: Int) -> [Framebuffer] {
+        
+        var depthTextureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: specularResolution, height: specularResolution, mipmapped: true)
+        depthTextureDescriptor.usage = .RenderTarget
+        let specularDepthTexture = Texture(textureWithDescriptor: depthTextureDescriptor)
+        
         let framebuffers = (0..<specularTexture.descriptor.mipmapLevelCount).map { (mipmapLevel) -> Framebuffer in
             
             let mipLevelSize = resolution / Int(1 << mipmapLevel)
@@ -128,7 +132,8 @@ final class LDTexture {
                 return attachment
             }
             var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
-            depthAttachment.texture = self.depthTextures[Int(mipmapLevel)]
+            depthAttachment.texture = specularDepthTexture
+            depthAttachment.mipmapLevel = Int(mipmapLevel)
             
             return Framebuffer(width: Int32(mipLevelSize), height: Int32(mipLevelSize), colourAttachments: colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
         }

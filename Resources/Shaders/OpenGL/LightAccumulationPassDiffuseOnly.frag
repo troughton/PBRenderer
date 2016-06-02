@@ -1,5 +1,6 @@
 #version 410
 
+#define NoSpecular
 #include "LightAccumulation.glsl"
 
 uniform vec4 nearPlaneAndProjectionTerms;
@@ -13,8 +14,8 @@ uniform mat4 cameraToWorldMatrix;
 uniform float exposure;
 
 vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
-                             uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2, float gBufferDepth,
-                             vec2 uv, mat4 cameraToWorldMatrix) {
+                           uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2, float gBufferDepth,
+                           vec2 uv, mat4 cameraToWorldMatrix) {
     
     vec4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
     vec3 worldSpacePosition = (cameraToWorldMatrix * cameraSpacePosition).xyz;
@@ -23,7 +24,7 @@ vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
     
     MaterialData material = decodeDataFromGBuffers(N, gBuffer0, gBuffer1, gBuffer2);
     
-    MaterialRenderingData renderingMaterial = evaluateMaterialData(material);
+    MaterialRenderingData renderingMaterial = evaluateMaterialDataNoSpeculars(material);
     
     vec3 V = normalize((cameraToWorldMatrix * vec4(-cameraSpacePosition.xyz, 0)).xyz);
     float NdotV = abs(dot(N, V)) + 1e-5f; //bias the result to avoid artifacts

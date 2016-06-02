@@ -198,6 +198,20 @@ public extension WindowInputDelegate {
     }
 }
 
+public struct Size {
+    let width: GLint
+    let height: GLint
+    
+    public init(_ width: GLint, _ height: GLint) {
+        self.width = width
+        self.height = height
+    }
+    
+    public var aspect : Float {
+        return Float(self.width) / Float(self.height)
+    }
+}
+
 public final class PBWindow {
     
     // called whenever a key is pressed/released via GLFW
@@ -210,20 +224,6 @@ public final class PBWindow {
     private static var glfwWindowsToWindows = [OpaquePointer : PBWindow]()
     
     public let glfwWindow : OpaquePointer!
-    
-    public struct Size {
-        let width: GLint
-        let height: GLint
-        
-        public init(_ width: GLint, _ height: GLint) {
-            self.width = width
-            self.height = height
-        }
-        
-        public var aspect : Float {
-            return Float(self.width) / Float(self.height)
-        }
-    }
     
     public var dimensions : Size {
         get {

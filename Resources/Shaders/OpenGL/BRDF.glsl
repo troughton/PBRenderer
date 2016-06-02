@@ -38,6 +38,39 @@ float D_GGX(float NdotH, float m) {
     return m2 / (f * f);
 }
 
+vec3 BRDFDiffuse(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingData material) {
+    
+    vec3 H = normalize(V + L);
+    float LdotH = saturate(dot(L, H));
+    
+    //Diffuse
+    float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, material.linearRoughness) * INV_PI;
+    
+    return Fd * material.albedo;
+}
+
+vec3 BRDFSpecular(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingData material) {
+    
+    vec3 H = normalize(V + L);
+    float LdotH = saturate(dot(L, H));
+    float NdotH = saturate(dot(N, H));
+    
+    //Specular
+    vec3 F = F_Schlick(material.f0, material.f90, LdotH);
+    float Vis = V_SmithGGXCorrelated(NdotV, NdotL, material.roughness);
+    float D = D_GGX(NdotH, material.roughness);
+    vec3 Fr = D * F * Vis * INV_PI;
+    
+    return Fr;
+}
+
+#ifdef NoSpecular
+
+vec3 BRDF(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingData material) {
+    return BRDFDiffuse(V, L, N, NdotV, NdotL, material);
+}
+
+#else
 
 vec3 BRDF(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingData material) {
     
@@ -56,3 +89,5 @@ vec3 BRDF(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingDat
     
     return Fd * material.albedo + Fr;
 }
+
+#endif

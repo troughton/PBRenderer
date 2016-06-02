@@ -20,13 +20,13 @@ final class GBufferPass {
     let dfgSampler = Sampler()
     let specularLDSampler = Sampler()
     
-    init(pixelDimensions: PBWindow.Size, lightAccumulationTexture: Texture) {
+    init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment) {
         
         var depthState = DepthStencilState()
         depthState.depthCompareFunction = GL_LESS
         depthState.isDepthWriteEnabled = true
         
-        let gBuffer = GBufferPass.gBufferFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationTexture: lightAccumulationTexture)
+        let gBuffer = GBufferPass.gBufferFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationAttachment: lightAccumulationAttachment)
         
         let geometryPassVertex = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "GeometryPass.vert"))
         
@@ -50,12 +50,12 @@ final class GBufferPass {
         self.dfgSampler.wrapT = GL_CLAMP_TO_EDGE
     }
     
-    func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationTexture: Texture) {
+    func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) {
         self.gBufferPassState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
-        self.gBufferPassState.framebuffer = GBufferPass.gBufferFramebuffer(width: width, height: height, lightAccumulationTexture: lightAccumulationTexture)
+        self.gBufferPassState.framebuffer = GBufferPass.gBufferFramebuffer(width: width, height: height, lightAccumulationAttachment: lightAccumulationAttachment)
     }
     
-    class func gBufferFramebuffer(width: GLint, height: GLint, lightAccumulationTexture: Texture) -> Framebuffer {
+    class func gBufferFramebuffer(width: GLint, height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) -> Framebuffer {
         
         let r32Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_R32UI, width: Int(width), height: Int(height), mipmapped: false)
         let attachment1Texture = Texture(textureWithDescriptor: r32Descriptor)
@@ -81,11 +81,6 @@ final class GBufferPass {
         attachment3.loadAction = .Clear
         attachment3.storeAction = .Store
         
-        var attachment4 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
-        attachment4.texture = lightAccumulationTexture
-        attachment4.loadAction = .Clear
-        attachment4.storeAction = .Store
-        
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT32F, width: Int(width), height: Int(height), mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
@@ -93,8 +88,11 @@ final class GBufferPass {
         depthAttachment.storeAction = .Store
         depthAttachment.texture = depthTexture
 
+        var lightAccumulationAttachment = lightAccumulationAttachment
+        lightAccumulationAttachment.loadAction = .Clear
+        lightAccumulationAttachment.blendState = BlendState()
         
-        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, attachment4], depthAttachment: depthAttachment, stencilAttachment: nil)
+        return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, lightAccumulationAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
     func renderNode(_ node: SceneNode, camera: Camera, shader: Shader) {
@@ -134,7 +132,6 @@ final class GBufferPass {
             shader.setUniform(GLint(environmentMap != nil ? 1 : 0), forProperty: GBufferShaderProperty.UseEnvironmentMap)
             
             let environmentMap = environmentMap ?? LDTexture.emptyTexture
-                
                 
                 dfg.texture.bindToIndex(0)
                 defer { dfg.texture.unbindFromIndex(0) }
@@ -178,7 +175,7 @@ final class FinalPass {
     var finalPassState : PipelineState
     var sampler : Sampler
     
-    init(pixelDimensions: PBWindow.Size) {
+    init(pixelDimensions: Size) {
         let finalBuffer = Framebuffer.defaultFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height)
         
         var depthState = DepthStencilState()
@@ -221,42 +218,56 @@ public final class SceneRenderer {
     
     var gBufferPass : GBufferPass
     var lightAccumulationPass : LightAccumulationPass
-    var finalPass : FinalPass
+    var finalPass : FinalPass?
     
     public init(window: PBWindow) {
         
         let pixelDimensions = window.pixelDimensions
         
-        let lightAccumulationTexture = SceneRenderer.lightAccumulationTexture(width: pixelDimensions.width, height: pixelDimensions.height)
+        let lightAccumulationAttachment = SceneRenderer.lightAccumulationAttachment(width: pixelDimensions.width, height: pixelDimensions.height)
         
-        self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationTexture: lightAccumulationTexture)
-        self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationTexture: lightAccumulationTexture)
+        self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
-//       let envMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "stpeters_cross.hdr"))
-//        
-//        self.envMapLD = LDTexture(resolution: 256)
-//        LDTexture.fillLDTexturesFromCubeMaps(textures: [envMapLD], cubeMaps: [envMapTexture], valueMultipliers: [2.0])
-        
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
+        
     }
     
-    class func lightAccumulationTexture(width: Int32, height: Int32) -> Texture {
+    init(lightProbeRendererWithLightAccumulationAttachment lightAccumulationAttachment: RenderPassColourAttachment) {
+        
+        let pixelDimensions = Size(Int32(lightAccumulationAttachment.texture!.descriptor.width), Int32(lightAccumulationAttachment.texture!.descriptor.height))
+        
+        self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment, noSpecular: true)
+        self.finalPass = nil
+    }
+    
+    class func lightAccumulationAttachment(width: Int32, height: Int32) -> RenderPassColourAttachment {
         let rgba16Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
-        return Texture(textureWithDescriptor: rgba16Descriptor)
+        let texture = Texture(textureWithDescriptor: rgba16Descriptor)
+        
+        let blendState = BlendState(isBlendingEnabled: true, sourceRGBBlendFactor: GL_ONE, destinationRGBBlendFactor: GL_ONE, rgbBlendOperation: GL_FUNC_ADD, sourceAlphaBlendFactor: GL_ZERO, destinationAlphaBlendFactor: GL_ONE, alphaBlendOperation: GL_FUNC_ADD, writeMask: .All)
+        
+        var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+        colourAttachment.texture = texture
+        colourAttachment.loadAction = .Load
+        colourAttachment.storeAction = .Store
+        colourAttachment.blendState = blendState
+        return colourAttachment
     }
     
     func framebufferDidResize(width: Int32, height: Int32) {
-        let lightAccumulationTexture = SceneRenderer.lightAccumulationTexture(width: width, height: height)
+        let lightAccumulationAttachment = SceneRenderer.lightAccumulationAttachment(width: width, height: height)
         
-        self.gBufferPass.resize(newPixelDimensions: width, height, lightAccumulationTexture: lightAccumulationTexture)
-        self.lightAccumulationPass.resize(newPixelDimensions: width, height, lightAccumulationTexture: lightAccumulationTexture)
-        self.finalPass.resize(newPixelDimensions: width, height)
+        self.gBufferPass.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.lightAccumulationPass.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.finalPass?.resize(newPixelDimensions: width, height)
     }
     
 //    var timingQuery : GLuint? = nil
     
-    public func renderScene(_ scene: Scene, camera: Camera) {
+    public func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture? = nil) {
 //        
 //        var timeElapsed = GLuint(0)
 //        
@@ -273,9 +284,9 @@ public final class SceneRenderer {
 //        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
 //
         
-        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: nil)
+        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: environmentMap)
         let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
-        self.finalPass.performPass(lightAccumulationTexture: lightAccumulationTexture)
+        self.finalPass?.performPass(lightAccumulationTexture: lightAccumulationTexture)
         
         
 //        glEndQuery(GLenum(GL_TIME_ELAPSED))

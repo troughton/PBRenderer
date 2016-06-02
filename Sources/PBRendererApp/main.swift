@@ -97,7 +97,11 @@ func main() {
     let camera = scene.cameras.first!
     camera.sceneNode.transform.rotation = quat.identity
     
-    mainWindow.dimensions = PBWindow.Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)
+    for light in scene.lights {
+        light.intensity *= 5000000
+    }
+    
+    mainWindow.dimensions = Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
@@ -111,9 +115,12 @@ func main() {
     var show_another_window = false;
     var clear_color = vec3(114, 144, 154);
     
+    let lightProbe = LocalLightProbe(resolution: 2048)
+    lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
+    
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
-        sceneRenderer.renderScene(scene, camera: camera)
+        sceneRenderer.renderScene(scene, camera: camera, environmentMap: lightProbe.ldTexture)
         
         ImGui_ImplGlfwGL3_NewFrame();
         

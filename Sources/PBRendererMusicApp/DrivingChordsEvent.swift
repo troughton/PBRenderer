@@ -23,7 +23,7 @@ func processDrivingChordsEvent(_ event: MIDIEventType, scene: Scene, beatNumber:
     if case let .noteMessage(noteMessage) = event {
         
         
-        let pyramidNode = scene.idsToNodes["_Pyramid1"]!
+        let pyramidNode = scene.namesToNodes["Pyramid1"]!
         
         let topLightMinIntensity = 0.5
         let topLightMaxIntensity = 100.0
@@ -31,7 +31,7 @@ func processDrivingChordsEvent(_ event: MIDIEventType, scene: Scene, beatNumber:
         let smoothnessMin = 0.3
         let smoothnessMax = 0.9
         
-        if let pyramidTopLight = scene.idsToNodes["_PyramidTopLight"] {
+        if let pyramidTopLight = scene.namesToNodes["PyramidTopLight"] {
             
             let decreasing = fmod(beatNumber, 8.0) > 3.0
             

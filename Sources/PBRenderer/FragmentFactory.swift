@@ -242,7 +242,7 @@ func RasterizeLights(builder: LightGridBuilder, viewerCamera: Camera, lights: [L
         }
         #else
         // warning: scalar version does coarser (AABB) culling
-        for light in lights {
+        for light in lights where light.intensity != 0 {
             let lightIndex = light.backingGPULight.bufferIndex
             GenerateLightFragments(fragmentFactory: fragmentFactory, builder: builder, camera: viewerCamera, light: light, lightIndex: lightIndex);
         }

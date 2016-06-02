@@ -121,6 +121,13 @@ extension Scene {
                             }
                         }
                     }
+                    
+                    if let emissive = materialParams.emission {
+                        if case let .color(_, colour) = emissive {
+                            material.emissive = vec4(colour)
+                        }
+                    }
+                    
                     if let reflectivity = materialParams.reflectivity {
                         if case let .float(_, value) = reflectivity {
                             material.reflectance = value

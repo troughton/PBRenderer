@@ -65,7 +65,7 @@ void main() {
     vec4 out2 = vec4(0);
     
     vec3 radiosity = evaluateEnvironmentMap(N, V, renderingMaterial) + material.emissive.rgb;
-    vec4 out3 = vec4(epilogueLighting(radiosity, exposure), 0);
+    vec4 out3 = vec4(epilogueLighting(radiosity, exposure), 1);
     
     encodeDataToGBuffers(material, N, out0, out1, out2);
     gBuffer0 = out0;

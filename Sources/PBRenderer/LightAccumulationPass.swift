@@ -15,18 +15,20 @@ final class LightAccumulationPass {
     
     var pipelineState : PipelineState
     
-    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 16, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //16MB
-    let lightGridBuilder = LightGridBuilder()
-    let lightGridTexture : Texture
+    static let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 16, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //16MB
+    static let lightGridBuilder = LightGridBuilder()
+    static let lightGridTexture : Texture = Texture(buffer: lightGridBuffer, internalFormat: GL_RGBA32UI)
     
-    init(pixelDimensions: PBWindow.Size, lightAccumulationTexture: Texture) {
+    static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
+    static let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LightAccumulationPass.frag"))
+    static let fragmentShaderNoSpecular = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LightAccumulationPassDiffuseOnly.frag"))
+    
+    static let lightAccumulationShader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
+    static let lightAccumulationShaderNoSpecular = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
+    
+    init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment, noSpecular: Bool = false) {
         
-        let framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationTexture: lightAccumulationTexture)
-        
-        let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
-        let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LightAccumulationPass.frag"))
-        
-        let lightAccumulationShader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
+        let framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationAttachment: lightAccumulationAttachment)
         
         var depthState = DepthStencilState()
         depthState.depthCompareFunction = GL_ALWAYS
@@ -34,25 +36,15 @@ final class LightAccumulationPass {
         
         self.pipelineState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height),
                                            framebuffer: framebuffer,
-                                           shader: lightAccumulationShader,
+                                           shader: noSpecular ? LightAccumulationPass.lightAccumulationShaderNoSpecular : LightAccumulationPass.lightAccumulationShader,
                                            depthStencilState: depthState)
-        
-        self.lightGridTexture = Texture(buffer: lightGridBuffer, internalFormat: GL_RGBA32UI)
         
     }
     
     deinit {
     }
     
-    class func lightAccumulationFramebuffer(width: GLint, height: GLint, lightAccumulationTexture: Texture) -> Framebuffer {
-        
-        let blendState = BlendState(isBlendingEnabled: true, sourceRGBBlendFactor: GL_ONE, destinationRGBBlendFactor: GL_ONE, rgbBlendOperation: GL_FUNC_ADD, sourceAlphaBlendFactor: GL_ZERO, destinationAlphaBlendFactor: GL_ONE, alphaBlendOperation: GL_FUNC_ADD, writeMask: .All)
-        
-        var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
-        colourAttachment.texture = lightAccumulationTexture
-        colourAttachment.loadAction = .Load
-        colourAttachment.storeAction = .Store
-        colourAttachment.blendState = blendState
+    class func lightAccumulationFramebuffer(width: GLint, height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) -> Framebuffer {
         
         var depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false)
         depthDescriptor.usage = .RenderTarget
@@ -63,14 +55,14 @@ final class LightAccumulationPass {
         depthAttachment.storeAction = .Store
         depthAttachment.texture = depthTexture
         
-        return Framebuffer(width: width, height: height, colourAttachments: [colourAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
+        return Framebuffer(width: width, height: height, colourAttachments: [lightAccumulationAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
 
     
     
-    func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationTexture: Texture) {
+    func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) {
         self.pipelineState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
-        self.pipelineState.framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: width, height: height, lightAccumulationTexture: lightAccumulationTexture)
+        self.pipelineState.framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: width, height: height, lightAccumulationAttachment: lightAccumulationAttachment)
     }
     
     //Calculates the size of a plane positioned at z = -1 (hence the divide by zNear)
@@ -83,13 +75,13 @@ final class LightAccumulationPass {
     
     func setupLightGrid(camera: Camera, lights: [Light]) {
         let clusteredGridScale = 16
-        self.lightGridBuilder.reset(dim: LightGridDimensions(width: 2 * clusteredGridScale, height: clusteredGridScale, depth: 4 * clusteredGridScale))
+        LightAccumulationPass.lightGridBuilder.reset(dim: LightGridDimensions(width: 2 * clusteredGridScale, height: clusteredGridScale, depth: 4 * clusteredGridScale))
         
-        self.lightGridBuilder.clearAllFragments()
-        RasterizeLights(builder: self.lightGridBuilder, viewerCamera: camera, lights: lights)
+        LightAccumulationPass.lightGridBuilder.clearAllFragments()
+        RasterizeLights(builder: LightAccumulationPass.lightGridBuilder, viewerCamera: camera, lights: lights)
         
-        self.lightGridBuffer.asMappedBuffer({ (lightGridBuffer) -> Void in
-            self.lightGridBuilder.buildAndUpload(gpuBuffer: lightGridBuffer!, bufferSize: self.lightGridBuffer.capacity * sizeof(LightGridEntry))
+        LightAccumulationPass.lightGridBuffer.asMappedBuffer({ (lightGridBuffer) -> Void in
+            LightAccumulationPass.lightGridBuilder.buildAndUpload(gpuBuffer: lightGridBuffer!, bufferSize: LightAccumulationPass.lightGridBuffer.capacity * sizeof(LightGridEntry))
             }, usage: GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_INVALIDATE_RANGE_BIT)
     }
     
@@ -130,8 +122,8 @@ final class LightAccumulationPass {
             defer { gBufferColours[3].unbindFromIndex(0) }
             shader.setUniform(GLint(0), forProperty: LightAccumulationShaderProperty.GBufferDepthTexture)
             
-            self.lightGridTexture.bindToIndex(4)
-            defer { self.lightGridTexture.unbindFromIndex(4) }
+            LightAccumulationPass.lightGridTexture.bindToIndex(4)
+            defer { LightAccumulationPass.lightGridTexture.unbindFromIndex(4) }
             shader.setUniform(GLint(4), forProperty: LightAccumulationShaderProperty.LightGrid)
             
             
