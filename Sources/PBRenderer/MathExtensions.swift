@@ -206,3 +206,68 @@ extension Matrix4x4 where T : FloatingPointArithmeticType {
     }
 
 }
+
+
+
+    public func slerp<T>(from : Quaternion<T>, to: Quaternion<T>, t: T) -> Quaternion<T> {
+    // Calculate angle between them.
+    let cosHalfTheta = dot(from, to);
+    
+    // if this == other or this == -other then theta = 0 and we can return this
+    if (abs(cosHalfTheta) >= 1.0) {
+        return from;
+    }
+    
+    // Calculate temporary values.
+        var halfTheta : T
+        var sinHalfTheta : T
+        if let val = cosHalfTheta as? Float {
+            halfTheta = unsafeBitCast(acosf(val), to: T.self)
+            sinHalfTheta = unsafeBitCast(sqrtf(1.0 - val * val), to: T.self)
+        } else if let val = cosHalfTheta as? Double {
+            halfTheta = unsafeBitCast(acos(val), to: T.self)
+            sinHalfTheta = unsafeBitCast(sqrt(1.0 - val * val), to: T.self)
+        } else {
+            fatalError()
+        }
+    
+        var x : T, y : T, z : T, w : T;
+    
+    // if theta = 180 degrees then result is not fully defined
+    // we could rotate around any axis normal to qa or qb
+    if (abs(sinHalfTheta) < 0.001){
+        w = (from.w * 0.5 + to.w * 0.5);
+        x = (from.x * 0.5 + to.x * 0.5);
+        y = (from.y * 0.5 + to.y * 0.5);
+        z = (from.z * 0.5 + to.z * 0.5);
+    } else {
+        
+        var ratioA : T
+        var ratioB : T
+        
+        if let halfTheta = halfTheta as? Float, let sinHalfTheta = sinHalfTheta as? Float, let t = t as? Float {
+            ratioA = unsafeBitCast(sinf((1 - t) * halfTheta) / sinHalfTheta, to: T.self)
+            ratioB = unsafeBitCast(sinf(t * halfTheta) / sinHalfTheta, to: T.self)
+        } else if let halfTheta = halfTheta as? Double, let sinHalfTheta = sinHalfTheta as? Double, let t = t as? Double {
+            ratioA = unsafeBitCast(sin((1 - t) * halfTheta) / sinHalfTheta, to: T.self)
+            ratioB = unsafeBitCast(sin(t * halfTheta) / sinHalfTheta, to: T.self)
+        } else {
+            fatalError()
+        }
+    
+        //calculate quaternion.
+        w = (from.w * ratioA + to.w * ratioB);
+        x = (from.x * ratioA + to.x * ratioB);
+        y = (from.y * ratioA + to.y * ratioB);
+        z = (from.z * ratioA + to.z * ratioB);
+    }
+    return Quaternion<T>(x, y, z, w);
+    }
+
+
+@warn_unused_result
+public func lerp<genType:VectorType where
+    genType.Element:FloatingPointArithmeticType
+    >(from: genType, to: genType, t: genType.Element) -> genType {
+    return from + t * (to - from)
+}

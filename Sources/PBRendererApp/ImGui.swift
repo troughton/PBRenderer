@@ -116,7 +116,7 @@ private final class ImGui : WindowInputDelegate {
             io?.pointee.DisplayFramebufferScale = ImVec2(x: Float(width) / Float(windowSize.width), y: Float(height) / Float(windowSize.height));
         }
         
-        onFramebufferResize(width: window.dimensions.width, height: window.dimensions.height)
+        onFramebufferResize(width: window.pixelDimensions.width, height: window.pixelDimensions.height)
         window.registerForFramebufferResize(onResize: onFramebufferResize)
         
         window.inputDelegates.append(self)

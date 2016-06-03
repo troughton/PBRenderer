@@ -34,8 +34,8 @@ final class CameraControl : WindowInputDelegate {
     }
     
     func mouseDrag(delta: (x: Double, y: Double)) {
-//        self.pitch += Float(delta.y) * 0.01
-//        self.yaw += Float(delta.x) * 0.01
+        self.pitch += Float(delta.y) * 0.01
+        self.yaw += Float(delta.x) * 0.01
         
     }
     

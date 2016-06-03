@@ -33,11 +33,11 @@ let mainMelodyNotes : [UInt8] = [50, 52, 55, 57, 59, 62]
                     if percentage >= 1.0 {
                         
                         material.emissive = vec4(0)
-                        light?.intensity = 0.0
+                        light?.intensity.value = 0.0
                     } else {
                         
                         material.emissive = vec4(1000)
-                        light?.intensity = 100.0
+                        light?.intensity.value = 100.0
                     }
                     
                 })

@@ -63,12 +63,17 @@ final class AudioVisualManager : SongDelegate {
         guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
         
         self.scene = Scene(fromCollada: collada)
-        self.camera = scene.cameras.first!
+        self.camera = scene.namesToNodes["MainCamera"]!.cameras.first!
+        
+        
+        let startCamera = scene.namesToNodes["camera1"]!.cameras.first!
+        self.camera.transform.translation = startCamera.transform.translation
+        self.camera.transform.rotation = startCamera.transform.rotation
         
         self.camera.shutterTime = 1.0
         self.camera.aperture = 1.0
         
-        self.scene.lights.forEach { $0.intensity = 0 }
+        self.scene.lights.forEach { $0.intensity.value = 0 }
         
         for i in 1...6 {
             let backgroundAreaLightPlane = scene.namesToNodes["BackgroundAreaLightPlane\(i)"]!
@@ -82,6 +87,17 @@ final class AudioVisualManager : SongDelegate {
             })
             
         }
+        
+        let endCamera = scene.namesToNodes["camera2"]!.cameras.first!
+        
+        let cameraAnimation = AnimationSystem.Animation(startBeat: 4 * 13, duration: 4 * 4, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
+            
+            let translation = lerp(from: startCamera.transform.translation, to: endCamera.transform.translation, t: Float(percentage))
+            
+            self.camera.transform.translation = translation
+            self.camera.transform.rotation = slerp(from: startCamera.transform.rotation, to: endCamera.transform.rotation, t: Float(percentage))
+        })
+        AnimationSystem.addAnimation(cameraAnimation)
         
     }
     

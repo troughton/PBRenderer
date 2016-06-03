@@ -26,7 +26,7 @@ func processDrivingChordsEvent(_ event: MIDIEventType, scene: Scene, beatNumber:
         let pyramidNode = scene.namesToNodes["Pyramid1"]!
         
         let topLightMinIntensity = 0.5
-        let topLightMaxIntensity = 100.0
+        let topLightMaxIntensity = 140.0
         
         let smoothnessMin = 0.3
         let smoothnessMax = 0.9
@@ -41,7 +41,7 @@ func processDrivingChordsEvent(_ event: MIDIEventType, scene: Scene, beatNumber:
                 let to = decreasing ? topLightMinIntensity : topLightMaxIntensity
                 
                 let light = pyramidTopLight.lights.first
-                light?.intensity = Float(lerp(from: from, to: to, percentage: percentage))
+                light?.intensity.value = Float(lerp(from: from, to: to, percentage: percentage))
                 
                 
                 let fromSmoothness = decreasing ? smoothnessMax : smoothnessMin
