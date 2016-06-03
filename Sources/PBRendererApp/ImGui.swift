@@ -12,31 +12,31 @@ import SGLOpenGL
 import CGLFW3
 
 
-public struct GuiWindowFlags : OptionSet {
+public struct GUIWindowFlags : OptionSet {
     public let rawValue : Int32
     
     public init(rawValue: Int32) {
         self.rawValue = rawValue
     }
     
-    static let Default = GuiWindowFlags(rawValue: 0)
-    static let NoTitleBar = GuiWindowFlags(rawValue: 1 << 0)  // Disable title-bar
-    static let NoResize = GuiWindowFlags(rawValue: 1 << 1) // Disable user resizing with the lower-right grip
-    static let NoMove = GuiWindowFlags(rawValue: 1 << 2)   // Disable user moving the window
-    static let NoScrollbar = GuiWindowFlags(rawValue: 1 << 3) // Disable scrollbars (window can still scroll with mouse or programatically)
-    static let NoScrollWithMouse = GuiWindowFlags(rawValue: 1 << 4)  // Disable user vertically scrolling with mouse wheel
-    static let NoCollapse = GuiWindowFlags(rawValue: 1 << 5)     // Disable user collapsing window by double-clicking on it
-    static let AlwaysAutoResize = GuiWindowFlags(rawValue: 1 << 6)    // Resize every window to its content every frame
-    static let ShowBorders = GuiWindowFlags(rawValue: 1 << 7)  // Show borders around windows and items
-    static let NoSavedSettings  = GuiWindowFlags(rawValue: 1 << 8)    // Never load/save settings in .ini file
-    static let NoInputs   = GuiWindowFlags(rawValue: 1 << 9)  // Disable catching mouse or keyboard inputs
-    static let MenuBar      = GuiWindowFlags(rawValue: 1 << 10)   // Has a menu-bar
-    static let HorizontalScrollbar    = GuiWindowFlags(rawValue: 1 << 11)   // Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(ImVec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
-    static let NoFocusOnAppearing    = GuiWindowFlags(rawValue: 1 << 12)   // Disable taking focus when transitioning from hidden to visible state
-    static let NoBringToFrontOnFocus = GuiWindowFlags(rawValue: 1 << 13)    // Disable bringing window to front when taking focus (e.g. clicking on it or programatically giving it focus)
-    static let AlwaysVerticalScrollbar = GuiWindowFlags(rawValue: 1 << 14)   // Always show vertical scrollbar (even if ContentSize.y < Size.y)
-    static let AlwaysHorizontalScrollbar = GuiWindowFlags(rawValue: 1 << 15)    // Always show horizontal scrollbar (even if ContentSize.x < Size.x)
-    static let AlwaysUseWindowPadding = GuiWindowFlags(rawValue: 1 << 16)   // Ensure child windows without border uses style.WindowPadding (ignored by default for non-
+    static let Default = GUIWindowFlags(rawValue: 0)
+    static let NoTitleBar = GUIWindowFlags(rawValue: 1 << 0)  // Disable title-bar
+    static let NoResize = GUIWindowFlags(rawValue: 1 << 1) // Disable user resizing with the lower-right grip
+    static let NoMove = GUIWindowFlags(rawValue: 1 << 2)   // Disable user moving the window
+    static let NoScrollbar = GUIWindowFlags(rawValue: 1 << 3) // Disable scrollbars (window can still scroll with mouse or programatically)
+    static let NoScrollWithMouse = GUIWindowFlags(rawValue: 1 << 4)  // Disable user vertically scrolling with mouse wheel
+    static let NoCollapse = GUIWindowFlags(rawValue: 1 << 5)     // Disable user collapsing window by double-clicking on it
+    static let AlwaysAutoResize = GUIWindowFlags(rawValue: 1 << 6)    // Resize every window to its content every frame
+    static let ShowBorders = GUIWindowFlags(rawValue: 1 << 7)  // Show borders around windows and items
+    static let NoSavedSettings  = GUIWindowFlags(rawValue: 1 << 8)    // Never load/save settings in .ini file
+    static let NoInputs   = GUIWindowFlags(rawValue: 1 << 9)  // Disable catching mouse or keyboard inputs
+    static let MenuBar      = GUIWindowFlags(rawValue: 1 << 10)   // Has a menu-bar
+    static let HorizontalScrollbar    = GUIWindowFlags(rawValue: 1 << 11)   // Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(ImVec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
+    static let NoFocusOnAppearing    = GUIWindowFlags(rawValue: 1 << 12)   // Disable taking focus when transitioning from hidden to visible state
+    static let NoBringToFrontOnFocus = GUIWindowFlags(rawValue: 1 << 13)    // Disable bringing window to front when taking focus (e.g. clicking on it or programatically giving it focus)
+    static let AlwaysVerticalScrollbar = GUIWindowFlags(rawValue: 1 << 14)   // Always show vertical scrollbar (even if ContentSize.y < Size.y)
+    static let AlwaysHorizontalScrollbar = GUIWindowFlags(rawValue: 1 << 15)    // Always show horizontal scrollbar (even if ContentSize.x < Size.x)
+    static let AlwaysUseWindowPadding = GUIWindowFlags(rawValue: 1 << 16)   // Ensure child windows without border uses style.WindowPadding (ignored by default for non-
 }
 
 public typealias UIDrawFunction = (state: inout GUIDisplayState) -> Void
@@ -47,11 +47,11 @@ public final class GUI {
     let window : PBWindow
     
     private var _displayState = GUIDisplayState()
-    private let _imGui : IMGUI
+    private let _imGui : ImGui
     
     public init(window: PBWindow) {
         self.window = window
-        _imGui = IMGUI(window: window)
+        _imGui = ImGui(window: window)
     }
     
     public func render() {
@@ -65,7 +65,7 @@ public final class GUI {
     }
     
     public static func shutdown() {
-        IMGUI.shutdown()
+        ImGui.shutdown()
     }
 }
 
@@ -94,7 +94,7 @@ public func renderCameraUI(state: inout GUIDisplayState, camera: Camera) {
 }
 
 
-private final class IMGUI : WindowInputDelegate {
+private final class ImGui : WindowInputDelegate {
     private var _lastTime = 0.0;
     private static var _fontTexture : GLuint = 0;
     private static var _shader : Shader! = nil;
@@ -143,7 +143,7 @@ private final class IMGUI : WindowInputDelegate {
         keyMap[Int(ImGuiKey_Z.rawValue)] = GLFW_KEY_Z;
         
         io?.pointee.RenderDrawListsFn = { data in
-            IMGUI.renderDrawLists(drawData: &data!.pointee)
+            ImGui.renderDrawLists(drawData: &data!.pointee)
         };
 
     }
@@ -204,8 +204,8 @@ private final class IMGUI : WindowInputDelegate {
     }
     
     private func newFrame() {
-        if (IMGUI._fontTexture == 0) {
-            IMGUI.createDeviceObjects()
+        if (ImGui._fontTexture == 0) {
+            ImGui.createDeviceObjects()
         }
        
         let io = igGetIO()
@@ -430,7 +430,7 @@ func igCollapsingHeader(label: String, displayFrame: Bool = false, defaultOpen: 
     return igCollapsingHeader(label, label, displayFrame, defaultOpen)
 }
 
-func igBegin(name: String, didOpen: Bool = false, flags: GuiWindowFlags = GuiWindowFlags.Default) -> Bool {
+func igBegin(name: String, didOpen: Bool = false, flags: GUIWindowFlags = GUIWindowFlags.Default) -> Bool {
     var didOpenPointer = didOpen
     return igBegin(name, &didOpenPointer, flags.rawValue);
 }

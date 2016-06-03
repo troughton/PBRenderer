@@ -71,7 +71,7 @@
 //public func renderFPSCounter() {
 //    igSetNextWindowPos(ImVec2(x: 10, y: 10), Int32(ImGuiSetCond_FirstUseEver.rawValue))
 //
-//    igBegin(name: "Stats", didOpen: true, flags: [GuiWindowFlags.NoTitleBar, GuiWindowFlags.NoResize, GuiWindowFlags.NoMove, GuiWindowFlags.NoSavedSettings])
+//    igBegin(name: "Stats", didOpen: true, flags: [GUIWindowFlags.NoTitleBar, GUIWindowFlags.NoResize, GUIWindowFlags.NoMove, GUIWindowFlags.NoSavedSettings])
 //    igText("Stats")
 //    igSeparator()
 //    igText(String(format: "%.3f ms/frame (%.1f FPS)", 1000.0 / igGetIO().pointee.Framerate, igGetIO().pointee.Framerate))
