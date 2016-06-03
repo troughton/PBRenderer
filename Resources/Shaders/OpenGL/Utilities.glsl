@@ -53,3 +53,8 @@ float fast_atan(float x) {
     float t0 = fast_atan_pos(abs(x));
     return (x < 0.0f) ? -t0: t0;
 }
+
+float lineariseDepth(float depth, float near, float far) {
+    float z = (2 * near) / (far + near - depth * (far - near));
+    return z;
+}
