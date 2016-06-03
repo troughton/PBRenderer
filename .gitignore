@@ -2,3 +2,5 @@
 *.xcodeproj
 .build/
 Packages/
+
+imgui.ini

@@ -178,8 +178,9 @@ public protocol WindowInputDelegate {
     func keyAction(key: InputKey, action: InputAction, modifiers: InputModifiers)
     
     func mouseAction(position: (x: Double, y: Double), button: MouseButton, action: InputAction, modifiers: InputModifiers)
-    func mouseMove(delta: (x: Double, y: Double))
+    func mouseMove(position: (x: Double, y: Double), delta: (x: Double, y: Double))
     func mouseDrag(delta: (x: Double, y: Double))
+    func scroll(offsets: (x: Double, y: Double))
 }
 
 public extension WindowInputDelegate {
@@ -191,10 +192,13 @@ public extension WindowInputDelegate {
         
     }
     
-    func mouseMove(delta: (x: Double, y: Double)) {
+    func mouseMove(position: (x: Double, y: Double), delta: (x: Double, y: Double)) {
         
     }
     func mouseDrag(delta: (x: Double, y: Double)) {
+    }
+    
+    func scroll(offsets: (x: Double, y: Double)) {
     }
 }
 
@@ -242,8 +246,26 @@ public final class PBWindow {
         return Size(width, height)
     }
     
+    public var hasFocus : Bool {
+        return glfwGetWindowAttrib(self.glfwWindow, GLFW_FOCUSED) != 0
+    }
+    
+    public var shouldHideCursor : Bool {
+        get {
+            return glfwGetInputMode(self.glfwWindow, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN
+        }
+        
+        set(shouldHideCursor) {
+            glfwSetInputMode(self.glfwWindow, GLFW_CURSOR, shouldHideCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+        }
+    }
+    
     public var shouldClose : Bool {
         return glfwWindowShouldClose(self.glfwWindow) != 0
+    }
+    
+    public var currentTime : Double {
+        return glfwGetTime()
     }
     
     public typealias OnUpdate = (window: PBWindow, deltaTime: Double) -> ()
@@ -258,7 +280,7 @@ public final class PBWindow {
     private var _previousMouseX = 0.0;
     private var _previousMouseY = 0.0;
     
-    public var inputDelegate: WindowInputDelegate? = nil
+    public var inputDelegates: [WindowInputDelegate] = []
     
     public init(name: String, width: Int, height: Int) {
         // Create a GLFWwindow object that we can use for GLFW's functions
@@ -274,7 +296,7 @@ public final class PBWindow {
         // Set the required callback functions
         glfwSetKeyCallback(self.glfwWindow) { (glfwWindow, key, scanCode, action, modifiers) in
             let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
-            window.inputDelegate?.keyAction(key: InputKey(rawValue: key)!, action: InputAction(rawValue: action)!, modifiers: InputModifiers(rawValue: modifiers))
+            window.inputDelegates.forEach { $0.keyAction(key: InputKey(rawValue: key)!, action: InputAction(rawValue: action)!, modifiers: InputModifiers(rawValue: modifiers)) }
         }
         
         glfwSetMouseButtonCallback(self.glfwWindow) { (glfwWindow, button, action, modifiers) in
@@ -283,7 +305,7 @@ public final class PBWindow {
             var xPosition : Double = 0.0, yPosition : Double = 0.0;
             glfwGetCursorPos(glfwWindow, &xPosition, &yPosition);
             
-            window.inputDelegate?.mouseAction(position: (xPosition, yPosition), button: MouseButton(rawValue: button)!, action: InputAction(rawValue: action)!, modifiers: InputModifiers(rawValue: modifiers));
+            window.inputDelegates.forEach { $0.mouseAction(position: (xPosition, yPosition), button: MouseButton(rawValue: button)!, action: InputAction(rawValue: action)!, modifiers: InputModifiers(rawValue: modifiers)) };
         }
         
         glfwSetCursorPosCallback(self.glfwWindow) { (glfwWindow, xPosition, yPosition) in
@@ -294,12 +316,18 @@ public final class PBWindow {
             let mouseDeltaY = window._previousMouseY - yPosition;
             
             if (action == GLFW_PRESS) {
-                window.inputDelegate?.mouseDrag(delta: (mouseDeltaX, mouseDeltaY));
+                window.inputDelegates.forEach { $0.mouseDrag(delta: (mouseDeltaX, mouseDeltaY)) };
             }
-            window.inputDelegate?.mouseMove(delta: (mouseDeltaX, mouseDeltaY))
+            window.inputDelegates.forEach { $0.mouseMove(position: (window._previousMouseX, window._previousMouseY), delta: (mouseDeltaX, mouseDeltaY)) }
             
             window._previousMouseX = xPosition;
             window._previousMouseY = yPosition;
+        }
+        
+        glfwSetScrollCallback(self.glfwWindow) { (glfwWindow, xOffset, yOffset)  in
+            let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
+
+            window.inputDelegates.forEach { $0.scroll(offsets: (xOffset, yOffset)) }
         }
         
         glfwSetFramebufferSizeCallback(self.glfwWindow) { (glfwWindow, width, height) in
@@ -314,9 +342,7 @@ public final class PBWindow {
     }
     
     public final func update() {
-        
-        let currentTime = glfwGetTime()
-        let elapsedTime = currentTime - _timeLastFrame
+        let elapsedTime = self.currentTime - _timeLastFrame
         
         for closure in self.onUpdateClosures {
             closure(window: self, deltaTime: elapsedTime)

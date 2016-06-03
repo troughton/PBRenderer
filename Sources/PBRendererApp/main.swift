@@ -34,12 +34,8 @@ final class CameraControl : WindowInputDelegate {
     }
     
     func mouseDrag(delta: (x: Double, y: Double)) {
-        self.pitch += Float(delta.y) * 0.01
-        self.yaw += Float(delta.x) * 0.01
-        
-    }
-    
-    func mouseMove(delta: (x: Double, y: Double)) {
+//        self.pitch += Float(delta.y) * 0.01
+//        self.yaw += Float(delta.x) * 0.01
         
     }
     
@@ -67,9 +63,8 @@ final class CameraControl : WindowInputDelegate {
         let pitchQuat = quat(angle: self.pitch, axis: vec3(1, 0, 0))
         let yawQuat = quat(angle: self.yaw, axis: vec3(0, 1, 0))
         
-        self.camera.sceneNode.transform.rotation = /*self.baseRotation * */yawQuat * pitchQuat
-    }
-}
+        self.camera.sceneNode.transform.rotation = self.baseRotation * yawQuat * pitchQuat
+    }}
 
 let baseHeight = Int32(800)
 
@@ -106,7 +101,7 @@ func main() {
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
     let cameraControl = CameraControl(camera: camera)
-    mainWindow.inputDelegate = cameraControl
+    mainWindow.inputDelegates.append(cameraControl)
     
     let lightProbe = LocalLightProbe(resolution: 256)
     lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
@@ -127,10 +122,19 @@ func main() {
     let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
     print(String(format: "Elapsed time to generate light probe: %.2fms", timeElapsedMillis))
     
+    let spotLight = scene.namesToNodes["spotLight1"]?.lights.first
     
-    let gui = Gui(glfwWindow: mainWindow.glfwWindow)
-    gui.drawFunctions.append({ renderFPSCounter()} )
-    gui.drawFunctions.append({ renderCameraUI(camera: camera) })
+    let gui = GUI(window: mainWindow)
+//    gui.drawFunctions.append({ renderFPSCounter()} )
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderCameraUI(state: &state, camera: camera)
+    })
+//    gui.drawFunctions.append({ state in {
+//        renderCameraUI(state: state, camera: camera)
+//    }})
+//      gui.drawFunctions.append({ renderTestUI() })
+//    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })
+
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
@@ -148,6 +152,8 @@ func main() {
         
         mainWindow.update()
     }
+    
+    GUI.shutdown()
 }
 
 main()
