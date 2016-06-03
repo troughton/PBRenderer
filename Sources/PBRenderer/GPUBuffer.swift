@@ -45,7 +45,7 @@ private func typeSize<U>(_ type: U.Type, bufferType: SGLOpenGL.GLenum) -> Int {
 private final class GPUBufferImpl {
     let bufferBinding : SGLOpenGL.GLenum
     
-    let capacityInBytes : Int
+    private(set) var capacityInBytes : Int
     
     private var _contents : UnsafeMutablePointer<UInt8>
     private let _glBuffer : GLuint
@@ -140,6 +140,24 @@ private final class GPUBufferImpl {
         glBindBuffer(buffer, _glBuffer)
     }
     
+    func reserveCapacity(_ capacityInBytes: Int) {
+        if capacityInBytes <= self.capacityInBytes {
+            return
+        }
+        
+        let tempBuffer = UnsafeMutablePointer<UInt8>(calloc(1, capacityInBytes))!
+        
+        memcpy(tempBuffer, self._contents, self.capacityInBytes)
+        free(self._contents)
+        self._contents = tempBuffer
+        
+        glBindBuffer(bufferBinding, _glBuffer);
+        glBufferData(bufferBinding, capacityInBytes, self._contents, usage);
+        glBindBuffer(bufferBinding, 0)
+        
+        self.capacityInBytes = capacityInBytes
+    }
+    
     func bindToUniformBlockIndex(_ index: Int, byteOffset: Int = 0) {
 
         assert(self.bufferBinding != GL_UNIFORM_BUFFER || byteOffset % Int(glOffsetAlignment) == 0, "For uniform blocks, the byte offset must be a multiple of GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT")
@@ -189,7 +207,7 @@ public class GPUBufferElement<T> {
 
 public final class GPUBuffer<T> {
     
-    public let capacity : Int
+    private(set) public var capacity : Int
     
     private let _internalBuffer : GPUBufferImpl
     
@@ -277,6 +295,10 @@ public final class GPUBuffer<T> {
     
     func bindToGL(buffer: SGLOpenGL.GLenum) {
         _internalBuffer.bindToGL(buffer: buffer)
+    }
+    
+    func reserveCapacity(capacity: Int) {
+        _internalBuffer.reserveCapacity(capacity * typeSize(T.self, bufferType: _internalBuffer.bufferBinding))
     }
     
     func openCLMemory(clContext: cl_context, flags: cl_mem_flags) -> OpenCLMemory {

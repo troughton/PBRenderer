@@ -6,10 +6,10 @@
 // http://opensource.org/licenses/BSD-2-Clause
 
 
-uniform mat4 viewToTextureSpaceMatrix;
+uniform mat4 cameraToClipMatrix;
 uniform sampler2D depthBuffer;
 
-uniform ivec2 depthBufferSize;
+//uniform ivec2 depthBufferSize;
 
 float distanceSquared(vec2 a, vec2 b) { a -= b; return dot(a, a); }
 
@@ -39,7 +39,7 @@ float linearDepthTexelFetch(ivec2 hitPixel) {
 
 // Returns true if the ray hit something
 // Assumes negative depth.
-bool traceScreenSpaceRay1(
+bool traceScreenSpaceRay(
                           // Camera-space ray origin, which must be within the view volume
                           vec3 csOrig,
                           
@@ -62,10 +62,10 @@ bool traceScreenSpaceRay1(
     vec3 csEndPoint = csOrig + csDir * rayLength;
     
     // Project into homogeneous clip space
-    vec4 H0 = viewToTextureSpaceMatrix * vec4(csOrig, 1.0);
-    H0.xy *= depthBufferSize;
-    vec4 H1 = viewToTextureSpaceMatrix * vec4(csEndPoint, 1.0);
-    H1.xy *= depthBufferSize;
+    vec4 H0 = cameraToClipMatrix * vec4(csOrig, 1.0);
+//    H0.xy *= depthBufferSize;
+    vec4 H1 = cameraToClipMatrix * vec4(csEndPoint, 1.0);
+//    H1.xy *= depthBufferSize;
     float k0 = 1.0 / H0.w, k1 = 1.0 / H1.w;
     
     // The interpolated homogeneous version of the camera-space points
@@ -160,7 +160,7 @@ void main() {
              }
      
      float depth = texelFetch(depthBuffer, loadIndices).r;
-     vec3 rayOriginVS = pIn.viewRay * linearizeDepth(depth);
+     vec3 rayOriginVS = pIn.viewRay * lineariseDepth(depth);
      
      /*
        * Since position is reconstructed in view space, just normalize it to get the

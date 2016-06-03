@@ -53,9 +53,9 @@ float isoscelesTriangleNextAdjacent(float adjacentLength, float incircleRadius)
 out vec4 blendedColour;
 
 void main() {
-    ivec3 loadIndices = int3(pIn.posH.xy, 0);
+    ivec2 loadIndices = ivec2(gl_FragCoord.xy);
     // get screen-space ray intersection point
-    vec4 raySS = rayTracingBuffer.Load(loadIndices).xyzw;
+    vec4 raySS = texelFetch( rayTracingBuffer, loadIndices).xyzw;
     vec3 fallbackColor = indirectSpecularBuffer.Load(loadIndices).rgb;
     if(raySS.w <= 0.0f) // either means no hit or the ray faces back towards the camera
     {

@@ -102,7 +102,7 @@ final class LightAccumulationPass {
         
         self.setupLightGrid(camera: camera, lights: scene.lights)
         
-        let lightTexture = Texture(buffer: scene.lightBuffer, internalFormat: GL_RGBA32F)
+        let lightTexture = scene.lightTexture
         
         self.pipelineState.renderPass { (framebuffer, shader) in
             

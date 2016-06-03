@@ -65,7 +65,7 @@ func CoarseRasterizeLights(lights: [Light], lightPositions: [vec3], bounds: inou
     
     bounds.withUnsafeMutableBufferPointer { (bounds) -> Void in
         for idx in 0..<lights.count {
-            if lights[idx].intensity == 0.0 { continue }
+            if !lights[idx].isOn { continue }
             dispatch_group_async(group, queue) {
                 var box = LightBounds()
                 GenerateLightBounds(light: lights[idx], lightPositionView: lightPositions[idx], box: &box, camera: camera, dim: dim)

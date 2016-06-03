@@ -133,8 +133,7 @@ final class GBufferPass {
     
     func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture?) -> (colourTextures: [Texture], depthTexture: Texture) {
         let dfg = DFGTexture.defaultTexture //this will generate it the first time, so we need to call it outside of the render pass method.
-        
-        let materialTexture = Texture(buffer: scene.materialBuffer, internalFormat: GL_RGBA32F)
+    
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             
@@ -164,7 +163,7 @@ final class GBufferPass {
             shader.setUniform(camera.exposure, forProperty: GBufferShaderProperty.Exposure)
             
             
-            materialTexture.bindToIndex(3)
+            scene.materialTexture.bindToIndex(3)
             shader.setUniform(GLint(3), forProperty: GBufferShaderProperty.Materials)
             
             let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz

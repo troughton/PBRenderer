@@ -11,6 +11,8 @@ import SGLMath
 
 public typealias Kelvin = Float
 
+public typealias Lux = Float
+public typealias Lumens = Float
 /** Luminous efficacy. */
 public typealias LumensPerWatt = Float
 
@@ -70,12 +72,94 @@ public enum LightColourMode {
         return colour * vec3(1.0/255.0)
     }
     
-    var rgbColour : vec3 {
+   public var rgbColour : vec3 {
         switch self {
         case .Colour(let colour):
             return colour
         case .Temperature(let kelvin):
             return kelvinToRGB(kelvin)
+        }
+    }
+}
+
+public enum LightIntensity {
+    case LuminousPower(Lumens)
+    case Luminance(CandelasPerMetreSq)
+    case LuminousIntensity(Candelas)
+    case Illuminance(Lux)
+    
+    public init(unit: LightIntensity, value: Float) {
+        switch unit {
+        case .LuminousPower(_):
+            self = .LuminousPower(value)
+        case .Illuminance(_):
+            self = .Illuminance(value)
+        case .Luminance(value):
+            self = .Luminance(value)
+        case .LuminousIntensity(_):
+            self = .LuminousIntensity(value)
+        default:
+            fatalError()
+        }
+    }
+    
+    public func toLuminousIntensity(forLightType lightType: LightType) -> Candelas {
+        
+        switch self {
+        case let .LuminousIntensity(candelas):
+            return candelas
+        case let .Luminance(candelasPerMetreSq):
+            return candelasPerMetreSq * lightType.surfaceArea
+        case let .LuminousPower(lumens):
+            switch lightType {
+            case .Point:
+                return lumens / (4 * Float(M_PI))
+            case .Spot(innerCutoff: _, outerCutoff: _):
+                return lumens * Float(M_PI) //not correct, but prevents the intensity from changing as the angle changes.
+            default:
+                fatalError()
+            }
+        default:
+            fatalError()
+        }
+    }
+    
+    public var value : Float {
+        get {
+            switch self {
+            case let .LuminousIntensity(candelas):
+                return candelas
+            case let .Luminance(candelasPerMetreSq):
+                return candelasPerMetreSq
+            case let .LuminousPower(lumens):
+                return lumens
+            case let .Illuminance(lux):
+                return lux
+            }
+        }
+        set(newValue) {
+            switch self {
+            case .LuminousIntensity(_):
+                self = .LuminousIntensity(newValue)
+            case .Luminance(_):
+                self = .Luminance(newValue)
+            case .LuminousPower(_):
+                self = .LuminousPower(newValue)
+            case .Illuminance(_):
+                self = .Illuminance(newValue)
+            }
+        }
+
+    }
+    
+    
+    func toStoredIntensity(forLightType lightType: LightType) -> Float {
+        
+        switch self {
+        case let .Illuminance(lux):
+            return lux
+        default:
+            return self.toLuminousIntensity(forLightType: lightType)
         }
     }
 }
@@ -102,6 +186,21 @@ public enum LightType {
         }
     }
     
+    public var validUnits : [LightIntensity] {
+        switch self {
+        case .Point:
+        fallthrough
+        case .Spot(_, _):
+            return [.LuminousPower(1.0)]
+        case .DiskArea(_):
+            fallthrough
+        case .SphereArea(_):
+            return [.LuminousPower(1.0), .Luminance(1.0)]
+        case .Directional:
+            return [.Illuminance(1.0)]
+        }
+    }
+    
     func fillGPULight(gpuLight: inout GPULight) {
         gpuLight.lightTypeFlag = self.lightTypeFlag
         
@@ -120,7 +219,17 @@ public enum LightType {
         default:
             break
         }
-        
+    }
+    
+    var surfaceArea : Float {
+        switch self {
+        case let .SphereArea(radius: radius):
+            return 4 * Float(M_PI) * radius * radius
+        case let .DiskArea(radius: radius):
+            return Float(M_PI) * radius * radius
+        default:
+            fatalError()
+        }
     }
 }
 
@@ -143,13 +252,11 @@ public final class Light {
         }
     }
     
-    public var intensity : Candelas {
-        get {
-            return self.backingGPULight.readOnlyElement.intensity
-        }
-        set (newValue) {
+    
+    public var intensity : LightIntensity {
+        didSet {
             self.backingGPULight.withElement { gpuLight in
-                gpuLight.intensity = newValue
+                gpuLight.intensity = self.intensity.toLuminousIntensity(forLightType: self.type)
             }
         }
     }
@@ -164,20 +271,25 @@ public final class Light {
         }
     }
     
+    public var isOn : Bool {
+        return self.intensity.value > 0
+    }
+    
     var backingGPULight : GPUBufferElement<GPULight>
     
-    init(type: LightType, colour: LightColourMode, intensity: Candelas, falloffRadius: Float, backingGPULight: GPUBufferElement<GPULight>) {
+    init(type: LightType, colour: LightColourMode, intensity: LightIntensity, falloffRadius: Float, backingGPULight: GPUBufferElement<GPULight>) {
         self.type = type
         self.backingGPULight = backingGPULight
         self.colour = colour
         self.falloffRadius = falloffRadius
+        self.intensity = intensity
         
         self.backingGPULight.withElement { gpuLight in
             let radiusSquared = self.falloffRadius * self.falloffRadius
             let inverseRadiusSquared = 1.0 / radiusSquared
             gpuLight.inverseSquareAttenuationRadius = inverseRadiusSquared
             
-            gpuLight.colourAndIntensity = vec4(self.colour.rgbColour, intensity)
+            gpuLight.colourAndIntensity = vec4(self.colour.rgbColour, intensity.toStoredIntensity(forLightType: self.type))
             self.type.fillGPULight(gpuLight: &gpuLight)
         }
     }

@@ -71,7 +71,9 @@ extension Scene {
                 }
                 
                 let warningFalloffIsHardCoded = true
-                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensity, falloffRadius: 15.0, backingGPULight: lightBuffer[viewForIndex: i])
+                
+                let intensityWithUnits = LightIntensity(unit: type.validUnits.first!, value: intensity)
+                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensityWithUnits, falloffRadius: 15.0, backingGPULight: lightBuffer[viewForIndex: i])
                 elementsInBuffer[light.id!] = pbLight
                     i += 1
                 }

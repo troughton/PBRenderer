@@ -98,7 +98,7 @@ func main() {
     camera.sceneNode.transform.rotation = quat.identity
     
     for light in scene.lights {
-        light.intensity *= 5000000
+        light.intensity.value *= 5000000
     }
     
     mainWindow.dimensions = Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)

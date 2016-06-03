@@ -8,6 +8,7 @@
 
 import Foundation
 import SGLMath
+import SGLOpenGL
 
 public typealias quat = Quaternion<Float>
 
@@ -25,7 +26,9 @@ public final class Scene {
     public let nodes : [SceneNode]
     let meshes : [[GLMesh]]
     let materialBuffer : GPUBuffer<Material>
+    let materialTexture : Texture
     let lightBuffer : GPUBuffer<GPULight>
+    let lightTexture : Texture
     public var namesToNodes : [String : SceneNode]! = nil
 
     init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>) {
@@ -33,6 +36,9 @@ public final class Scene {
         self.meshes = meshes
         self.materialBuffer = materials
         self.lightBuffer = lights
+        
+        self.lightTexture = Texture(buffer: self.lightBuffer, internalFormat: GL_RGBA32F)
+        self.materialTexture = Texture(buffer: self.materialBuffer, internalFormat: GL_RGBA32F)
         
         var dictionary = [String : SceneNode]()
         self.flattenedScene.forEach({ (node) in

@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import PBRenderer
 import CPBRendererLibs
 import SGLOpenGL
 import CGLFW3
