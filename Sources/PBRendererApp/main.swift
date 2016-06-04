@@ -120,7 +120,6 @@ func main() {
     let spotLight = scene.idsToNodes["spotLight1"]?.lights.first
     
     let gui = GUI(window: mainWindow)
-//    gui.drawFunctions.append({ renderFPSCounter()} )
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderCameraUI(state: &state, camera: camera)
     })
@@ -135,6 +134,10 @@ func main() {
     
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderSceneHierachy(state: &state, scene: scene)
+    })
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderFPSCounter(state: &state);
     })
 //      gui.drawFunctions.append({ renderTestUI() })
 //    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })

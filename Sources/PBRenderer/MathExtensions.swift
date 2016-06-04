@@ -117,13 +117,12 @@ extension Quaternion where T : FloatingPoint {
         self = Quaternion(scale * axis.x, scale * axis.y, scale * axis.z, w);
     }
     
-    public init(euler: Vector3<T>) {
-        print(Quaternion(angle: T(0), axis: Vector3<T>(0, 0, 1)))
+    public static func fromEuler(euler: Vector3<T>) -> Quaternion<T> {
         var quaternion = Quaternion(angle: euler.z, axis: Vector3<T>(0, 0, 1))
         quaternion *= Quaternion(angle: euler.y, axis: Vector3<T>(0, 1, 0))
         quaternion *= Quaternion(angle: euler.x, axis: Vector3<T>(1, 0, 0))
         
-        self = quaternion
+        return quaternion
     }
     
     func toEuler() -> Vector3<T> {

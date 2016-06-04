@@ -133,13 +133,12 @@ private func renderTransformControls(transform: Transform) {
         _ = igDragFloat(label: "z", value: &transform.translation.z, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
         
         igText("Rotation")
-        var eulerRotationDegrees = degrees(radians: transform.rotation.toEuler())
-        _ = igDragFloat(label: "x_r", value: &eulerRotationDegrees.x, vSpeed: 0.1, vMin: 0, vMax: 360.0)
-        _ = igDragFloat(label: "y_r", value: &eulerRotationDegrees.y, vSpeed: 0.1, vMin: 0.0, vMax: 360.0)
-        _ = igDragFloat(label: "z_r", value: &eulerRotationDegrees.z, vSpeed: 0.1, vMin: 0.0, vMax: 360.0)
-        
-        var eulerRotationRadians = radians(degrees: eulerRotationDegrees)
-        transform.rotation = quat(euler: eulerRotationRadians)
+        let eulerRotationDegrees = degrees(radians: transform.rotation.toEuler())
+        igText("x:\(eulerRotationDegrees.x), y:\(eulerRotationDegrees.y), z:\(eulerRotationDegrees.z)")
+        _ = igDragFloat(label: "x_r", value: &transform.rotation.x, vSpeed: 0.01, vMin: 0, vMax: 6)
+        _ = igDragFloat(label: "y_r", value: &transform.rotation.y, vSpeed: 0.01, vMin: 0.0, vMax: 6)
+        _ = igDragFloat(label: "z_r", value: &transform.rotation.z, vSpeed: 0.01, vMin: 0.0, vMax: 6)
+        _ = igDragFloat(label: "w_r", value: &transform.rotation.w, vSpeed: 0.01, vMin: 0.0, vMax: 6)
     }
 }
 
@@ -153,6 +152,10 @@ private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
                              ("cd/m²", LightIntensity.Luminance(1.0)),
                              ("lm", LightIntensity.LuminousPower(1.0)),
                              ("cd", LightIntensity.LuminousIntensity(1.0))]
+
+private func renderMaterialControls(material: Material) {
+    
+}
 
 private func renderLightControls(light: Light) {
     if(igCollapsingHeader(label: "Light")) {
@@ -173,10 +176,14 @@ private func renderLightControls(light: Light) {
         }!
         
         var intensity = light.intensity.value
-        _ = igDragFloat(label: "Intensity (\(lightUnitText[currentLightUnit].0))", value: &intensity, vSpeed: 0.1, vMin: 0.0, vMax: 100000.0)
+        _ = igDragFloat(label: "Intensity (\(lightUnitText[currentLightUnit].0))", value: &intensity, vSpeed: 5, vMin: 0.0, vMax: 100000.0)
         light.intensity = LightIntensity(unit: light.type.validUnits.first!, value: intensity)
         
         switch(light.type) {
+        case .DiskArea(var radius):
+            igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            light.type = .DiskArea(radius: radius)
+            break
         case .SphereArea(var radius):
             igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .SphereArea(radius: radius)
@@ -194,6 +201,17 @@ public func renderCameraControls(camera: Camera) {
         _ = igSliderFloat(label: "Shutter Time", value: &camera.shutterTime, vMin: 0, vMax: 10);
         _ = igSliderFloat(label: "ISO", value: &camera.ISO, vMin: 0, vMax: 2000);
     }
+}
+
+public func renderFPSCounter(state: inout GUIDisplayState) {
+        igSetNextWindowPos(ImVec2(x: 10, y: 10), Int32(ImGuiSetCond_FirstUseEver.rawValue))
+    
+        var opened = true
+        igBegin(label: "Stats", didOpen: &opened, flags: [GUIWindowFlags.NoTitleBar, GUIWindowFlags.NoResize, GUIWindowFlags.NoMove, GUIWindowFlags.NoSavedSettings])
+        igText("Stats")
+        igSeparator()
+        igText(String(format: "%.3f ms/frame (%.1f FPS)", 1000.0 / igGetIO().pointee.Framerate, igGetIO().pointee.Framerate))
+        igEnd()
 }
 
 

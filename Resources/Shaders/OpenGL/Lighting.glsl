@@ -98,29 +98,64 @@ float calculateSphereIlluminance(vec3 worldSpacePosition, float NdotL, float sqr
     return illuminanceSphereOrDisk(cosTheta, sinSigmaSqr);
 }
 
-
 vec3 evaluateAreaLight(vec3 worldSpacePosition,
                          vec3 V, vec3 N, float NdotV,
                          MaterialRenderingData material,
                          LightData light) {
+    
     vec3 Lunormalized = light.worldSpacePosition.xyz - worldSpacePosition;
     vec3 L = normalize(Lunormalized);
     float sqrDist = dot(Lunormalized, Lunormalized);
+    float inverseDistanceToLight = inversesqrt(sqrDist);
     
-    float NdotL = dot(N, L);
-    
-    float illuminance;
-    if (light.lightTypeFlag == LightTypeSphereArea) {
-        illuminance = calculateSphereIlluminance(worldSpacePosition, NdotL, sqrDist, light);
-    } else {
-        illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
-    }
-    
-    NdotL = saturate(NdotL);
+    float lightRadius = light.extraData.x;
     
     vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
-    return BRDFDiffuse(V, L, N, NdotV, NdotL, material) * illuminance * lightColour;
+    float lobeEnergy = 1;
+    float alpha = sqr(material.roughness);
+    
+    float sphereAngle = saturate( lightRadius * inverseDistanceToLight);
+    lobeEnergy *= sqr( alpha / saturate( alpha + 0.5 * sphereAngle ) );
+
+    V = normalize(V);
+    N = normalize(N);
+    vec3 R = reflect(-V, N);
+    R = getSpecularDominantDirArea(N, R, NdotV, material.roughness);
+   
+    vec3 closestPointOnRay = dot(Lunormalized, R) * R;
+    vec3 centreToRay = closestPointOnRay - Lunormalized;
+    vec3 closestPointOnSphere = Lunormalized + centreToRay * saturate(lightRadius * inversesqrt(dot(centreToRay, centreToRay)));
+    
+    L = normalize(closestPointOnSphere);
+
+    float NdotL = saturate(dot(N, L));
+    
+    // Tilted patch to sphere equation
+    float illuminance = 0;
+    
+    float Beta = fast_acos(dot(N, L));
+    float H = sqrt(sqrDist);
+    float h = H / lightRadius;
+    float x = sqrt(h * h - 1);
+    float y = -x * (1 / tan(Beta));
+    
+    if (h * cos(Beta) > 1) {
+        illuminance = cos(Beta) / (h * h);
+    } else {
+        illuminance = (1 / (PI * h * h)) *
+        (cos(Beta) * fast_acos(y) - x * sin(Beta) * sqrt(1 - y * y)) +
+        (1 / PI) * fast_atan(sin(Beta) * sqrt(1 - y * y) / x);
+    }
+    
+    illuminance *= PI;
+
+    illuminance *= smoothDistanceAtt(sqrDist, light.inverseSquareAttenuationRadius);
+    
+    vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
+    vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
+    
+    return (diffuse + specular) * illuminance * lightColour;
 }
 
 vec3 evaluatePunctualLight(vec3 worldSpacePosition,
