@@ -10,6 +10,7 @@ import Foundation
 import CPBRendererLibs
 import SGLOpenGL
 import CGLFW3
+import SGLMath
 
 
 public struct GUIWindowFlags : OptionSet {
@@ -71,10 +72,14 @@ public final class GUI {
 
 
 public struct GUIDisplayState {
+    var sceneEditorOpen : Bool = true
+    var cameraEditorOpen : Bool = true
     
+    // the id of node being editied in the editor
+    var editorSceneNodeId : String? = nil
 }
 
-public func renderTestUI(state: GUIDisplayState) {
+public func renderTestUI(state: inout GUIDisplayState) {
     igSetNextWindowPos(ImVec2(x: 650, y: 20), Int32(ImGuiSetCond_FirstUseEver.rawValue));
     var show_test_window = true
     withUnsafeMutablePointer(&show_test_window) { (opened) -> () in
@@ -83,14 +88,183 @@ public func renderTestUI(state: GUIDisplayState) {
 }
 
 public func renderCameraUI(state: inout GUIDisplayState, camera: Camera) {
-    _ = igBegin(name: "Camera - \(camera.name!)")
+    _ = igBegin(label: "Camera - \(camera.name!)", didOpen: &state.cameraEditorOpen, flags: GUIWindowFlags.Default)
 
     igText("Exposure: \(camera.exposure)")
     _ = igSliderFloat(label: "Aperture", value: &camera.aperture, vMin: 0.7, vMax: 200.0);
     _ = igSliderFloat(label: "Shutter Time", value: &camera.shutterTime, vMin: 0, vMax: 10);
     _ = igSliderFloat(label: "ISO", value: &camera.ISO, vMin: 0, vMax: 2000);
-
     igEnd()
+}
+
+public func renderPropertyEditor(state: inout GUIDisplayState, scene: Scene) {
+    if(!igBegin(label: "Scene Node Editor", didOpen: &state.sceneEditorOpen, flags: GUIWindowFlags.Default)) {
+        igEnd()
+        return
+    }
+
+    if let editorSceneNodeId = state.editorSceneNodeId {
+        if let sceneNode = scene.idsToNodes[editorSceneNodeId] {
+            igText(sceneNode.id)
+            renderTransformControls(transform: sceneNode.transform)
+            
+            sceneNode.lights.forEach({ (light) in
+                renderLightControls(light: light)
+            })
+            
+            sceneNode.cameras.forEach({ (camera) in
+                renderCameraControls(camera: camera)
+            })
+        } else {
+            igText("No scene node selected")
+        }
+    } else {
+        igText("No scene node selected")
+    }
+    
+    igEnd()
+}
+
+private func renderTransformControls(transform: Transform) {
+    if(igCollapsingHeader(label: "Transform")) {
+        igText("Translation")
+        _ = igDragFloat(label: "x", value: &transform.translation.x, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+        _ = igDragFloat(label: "y", value: &transform.translation.y, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+        _ = igDragFloat(label: "z", value: &transform.translation.z, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+        
+        igText("Rotation")
+        var eulerRotationDegrees = degrees(radians: transform.rotation.toEuler())
+        _ = igDragFloat(label: "x_r", value: &eulerRotationDegrees.x, vSpeed: 0.1, vMin: 0, vMax: 360.0)
+        _ = igDragFloat(label: "y_r", value: &eulerRotationDegrees.y, vSpeed: 0.1, vMin: 0.0, vMax: 360.0)
+        _ = igDragFloat(label: "z_r", value: &eulerRotationDegrees.z, vSpeed: 0.1, vMin: 0.0, vMax: 360.0)
+        
+        var eulerRotationRadians = radians(degrees: eulerRotationDegrees)
+        transform.rotation = quat(euler: eulerRotationRadians)
+    }
+}
+
+private let lightTypes : [(String, LightType)] = [("Point", LightType.Point),
+                                                 ("Spot", LightType.Spot(innerCutoff: 0.1, outerCutoff: 1.0)),
+                                                 ("Directional", LightType.Directional),
+                                                 ("Sphere Area", LightType.SphereArea(radius: 1.0)),
+                                                 ("Disk Area", LightType.DiskArea(radius: 1.0))]
+
+private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
+                             ("cd/m²", LightIntensity.Luminance(1.0)),
+                             ("lm", LightIntensity.LuminousPower(1.0)),
+                             ("cd", LightIntensity.LuminousIntensity(1.0))]
+
+private func renderLightControls(light: Light) {
+    if(igCollapsingHeader(label: "Light")) {
+        var currentLightType = lightTypes.index { (tuple) -> Bool in
+            return tuple.1.isSameTypeAs(light.type)
+        }!
+        
+        igCombo(label: "Type", currentItem: &currentLightType, items: lightTypes.lazy.map { $0.0 })
+        
+        // only change if we switch to another light type
+        let newLightType = lightTypes[currentLightType].1
+        if !light.type.isSameTypeAs(newLightType) {
+            light.type = newLightType
+        }
+        
+        let currentLightUnit = lightUnitText.index { (tuple) -> Bool in
+            return tuple.1.isSameTypeAs(light.intensity)
+        }!
+        
+        var intensity = light.intensity.value
+        _ = igDragFloat(label: "Intensity (\(lightUnitText[currentLightUnit].0))", value: &intensity, vSpeed: 0.1, vMin: 0.0, vMax: 100000.0)
+        light.intensity = LightIntensity(unit: light.type.validUnits.first!, value: intensity)
+        
+        switch(light.type) {
+        case .SphereArea(var radius):
+            igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            light.type = .SphereArea(radius: radius)
+            break
+        default:
+            break
+        }
+    }
+}
+
+public func renderCameraControls(camera: Camera) {
+    if(igCollapsingHeader(label: "Camera")) {
+        igText("Exposure: \(camera.exposure)")
+        _ = igSliderFloat(label: "Aperture", value: &camera.aperture, vMin: 0.7, vMax: 200.0);
+        _ = igSliderFloat(label: "Shutter Time", value: &camera.shutterTime, vMin: 0, vMax: 10);
+        _ = igSliderFloat(label: "ISO", value: &camera.ISO, vMin: 0, vMax: 2000);
+    }
+}
+
+
+public func renderSceneHierachy(state: inout GUIDisplayState, scene: Scene) {
+    
+    if(!igBegin(label: "Scene", didOpen: &state.sceneEditorOpen, flags: GUIWindowFlags.Default)) {
+        igEnd()
+        return
+    }
+
+    igPushStyleVarVec(Int32(ImGuiStyleVar_FramePadding.rawValue), ImVec2(x: 2,y: 2))
+    igColumns(2, "Test Columns", false)
+    igSeparator()
+    
+    func renderChild(sceneNode: SceneNode) {
+        igPushIdStr(sceneNode.id!)
+        igAlignFirstTextHeightToWidgets()
+        
+        let node_open = igTreeNode("\(sceneNode.id!)")
+        igNextColumn()
+        igAlignFirstTextHeightToWidgets()
+        
+        
+        if state.editorSceneNodeId == sceneNode.id {
+            igPushStyleColor(Int32(ImGuiCol_Button.rawValue), ImVec4 (x: 0.8, y: 0.52, z: 0.82, w: 1))
+            igPushStyleColor(Int32(ImGuiCol_ButtonHovered.rawValue), ImVec4 (x: 0.9, y: 0.52, z: 0.92, w: 1))
+
+            if (igButton(label: "Edit")) {
+                state.editorSceneNodeId = sceneNode.id!
+            }
+            igPopStyleColor(2)
+        } else {
+            if (igButton(label: "Edit")) {
+                state.editorSceneNodeId = sceneNode.id!
+            }
+        }
+      
+        igNextColumn()
+        
+        if (node_open) {
+            igText("\(sceneNode.name!)")
+            
+            sceneNode.children.forEach({ (child) in
+                renderChild(sceneNode: child)
+            })
+            
+            igTreePop()
+        }
+        igPopId()
+    }
+    
+    scene.nodes.forEach { (sceneNode) in
+        renderChild(sceneNode: sceneNode)
+    }
+    
+    igColumns(1, nil, false)
+    igSeparator()
+    igPopStyleVar(1)
+    igEnd()
+}
+
+private func renderLightUI(light: Light) {
+    
+}
+
+private func renderTransformUI(transform: Transform) {
+    
+}
+
+private func renderMaterialUI(material: Material) {
+    
 }
 
 
@@ -404,7 +578,11 @@ private final class ImGui : WindowInputDelegate {
 
 }
 
-
+func igTextColoredV(color: ImVec4, format: String, args: [CVarArg] = []) {
+    return withVaList(args) { (pointer: CVaListPointer) -> () in
+        return NSPredicate(format: format, arguments: pointer)
+    }
+}
 
 func igCombo<T: Sequence where T.Iterator.Element == String>(label: String, currentItem: inout Int, items: T, heightInItems: Int32 = -1) {
     let cItems = items.joined(separator: "\0") + "\0"
@@ -414,13 +592,17 @@ func igCombo<T: Sequence where T.Iterator.Element == String>(label: String, curr
     currentItem = Int(cCurrentItem)
 }
 
+func igDragFloat(label: String, value: inout Float, vSpeed: Float, vMin: Float, vMax: Float, displayFormat: String = "%.3f", power: Float = 1.0) -> Bool {
+    return igDragFloat(label, &value, vSpeed, vMin, vMax, displayFormat, power)
+}
+
 func igSliderFloat(label: String, value: inout Float, vMin: Float, vMax: Float, displayFormat: String = "%.3f", power: Float = 1.0) -> Bool {
     return igSliderFloat(label, &value, vMin, vMax, displayFormat, power)
 }
 
-//func igFloat(label: String, value: inout Float, vMin: Float, vMax: Float) -> Bool {
-//    return igInputFloat(<#T##label: UnsafePointer<Int8>!##UnsafePointer<Int8>!#>, <#T##v: UnsafeMutablePointer<Float>!##UnsafeMutablePointer<Float>!#>, <#T##step: Float##Float#>, <#T##step_fast: Float##Float#>, <#T##decimal_precision: Int32##Int32#>, <#T##extra_flags: ImGuiInputTextFlags##ImGuiInputTextFlags#>)
-//}
+func igFloat(label: String, value: inout Float, decimalPrecision: Int32 = 3) -> Bool {
+   return igInputFloat2(label, &value, decimalPrecision, 0)
+}
 
 func igButton(label: String, size: ImVec2 = ImVec2(x: 0, y: 0)) -> Bool {
     return igButton(label, size)
@@ -430,13 +612,6 @@ func igCollapsingHeader(label: String, displayFrame: Bool = false, defaultOpen: 
     return igCollapsingHeader(label, label, displayFrame, defaultOpen)
 }
 
-func igBegin(name: String, didOpen: Bool = false, flags: GUIWindowFlags = GUIWindowFlags.Default) -> Bool {
-    var didOpenPointer = didOpen
-    return igBegin(name, &didOpenPointer, flags.rawValue);
+func igBegin(label: String, didOpen: inout Bool, flags: GUIWindowFlags = GUIWindowFlags.Default) -> Bool {
+    return igBegin(label, &didOpen, flags.rawValue);
 }
-
-func ImGui_ImplGlfwGL3_Shutdown()
-    {
-      
-}
-

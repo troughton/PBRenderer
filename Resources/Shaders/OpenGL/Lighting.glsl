@@ -118,11 +118,9 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     
     NdotL = saturate(NdotL);
     
-    L = getSpecularDominantDirArea(N, L, NdotV, material.roughness);
-    
     vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
-    return BRDF(V, L, N, NdotV, NdotL, material) * illuminance * lightColour;
+    return BRDFDiffuse(V, L, N, NdotV, NdotL, material) * illuminance * lightColour;
 }
 
 vec3 evaluatePunctualLight(vec3 worldSpacePosition,
