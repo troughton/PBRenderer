@@ -3,7 +3,9 @@
 #define NoSpecular
 #include "LightAccumulation.glsl"
 
-uniform vec4 nearPlaneAndProjectionTerms;
+in vec3 cameraDirection;
+
+uniform vec2 projectionTerms;
 uniform vec2 cameraNearFar;
 uniform usampler2D gBuffer0Texture;
 uniform sampler2D gBuffer1Texture;
@@ -13,11 +15,11 @@ uniform sampler2D gBufferDepthTexture;
 uniform mat4 cameraToWorldMatrix;
 uniform float exposure;
 
-vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
+vec4 lightAccumulationPass(vec2 projectionTerms, vec2 cameraNearFar,
                            uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2, float gBufferDepth,
                            vec2 uv, mat4 cameraToWorldMatrix) {
     
-    vec4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, uv, nearPlaneAndProjectionTerms.xy, nearPlaneAndProjectionTerms.zw);
+    vec4 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, cameraDirection, projectionTerms);
     vec3 worldSpacePosition = (cameraToWorldMatrix * cameraSpacePosition).xyz;
     
     vec3 N;
@@ -33,7 +35,7 @@ vec3 lightAccumulationPass(vec4 nearPlaneAndProjectionTerms, vec2 cameraNearFar,
     
     vec3 epilogue = epilogueLighting(lightAccumulation, exposure);
     
-    return epilogue;
+    return vec4(epilogue, 1);
 }
 
 
@@ -46,7 +48,5 @@ void main() {
     vec4 gBuffer1 = texelFetch(gBuffer1Texture, pixelCoord, 0);
     vec4 gBuffer2 = texelFetch(gBuffer2Texture, pixelCoord, 0);
     
-    vec3 lightAccumulation = lightAccumulationPass(nearPlaneAndProjectionTerms, cameraNearFar, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, uv, cameraToWorldMatrix);
-    
-    outputColour = vec4(lightAccumulation, 1);
+    outputColour = lightAccumulationPass(projectionTerms, cameraNearFar, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, uv, cameraToWorldMatrix);
 }

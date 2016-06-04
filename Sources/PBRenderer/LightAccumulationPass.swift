@@ -17,24 +17,28 @@ final class LightAccumulationPass {
 
     static let lightGridBuilder = LightGridBuilder()
     
-    static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
+    static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "CameraSpacePositionVertexShader.vert"))
     static let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LightAccumulationPass.frag"))
     static let fragmentShaderNoSpecular = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LightAccumulationPassDiffuseOnly.frag"))
     
     static let lightAccumulationShader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     static let lightAccumulationShaderNoSpecular = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     
-    init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment, noSpecular: Bool = false) {
+    let hasSpecularAndReflections : Bool
+    
+    init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment, hasSpecularAndReflections: Bool = true) {
         
-        let framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationAttachment: lightAccumulationAttachment)
+        let framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: pixelDimensions.width, height: pixelDimensions.height, lightAccumulationAttachment: lightAccumulationAttachment, includeReflectionBuffer: hasSpecularAndReflections)
         
         var depthState = DepthStencilState()
         depthState.depthCompareFunction = GL_ALWAYS
         depthState.isDepthWriteEnabled = false
         
+        self.hasSpecularAndReflections = hasSpecularAndReflections
+        
         self.pipelineState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: pixelDimensions.width, height: pixelDimensions.height),
                                            framebuffer: framebuffer,
-                                           shader: noSpecular ? LightAccumulationPass.lightAccumulationShaderNoSpecular : LightAccumulationPass.lightAccumulationShader,
+                                           shader: hasSpecularAndReflections ? LightAccumulationPass.lightAccumulationShader : LightAccumulationPass.lightAccumulationShaderNoSpecular,
                                            depthStencilState: depthState)
         
     }
@@ -42,7 +46,19 @@ final class LightAccumulationPass {
     deinit {
     }
     
-    class func lightAccumulationFramebuffer(width: GLint, height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) -> Framebuffer {
+    class func lightAccumulationFramebuffer(width: GLint, height: GLint, lightAccumulationAttachment: RenderPassColourAttachment, includeReflectionBuffer: Bool) -> Framebuffer {
+        
+        var reflectionAttachment : RenderPassColourAttachment? = nil
+        if includeReflectionBuffer {
+            let reflectionBufferDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
+            let reflectionTexture = Texture(textureWithDescriptor: reflectionBufferDescriptor)
+            
+            reflectionAttachment = RenderPassColourAttachment(clearColour: vec4(0))
+            reflectionAttachment!.loadAction = .Clear
+            reflectionAttachment!.storeAction = .Store
+            reflectionAttachment!.texture = reflectionTexture
+        }
+        
         
         var depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false)
         depthDescriptor.usage = .RenderTarget
@@ -53,14 +69,13 @@ final class LightAccumulationPass {
         depthAttachment.storeAction = .Store
         depthAttachment.texture = depthTexture
         
-        return Framebuffer(width: width, height: height, colourAttachments: [lightAccumulationAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
+        return Framebuffer(width: width, height: height, colourAttachments: [lightAccumulationAttachment, reflectionAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
-
     
     
     func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) {
         self.pipelineState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
-        self.pipelineState.framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: width, height: height, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.pipelineState.framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: width, height: height, lightAccumulationAttachment: lightAccumulationAttachment, includeReflectionBuffer: hasSpecularAndReflections)
     }
     
     //Calculates the size of a plane positioned at z = -1 (hence the divide by zNear)
@@ -83,7 +98,8 @@ final class LightAccumulationPass {
     
     enum LightAccumulationShaderProperty : String, ShaderProperty {
         case LightGrid = "lightGrid"
-        case NearPlaneAndProjectionTerms = "nearPlaneAndProjectionTerms"
+        case NearPlane = "nearPlane"
+        case ProjectionTerms = "projectionTerms"
         case CameraNearFar = "cameraNearFar"
         case GBuffer0Texture = "gBuffer0Texture"
         case GBuffer1Texture = "gBuffer1Texture"
@@ -91,7 +107,12 @@ final class LightAccumulationPass {
         case GBufferDepthTexture = "gBufferDepthTexture"
         case Lights = "lights"
         case CameraToWorldMatrix = "cameraToWorldMatrix"
+        case WorldToCameraMatrix = "worldToCameraMatrix"
+        case CameraToClipMatrix = "cameraToClipMatrix"
+        case DepthBufferSize = "depthBufferSize"
         case Exposure = "exposure"
+        
+        case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
         
         var name : String {
             return self.rawValue
@@ -142,7 +163,21 @@ final class LightAccumulationPass {
             let projectionA = camera.zFar / (camera.zFar - camera.zNear)
             let projectionB = (-camera.zFar * camera.zNear) / (camera.zFar - camera.zNear)
             
-            shader.setUniform(nearPlane.x, nearPlane.y, projectionA, projectionB, forProperty: LightAccumulationShaderProperty.NearPlaneAndProjectionTerms)
+            shader.setUniform(nearPlane.x, nearPlane.y, forProperty: LightAccumulationShaderProperty.NearPlane)
+            shader.setUniform(projectionA, projectionB, forProperty: LightAccumulationShaderProperty.ProjectionTerms)
+            
+            if self.hasSpecularAndReflections {
+                shader.setMatrix(camera.transform.worldToNodeMatrix, forProperty: LightAccumulationShaderProperty.WorldToCameraMatrix)
+                shader.setMatrix(camera.projectionMatrix, forProperty: LightAccumulationShaderProperty.CameraToClipMatrix)
+                
+                let width = gBufferDepth.descriptor.width
+                let height = gBufferDepth.descriptor.height
+                shader.setUniform(Float(width), Float(height), forProperty: LightAccumulationShaderProperty.DepthBufferSize)
+                
+                let traceDistance = 10.0 //(camera.zFar - camera.zNear) * 0.5
+                shader.setUniform(Float(traceDistance), forProperty: LightAccumulationShaderProperty.ReflectionTraceMaxDistance)
+    
+            }
             
             GLMesh.fullScreenQuad.render()
         }

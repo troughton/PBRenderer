@@ -12,20 +12,22 @@
     import PBRenderer
     import SGLMath
     
-private var cameraBaseTranslation : vec3! = nil
+private var cameraBaseTranslations : [vec3]! = nil
     func processKickEvent(_ event: MIDIEventType, scene: Scene, beatNumber: Double, strength: Double = 1.0) {
         
         if case let .noteMessage(noteMessage) = event {
             
-            let camera = scene.namesToNodes["camera1"]!
+            let camera1 = scene.namesToNodes["camera1"]!
+             let camera2 = scene.namesToNodes["camera2"]!
             
-            if cameraBaseTranslation == nil {
-                cameraBaseTranslation = camera.transform.translation
+            if cameraBaseTranslations == nil {
+                cameraBaseTranslations = [camera1.transform.translation, camera2.transform.translation]
             }
             
             let animation = AnimationSystem.Animation(startBeat: beatNumber, duration: 0.08, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
                 let zOffset = -sin(percentage * M_PI) * 0.3 * strength
-                camera.transform.translation = cameraBaseTranslation + (camera.transform.nodeToWorldMatrix * vec4(0, 0, Float(zOffset), 0)).xyz
+                camera1.transform.translation = cameraBaseTranslations[0] + (camera1.transform.nodeToWorldMatrix * vec4(0, 0, Float(zOffset), 0)).xyz
+                camera2.transform.translation = cameraBaseTranslations[1] + (camera2.transform.nodeToWorldMatrix * vec4(0, 0, Float(zOffset * 0.7), 0)).xyz
             })
             AnimationSystem.addAnimation(animation)
             

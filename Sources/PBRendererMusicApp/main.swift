@@ -54,7 +54,7 @@ func randomFloat() -> Float {
     
 final class AudioVisualManager : SongDelegate {
     let scene: Scene
-    let camera : Camera
+    var camera : Camera
     
     var lastMaterialChangeBeat : Double = 0.0
     
@@ -63,15 +63,15 @@ final class AudioVisualManager : SongDelegate {
         guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
         
         self.scene = Scene(fromCollada: collada)
-        self.camera = scene.namesToNodes["MainCamera"]!.cameras.first!
         
         
         let startCamera = scene.namesToNodes["camera1"]!.cameras.first!
-        self.camera.transform.translation = startCamera.transform.translation
-        self.camera.transform.rotation = startCamera.transform.rotation
+        self.camera = startCamera
         
-        self.camera.shutterTime = 1.0
-        self.camera.aperture = 1.0
+        for camera in scene.cameras {
+            camera.shutterTime = 1.0
+            camera.aperture = 1.0
+        }
         
         self.scene.lights.forEach { $0.intensity.value = 0 }
         
@@ -89,13 +89,23 @@ final class AudioVisualManager : SongDelegate {
         }
         
         let endCamera = scene.namesToNodes["camera2"]!.cameras.first!
+        self.camera.shutterTime = 1.0
+        self.camera.aperture = 1.0
+        
+        let movingCamera = scene.namesToNodes["MainCamera"]!.cameras.first!
         
         let cameraAnimation = AnimationSystem.Animation(startBeat: 4 * 13, duration: 4 * 4, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
+            if percentage < 1 {
+                self.camera = movingCamera
+            } else {
+                self.camera = endCamera
+            }
             
             let translation = lerp(from: startCamera.transform.translation, to: endCamera.transform.translation, t: Float(percentage))
             
             self.camera.transform.translation = translation
             self.camera.transform.rotation = slerp(from: startCamera.transform.rotation, to: endCamera.transform.rotation, t: Float(percentage))
+            print("Updating camera")
         })
         AnimationSystem.addAnimation(cameraAnimation)
         
@@ -105,7 +115,7 @@ final class AudioVisualManager : SongDelegate {
         
         if case let .noteMessage(noteMessage) = event {
             let instrument = Instrument.instrumentForTrackNumber(track)
-            print("Note \(noteMessage.note) playing for \(noteMessage.duration) beats on instrument \(instrument)")
+          //  print("Note \(noteMessage.note) playing for \(noteMessage.duration) beats on instrument \(instrument)")
             
             switch instrument {
             case .HighMotif:

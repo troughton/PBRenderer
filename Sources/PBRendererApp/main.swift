@@ -90,7 +90,7 @@ func main() {
     
     let scene = Scene(fromCollada: collada)
     let camera = scene.cameras.first!
-    camera.sceneNode.transform.rotation = quat.identity
+  //  camera.sceneNode.transform.rotation = quat.identity
     
     for light in scene.lights {
         light.intensity.value *= 5000000
@@ -138,7 +138,7 @@ func main() {
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
-        sceneRenderer.renderScene(scene, camera: camera, environmentMap: lightProbe.ldTexture)
+        sceneRenderer.renderScene(scene, camera: camera, environmentMap: nil) //lightProbe.ldTexture)
         gui.render()
     }
 

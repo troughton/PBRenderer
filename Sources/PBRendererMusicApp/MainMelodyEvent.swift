@@ -41,9 +41,6 @@ let mainMelodyNotes : [UInt8] = [50, 52, 55, 57, 59, 62]
                     }
                     
                 })
-                
-               
-                
 
             })
             AnimationSystem.addAnimation(animation)

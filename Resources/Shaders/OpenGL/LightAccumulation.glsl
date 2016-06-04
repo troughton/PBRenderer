@@ -27,11 +27,9 @@ out vec4 outputColour;
 in vec2 uv;
 
 vec4 calculateCameraSpacePositionFromWindowZ(float windowZ,
-                                             vec2 uv,
-                                             vec2 nearPlane,
+                                             vec3 cameraDirection,
                                              vec2 projectionTerms) {
     
-    vec3 cameraDirection = vec3(nearPlane * (uv.xy * 2 - 1), -1);
     float linearDepth = projectionTerms.y / (windowZ - projectionTerms.x);
     return vec4(cameraDirection * linearDepth, 1);
 }

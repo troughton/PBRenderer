@@ -231,6 +231,29 @@ public enum LightType {
             fatalError()
         }
     }
+    
+    func isSameTypeAs(_ other: LightType) -> Bool {
+        switch self {
+        case .Point:
+            if case .Point = other { return true } else { return false }
+        case .Directional:
+            if case .Directional = other { return true } else { return false }
+        case .DiskArea(_):
+            if case .DiskArea(_) = other {
+                return true
+            } else { return false }
+        case .SphereArea(_):
+            if case .SphereArea(_) = other {
+                return true
+            } else { return false }
+        case .Spot(_, _):
+            if case .Spot(_, _) = other {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
 }
 
 public final class Light {
