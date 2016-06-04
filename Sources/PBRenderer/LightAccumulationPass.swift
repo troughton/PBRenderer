@@ -108,7 +108,7 @@ final class LightAccumulationPass {
         case Lights = "lights"
         case CameraToWorldMatrix = "cameraToWorldMatrix"
         case WorldToCameraMatrix = "worldToCameraMatrix"
-        case CameraToClipMatrix = "cameraToClipMatrix"
+        case CameraToPixelClipMatrix = "cameraToPixelClipMatrix"
         case DepthBufferSize = "depthBufferSize"
         case Exposure = "exposure"
         
@@ -168,11 +168,18 @@ final class LightAccumulationPass {
             
             if self.hasSpecularAndReflections {
                 shader.setMatrix(camera.transform.worldToNodeMatrix, forProperty: LightAccumulationShaderProperty.WorldToCameraMatrix)
-                shader.setMatrix(camera.projectionMatrix, forProperty: LightAccumulationShaderProperty.CameraToClipMatrix)
+                
                 
                 let width = gBufferDepth.descriptor.width
                 let height = gBufferDepth.descriptor.height
-                shader.setUniform(Float(width), Float(height), forProperty: LightAccumulationShaderProperty.DepthBufferSize)
+                
+                let projectionMatrix = camera.projectionMatrix
+                let scaleMatrix = mat4(pixelScaleMatrixWithWidth: Float(width), height: Float(height)) * projectionMatrix
+                let invertedYMatrix = scaleMatrix //SGLMath.scale(scaleMatrix, vec3(1, -1, 1))
+                
+                shader.setMatrix(invertedYMatrix, forProperty: LightAccumulationShaderProperty.CameraToPixelClipMatrix)
+                
+                shader.setUniform(Float(width - 1), Float(height - 1), forProperty: LightAccumulationShaderProperty.DepthBufferSize)
                 
                 let traceDistance = 10.0 //(camera.zFar - camera.zNear) * 0.5
                 shader.setUniform(Float(traceDistance), forProperty: LightAccumulationShaderProperty.ReflectionTraceMaxDistance)
@@ -182,6 +189,6 @@ final class LightAccumulationPass {
             GLMesh.fullScreenQuad.render()
         }
         
-        return self.pipelineState.framebuffer.colourAttachments[0]!.texture!
+        return self.pipelineState.framebuffer.colourAttachments[1]?.texture! ?? self.pipelineState.framebuffer.colourAttachments[0]!.texture!
     }
 }

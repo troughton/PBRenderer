@@ -5,24 +5,23 @@
 //// Released as open source under the BSD 2-Clause License
 //// http://opensource.org/licenses/BSD-2-Clause
 //
-////This should take place in the light accumulation pass. If there's no result, then we want to blend in the results from the light probes that take place in the GBuffer creation pass  we can do this using alpha blending. i.e. output the reflection ray visibility in the alpha channel of the light accumulation buffer, and then set the blend mode to be (src * (1 - dstAlpha) + dst). We still calculate the light probes' contribution at GBuffer creation, since this will hopefully be more-or-less free (i.e. the ALU units aren't doing much during all the geometry processing.
+////This should take place in the light accumulation pass. If there's no result, then we want to blend in the results from the light probes that take place in the GBuffer creation pass  we can do this using alpha blending. i.e. output the reflection ray visibility in the alpha channel of the light accumulation buffer, and then set the blend mode to be (src * (1 - dstAlpha) + dst). We still calculate the light probes' contribution at GBuffer creation, since this will hopefully be more-or-less free (i.e. the ALU units aren't doing much during all the geometry processing).
 
 // N is the normal direction
 // R is the mirror vector
 vec3 getSpecularDominantDir(vec3 N, vec3 R, float roughness) {
     float smoothness = saturate(1 - roughness);
     float lerpFactor = smoothness * (sqrt(smoothness) + roughness);
-    // The result is not normalized as we fetch into a cubemap
     return mix(N, R, lerpFactor);
 }
 
-uniform mat4 cameraToClipMatrix;
+uniform mat4 cameraToPixelClipMatrix;
 uniform vec2 depthBufferSize;
 
 const float reflectionTraceMaxSteps = 20.f; // Maximum number of iterations. Higher gives better images but may be slow.
 uniform float reflectionTraceMaxDistance; // Maximum camera-space distance to trace before returning a miss.
 const float reflectionTraceStrideZCutoff = 0.2f; // More distant pixels are smaller in screen space. This value tells at what point to start relaxing the stride to give higher quality reflections for objects far from the camera.
-const float reflectionTraceZThickness = 0.01f; // Camera space thickness to ascribe to each pixel in the depth buffer
+const float reflectionTraceZThickness = 0.1f; // Camera space thickness to ascribe to each pixel in the depth buffer
 const float reflectionTraceStride = 1.f; // Step in horizontal or vertical pixels between samples. This is a float
 // because integer math is slow on GPUs, but should be set to an integer >= 1.
 
@@ -51,7 +50,7 @@ float linearDepthTexelFetch(ivec2 hitPixel) {
     // Load returns 0 for any value accessed out of bounds
     
     float windowZ = texelFetch(gBufferDepthTexture, hitPixel, 0).r;
-    float linearDepth = projectionTerms.y / (windowZ - projectionTerms.x);
+    float linearDepth = -projectionTerms.y / (windowZ - projectionTerms.x);
     return linearDepth;
 }
 
@@ -68,24 +67,17 @@ bool traceScreenSpaceRay(
                           // to conceal banding artifacts
                           float jitter,
 
-                          float roughness,
-
                           // Pixel coordinates of the first intersection with the scene
                           out vec2 hitPixel) {
 
     // Clip to the near plane
-    float rayLength = ((csOrig.z + csDir.z * reflectionTraceMaxDistance) < cameraNearFar.x) ?
+    float rayLength = ((csOrig.z + csDir.z * reflectionTraceMaxDistance) > cameraNearFar.x) ?
     (cameraNearFar.x - csOrig.z) / csDir.z : reflectionTraceMaxDistance;
     vec3 csEndPoint = csOrig + csDir * rayLength;
 
     // Project into homogeneous clip space
-    vec4 H0 = cameraToClipMatrix * vec4(csOrig, 1.0);
-    H0.xy *= depthBufferSize;
-    H0.z *= -1;
-    vec4 H1 = cameraToClipMatrix * vec4(csEndPoint, 1.0);
-    H1.xy *= depthBufferSize;
-    H1.z *= -1;
-    
+    vec4 H0 = cameraToPixelClipMatrix * vec4(csOrig, 1.0);
+    vec4 H1 = cameraToPixelClipMatrix * vec4(csEndPoint, 1.0);
     float k0 = 1.0 / H0.w, k1 = 1.0 / H1.w;
 
     // The interpolated homogeneous version of the camera-space points
@@ -93,9 +85,6 @@ bool traceScreenSpaceRay(
 
     // Screen-space endpoints
     vec2 P0 = H0.xy * k0, P1 = H1.xy * k1;
-    
-    P0.xy = (P0.xy + depthBufferSize) * 0.5;
-    P1.xy = (P1.xy + depthBufferSize) * 0.5;
 
     // If the line is degenerate, make it cover at least one pixel
     // to avoid handling zero-pixel extent as a special case later
@@ -123,8 +112,8 @@ bool traceScreenSpaceRay(
 
     // Scale derivatives by the desired pixel stride and then
     // offset the starting values by the jitter fraction
-    float strideScale = 1.0f - min(1.0f, csOrig.z * reflectionTraceStrideZCutoff);
-    float stride = 1.0f + strideScale * reflectionTraceStride;
+  //  float strideScale = 1.0f - min(1.0f, csOrig.z * reflectionTraceStrideZCutoff);
+    float stride = reflectionTraceStride; //1.0f + strideScale * reflectionTraceStride;
     dP *= stride;
     dQ *= stride;
     dk *= stride;
@@ -135,57 +124,54 @@ bool traceScreenSpaceRay(
 
 
     // Slide P from P0 to P1, (now-homogeneous) Q from Q0 to Q1, k from k0 to k1
-    vec4 PQk = vec4(P0, Q0.z, k0);
-    vec4 dPQk = vec4(dP, dQ.z, dk);
+//    vec4 PQk = vec4(P0, Q0.z, k0);
+//    vec4 dPQk = vec4(dP, dQ.z, dk);
     vec3 Q = Q0;
 
     // Adjust end condition for iteration direction
     float  end = P1.x * stepDir;
 
+    float k = k0;
     float stepCount = 0.0f;
     float prevZMaxEstimate = csOrig.z;
     float rayZMin = prevZMaxEstimate;
     float rayZMax = prevZMaxEstimate;
     float sceneZMax = rayZMax + 100.0f;
-    for(;
-         ((PQk.x * stepDir) <= end) &&
+    for(vec2 P = P0;
+         ((P.x * stepDir) <= end) &&
          (stepCount < reflectionTraceMaxSteps) &&
-         !intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax) &&
-         (sceneZMax != 0.0f);
-         ++stepCount)
+        ((rayZMax < sceneZMax - reflectionTraceZThickness) || (rayZMin > sceneZMax))
+        && (sceneZMax != 0.0f);
+         P += dP, Q.z += dQ.z, k += dk, ++stepCount)
         {
             rayZMin = prevZMaxEstimate;
-            rayZMax = (dPQk.z * 0.5f + PQk.z) / (dPQk.w * 0.5f + PQk.w);
+            rayZMax = (dQ.z * 0.5f + Q.z) / (dk * 0.5f + k);
             prevZMaxEstimate = rayZMax;
-            if(rayZMin > rayZMax)
-                {
-                    swap(rayZMin, rayZMax);
-                    }
+            if (rayZMin > rayZMax) {
+                float t = rayZMin; rayZMin = rayZMax; rayZMax = t;
+                //swap(rayZMin, rayZMax);
+            }
 
-            hitPixel = permute ? PQk.yx : PQk.xy;
+            hitPixel = permute ? P.yx : P;
             // You may need hitPixel.y = depthBufferSize.y - hitPixel.y; here if your vertical axis
             // is different than ours in screen space
             sceneZMax = linearDepthTexelFetch(ivec2(hitPixel));
-
-            PQk += dPQk;
-            }
+        }
 
     // Advance Q based on the number of steps
     Q.xy += dQ.xy * stepCount;
-    return intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax);
+    return (rayZMax >= sceneZMax - reflectionTraceZThickness) && (rayZMin < sceneZMax);// intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax);
 }
 
-vec4 traceReflection(vec3 cameraSpacePosition, vec3 normalVS, float roughness) {    
-    cameraSpacePosition.z *= -1; //(0, -0.1, 1)
-    normalVS.z *= -1; //(0, 1, 0)
+vec4 traceReflection(vec3 cameraSpacePosition, vec3 normalVS, float roughness) {
     
     /** Since position is reconstructed in view space, just normalise it to get the vector from the eye to the position and then reflect that around the normal to get the ray direction to trace. */
-    vec3 toPositionVS = normalize(cameraSpacePosition); 
-    vec3 R = reflect(toPositionVS, normalVS);
+    vec3 V = normalize(cameraSpacePosition);
+    vec3 R = reflect(V, normalVS);
     vec3 rayDirectionVS = normalize(getSpecularDominantDir(normalVS, R, roughness));
     
     // output rDotV to the alpha channel for use in determining how much to fade the ray
-    float rDotV = dot(rayDirectionVS, toPositionVS);
+    float rDotV = dot(rayDirectionVS, V);
     
     // out parameters
     vec2 hitPixel = vec2(0.0f, 0.0f);
@@ -193,7 +179,7 @@ vec4 traceReflection(vec3 cameraSpacePosition, vec3 normalVS, float roughness) {
     float jitter = reflectionTraceStride > 1.0f ? float(int(uv.x * 2 + uv.y * 2 - 2) & 1) * 0.5f : 0.0f;
     
     // perform ray tracing - true if hit found, false otherwise
-    bool intersection = traceScreenSpaceRay(cameraSpacePosition, rayDirectionVS, jitter, roughness, hitPixel);
+    bool intersection = traceScreenSpaceRay(cameraSpacePosition, rayDirectionVS, jitter, hitPixel);
     
     float depth = texelFetch(gBufferDepthTexture, ivec2(hitPixel), 0).r;
     

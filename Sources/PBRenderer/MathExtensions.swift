@@ -271,3 +271,16 @@ public func lerp<genType:VectorType where
     >(from: genType, to: genType, t: genType.Element) -> genType {
     return from + t * (to - from)
 }
+
+extension Matrix4x4 {
+    //From G3D10
+    init(pixelScaleMatrixWithWidth screenWidth: T, height screenHeight: T) {
+        let sx = screenWidth * T(0.5)
+        let sy = screenHeight * T(0.5)
+        
+        self = Matrix4x4(sx, 0, 0, 0,
+                          0, sy, 0, 0,
+                          0, 0, 1, 0,
+                          sx, sy, 0, 1)
+    }
+}
