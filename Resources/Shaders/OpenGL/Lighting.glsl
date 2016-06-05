@@ -131,24 +131,12 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
 
     float NdotL = saturate(dot(N, L));
     
-    // Tilted patch to sphere equation
-    float illuminance = 0;
-    
-    float Beta = fast_acos(dot(N, L));
-    float H = sqrt(sqrDist);
-    float h = H / lightRadius;
-    float x = sqrt(h * h - 1);
-    float y = -x * (1 / tan(Beta));
-    
-    if (h * cos(Beta) > 1) {
-        illuminance = cos(Beta) / (h * h);
+    float illuminance;
+    if (light.lightTypeFlag == LightTypeSphereArea) {
+        illuminance = calculateSphereIlluminance(worldSpacePosition, NdotL, sqrDist, light);
     } else {
-        illuminance = (1 / (PI * h * h)) *
-        (cos(Beta) * fast_acos(y) - x * sin(Beta) * sqrt(1 - y * y)) +
-        (1 / PI) * fast_atan(sin(Beta) * sqrt(1 - y * y) / x);
+        illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
     }
-    
-    illuminance *= PI;
 
     illuminance *= smoothDistanceAtt(sqrDist, light.inverseSquareAttenuationRadius);
     
