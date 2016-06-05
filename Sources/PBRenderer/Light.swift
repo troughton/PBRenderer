@@ -112,8 +112,12 @@ public enum LightIntensity {
             return candelasPerMetreSq * lightType.surfaceArea
         case let .LuminousPower(lumens):
             switch lightType {
+            case .SphereArea(_):
+                fallthrough
             case .Point:
                 return lumens / (4 * Float(M_PI))
+            case .DiskArea(_):
+                fallthrough
             case .Spot(innerCutoff: _, outerCutoff: _):
                 return lumens * Float(M_PI) //not correct, but prevents the intensity from changing as the angle changes.
             default:
@@ -162,6 +166,20 @@ public enum LightIntensity {
             return self.toLuminousIntensity(forLightType: lightType)
         }
     }
+    
+    func isSameTypeAs(_ other: LightIntensity) -> Bool {
+        switch self {
+        case .Illuminance(_):
+            if case .Illuminance = other { return true } else { return false }
+        case .Luminance(_):
+            if case .Luminance = other { return true } else { return false }
+        case .LuminousIntensity(_):
+            if case .LuminousIntensity = other { return true } else { return false }
+        case .LuminousPower(_):
+            if case .LuminousPower = other { return true } else { return false }
+        }
+    }
+
 }
 
 public enum LightType {
@@ -279,7 +297,7 @@ public final class Light {
     public var intensity : LightIntensity {
         didSet {
             self.backingGPULight.withElement { gpuLight in
-                gpuLight.intensity = self.intensity.toLuminousIntensity(forLightType: self.type)
+                gpuLight.intensity = self.intensity.toStoredIntensity(forLightType: self.type)
             }
         }
     }

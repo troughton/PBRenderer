@@ -98,16 +98,38 @@ float calculateSphereIlluminance(vec3 worldSpacePosition, float NdotL, float sqr
     return illuminanceSphereOrDisk(cosTheta, sinSigmaSqr);
 }
 
-
 vec3 evaluateAreaLight(vec3 worldSpacePosition,
                          vec3 V, vec3 N, float NdotV,
                          MaterialRenderingData material,
                          LightData light) {
+    
     vec3 Lunormalized = light.worldSpacePosition.xyz - worldSpacePosition;
     vec3 L = normalize(Lunormalized);
     float sqrDist = dot(Lunormalized, Lunormalized);
+    float inverseDistanceToLight = inversesqrt(sqrDist);
     
-    float NdotL = dot(N, L);
+    float lightRadius = light.extraData.x;
+    
+    vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
+    
+    float lobeEnergy = 1;
+    float alpha = sqr(material.roughness);
+    
+    float sphereAngle = saturate( lightRadius * inverseDistanceToLight);
+    lobeEnergy *= sqr( alpha / saturate( alpha + 0.5 * sphereAngle ) );
+
+    V = normalize(V);
+    N = normalize(N);
+    vec3 R = reflect(-V, N);
+    R = getSpecularDominantDirArea(N, R, NdotV, material.roughness);
+   
+    vec3 closestPointOnRay = dot(Lunormalized, R) * R;
+    vec3 centreToRay = closestPointOnRay - Lunormalized;
+    vec3 closestPointOnSphere = Lunormalized + centreToRay * saturate(lightRadius * inversesqrt(dot(centreToRay, centreToRay)));
+    
+    L = normalize(closestPointOnSphere);
+
+    float NdotL = saturate(dot(N, L));
     
     float illuminance;
     if (light.lightTypeFlag == LightTypeSphereArea) {
@@ -115,14 +137,13 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     } else {
         illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
     }
+
+    illuminance *= smoothDistanceAtt(sqrDist, light.inverseSquareAttenuationRadius);
     
-    NdotL = saturate(NdotL);
+    vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
+    vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
     
-    L = getSpecularDominantDirArea(N, L, NdotV, material.roughness);
-    
-    vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
-    
-    return BRDF(V, L, N, NdotV, NdotL, material) * illuminance * lightColour;
+    return (diffuse + specular) * illuminance * lightColour;
 }
 
 vec3 evaluatePunctualLight(vec3 worldSpacePosition,
