@@ -34,8 +34,8 @@ final class CameraControl : WindowInputDelegate {
     }
     
     func mouseDrag(delta: (x: Double, y: Double)) {
-        self.pitch += Float(delta.y) * 0.01
-        self.yaw += Float(delta.x) * 0.01
+//        self.pitch += Float(delta.y) * 0.01
+//        self.yaw += Float(delta.x) * 0.01
         
     }
     
@@ -90,12 +90,7 @@ func main() {
     
     let scene = Scene(fromCollada: collada)
     let camera = scene.cameras.first!
-  //  camera.sceneNode.transform.rotation = quat.identity
-    
-    for light in scene.lights {
-        light.intensity.value *= 5000000
-    }
-    
+
     mainWindow.dimensions = Size(Int32(camera.aspectRatio * Float(baseHeight)), baseHeight)
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
@@ -124,13 +119,25 @@ func main() {
 
     
     let gui = GUI(window: mainWindow)
-//    gui.drawFunctions.append({ renderFPSCounter()} )
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderCameraUI(state: &state, camera: camera)
     })
-//    gui.drawFunctions.append({ state in {
-//        renderCameraUI(state: state, camera: camera)
-//    }})
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderTestUI(state: &state)
+    })
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderPropertyEditor(state: &state, scene: scene)
+    })
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderSceneHierachy(state: &state, scene: scene)
+    })
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderFPSCounter(state: &state);
+    })
 //      gui.drawFunctions.append({ renderTestUI() })
 //    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })
 

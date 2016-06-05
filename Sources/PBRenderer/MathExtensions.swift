@@ -116,6 +116,64 @@ extension Quaternion where T : FloatingPoint {
         }
         self = Quaternion(scale * axis.x, scale * axis.y, scale * axis.z, w);
     }
+    
+    public static func fromEuler(euler: Vector3<T>) -> Quaternion<T> {
+        var quaternion = Quaternion(angle: euler.z, axis: Vector3<T>(0, 0, 1))
+        quaternion *= Quaternion(angle: euler.y, axis: Vector3<T>(0, 1, 0))
+        quaternion *= Quaternion(angle: euler.x, axis: Vector3<T>(1, 0, 0))
+        
+        return quaternion
+    }
+    
+    func toEuler() -> Vector3<T> {
+        var euler = Vector3<T>(0)
+        
+        let x1a = 2*self.y*self.w
+        let x1b = -2*self.x*self.z
+        let x1 = x1a - x1b
+        
+        let x2a = 1 - 2*self.y*self.y
+        let x2b = 2*self.z*self.z
+        let x2 = x2a - x2b
+        
+        if let x1 = x1 as? Float, x2 = x2 as? Float {
+            euler.x = unsafeBitCast(atan2(x1, x2), to: T.self)
+        } else if let x1 = x1 as? Double, x2 = x2 as? Double {
+            euler.x = unsafeBitCast(atan2(x1, x2), to: T.self)
+        } else {
+            fatalError()
+        }
+        
+        let ya = 2*self.x*self.y
+        let yb = 2*self.z*self.w
+        let y = ya + yb
+        
+        if let y = y as? Float {
+            euler.y = unsafeBitCast(asin(y), to: T.self)
+        } else if  let y = y as? Double {
+            euler.y = unsafeBitCast(asin(y), to: T.self)
+        } else {
+            fatalError()
+        }
+        
+        let z1a = 2*self.x*self.w
+        let z1b = 2*self.y*self.z
+        let z1 = z1a - z1b
+        
+        let z2a = 1 - 2*self.x*self.x
+        let z2b = 2*self.z*self.x
+        let z2 = z2a - z2b
+        
+        if let z1 = z1 as? Float, z2 = z2 as? Float {
+            euler.z = unsafeBitCast(atan2(z1, z2), to: T.self)
+        } else if let z1 = z1 as? Double, z2 = z2 as? Double {
+            euler.z = unsafeBitCast(atan2(z1, z2), to: T.self)
+        } else {
+            fatalError()
+        }
+        
+        return euler
+    }
 }
 
 extension Quaternion where T : FloatingPoint {

@@ -29,7 +29,7 @@ public final class Scene {
     let materialTexture : Texture
     let lightBuffer : GPUBuffer<GPULight>
     let lightTexture : Texture
-    public var namesToNodes : [String : SceneNode]! = nil
+    public var idsToNodes : [String : SceneNode]! = nil
 
     init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>) {
         self.nodes = nodes
@@ -42,11 +42,11 @@ public final class Scene {
         
         var dictionary = [String : SceneNode]()
         self.flattenedScene.forEach({ (node) in
-            if let id = node.name {
+            if let id = node.id {
                 dictionary[id] = node
             }
         })
-        self.namesToNodes = dictionary
+        self.idsToNodes = dictionary
     }
 
     private var flattenedScene : [SceneNode] {
@@ -100,7 +100,9 @@ public final class SceneNode {
     }
     
     init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:]) {
-        self.id = id
+        
+        self.id = id.map { $0.characters.first == "_" ? $0.substring(from: $0.index(after: $0.startIndex)) : $0 }
+        
         self.name = name;
         self.transform = transform
         self.meshes = meshes
