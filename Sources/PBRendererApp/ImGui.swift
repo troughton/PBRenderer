@@ -146,7 +146,8 @@ private let lightTypes : [(String, LightType)] = [("Point", LightType.Point),
                                                  ("Spot", LightType.Spot(innerCutoff: 0.1, outerCutoff: 1.0)),
                                                  ("Directional", LightType.Directional),
                                                  ("Sphere Area", LightType.SphereArea(radius: 1.0)),
-                                                 ("Disk Area", LightType.DiskArea(radius: 1.0))]
+                                                 ("Disk Area", LightType.DiskArea(radius: 1.0)),
+                                                 ("Tube Area", LightType.TubeArea(radius: 1.0, length: 2.0))]
 
 private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
                              ("cd/m²", LightIntensity.Luminance(1.0)),
@@ -180,6 +181,11 @@ private func renderLightControls(light: Light) {
         light.intensity = LightIntensity(unit: light.type.validUnits.first!, value: intensity)
         
         switch(light.type) {
+        case .TubeArea(var radius, var length):
+            igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            igDragFloat(label: "Length", value: &length, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            light.type = .TubeArea(radius: radius, length: length)
+            break
         case .DiskArea(var radius):
             igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .DiskArea(radius: radius)

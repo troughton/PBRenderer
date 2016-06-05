@@ -112,6 +112,8 @@ public enum LightIntensity {
             return candelasPerMetreSq * lightType.surfaceArea
         case let .LuminousPower(lumens):
             switch lightType {
+            case .TubeArea(_, _):
+                fallthrough
             case .SphereArea(_):
                 fallthrough
             case .Point:
@@ -188,6 +190,7 @@ public enum LightType {
     case Directional
     case SphereArea(radius: Float)
     case DiskArea(radius: Float)
+    case TubeArea(radius: Float, length: Float)
     
     private var lightTypeFlag : LightTypeFlag {
         switch self {
@@ -201,6 +204,8 @@ public enum LightType {
             return .SphereArea
         case .DiskArea(_):
             return .DiskArea
+        case .TubeArea(_, _):
+            return .TubeArea
         }
     }
     
@@ -210,6 +215,8 @@ public enum LightType {
         fallthrough
         case .Spot(_, _):
             return [.LuminousPower(1.0)]
+        case .TubeArea(_, _):
+            fallthrough
         case .DiskArea(_):
             fallthrough
         case .SphereArea(_):
@@ -234,6 +241,8 @@ public enum LightType {
             gpuLight.extraData = vec4(radius, 0, 0, 0)
         case let .DiskArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
+        case let .TubeArea(radius, length):
+            gpuLight.extraData = vec4(radius, length, 0, 0)
         default:
             break
         }
@@ -245,6 +254,8 @@ public enum LightType {
             return 4 * Float(M_PI) * radius * radius
         case let .DiskArea(radius: radius):
             return Float(M_PI) * radius * radius
+        case let .TubeArea(radius: radius, length: length):
+            return 2 * Float(M_PI) * radius * (2*radius + length) // TODO: this is probably incorrect
         default:
             fatalError()
         }
@@ -262,6 +273,10 @@ public enum LightType {
             } else { return false }
         case .SphereArea(_):
             if case .SphereArea(_) = other {
+                return true
+            } else { return false }
+        case .TubeArea(_, _):
+            if case .TubeArea(_, _) = other {
                 return true
             } else { return false }
         case .Spot(_, _):
@@ -349,6 +364,7 @@ enum LightTypeFlag : UInt32 {
     case Spot = 2
     case SphereArea = 3
     case DiskArea = 4
+    case TubeArea = 5
 }
 
 

@@ -3,6 +3,7 @@
 #define LightTypeSpot 2
 #define LightTypeSphereArea 3
 #define LightTypeDiskArea 4
+#define LightTypeTubeArea 5
 
 #include "Utilities.glsl"
 #include "BRDF.glsl"
@@ -98,6 +99,22 @@ float calculateSphereIlluminance(vec3 worldSpacePosition, float NdotL, float sqr
     return illuminanceSphereOrDisk(cosTheta, sinSigmaSqr);
 }
 
+float calculateTubeIlluminance(vec3 N, vec3 Lunormalized, LightData light, float lightLength) {
+    vec3 L01 = light.worldSpaceDirection.xyz * lightLength;
+    vec3 ToLight0 = Lunormalized - 0.5 * L01;
+    vec3 ToLight1 = Lunormalized + 0.5 * L01;
+
+    float LengthSqr0 = dot( ToLight0, ToLight0 );
+    float LengthSqr1 = dot( ToLight1, ToLight1 );
+    float rLength0 = inversesqrt( LengthSqr0 );
+    float rLength1 = inversesqrt( LengthSqr1 );
+    float Length0 = LengthSqr0 * rLength0;
+    float Length1 = LengthSqr0 * rLength0;
+
+//    DistanceAttenuation = rcp( ( Length0 * Length1 + dot( ToLight0, ToLight1 ) ) * 0.5 + 1 );
+    return saturate( 0.5 * ( dot(N, ToLight0) * rLength0 + dot(N, ToLight1) * rLength1 ) );
+}
+
 vec3 evaluateAreaLight(vec3 worldSpacePosition,
                          vec3 V, vec3 N, float NdotV,
                          MaterialRenderingData material,
@@ -109,8 +126,20 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     float inverseDistanceToLight = inversesqrt(sqrDist);
     
     float lightRadius = light.extraData.x;
+    float lightLength = light.extraData.y;
     
-    vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
+    float NdotL = saturate(dot(N, L));
+    
+    float illuminance;
+    if (light.lightTypeFlag == LightTypeSphereArea) {
+        illuminance = calculateSphereIlluminance(worldSpacePosition, NdotL, sqrDist, light);
+    } else if (light.lightTypeFlag == LightTypeDiskArea) {
+        illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
+    } else if (light.lightTypeFlag == LightTypeTubeArea) {
+        illuminance = calculateTubeIlluminance(N, Lunormalized, light, lightLength);
+    }
+    
+    illuminance *= smoothDistanceAtt(sqrDist, light.inverseSquareAttenuationRadius);
     
     float lobeEnergy = 1;
     float alpha = sqr(material.roughness);
@@ -122,26 +151,33 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     N = normalize(N);
     vec3 R = reflect(-V, N);
     R = getSpecularDominantDirArea(N, R, NdotV, material.roughness);
+    
+    if (lightLength > 1) { // for tube lights (at the moment)
+        // Closest point on line segment to ray
+        vec3 L01 = light.worldSpaceDirection.xyz * lightLength;
+        vec3 L0 = Lunormalized - 0.5 * L01;
+        vec3 L1 = Lunormalized + 0.5 * L01;
+        
+        // Shortest distance
+        float a = sqr(lightLength);
+        float b = dot( R, L01 );
+        float t = saturate( dot( L0, b*R - L01 ) / (a - b*b) );
+        
+        L = L0 + t * L01;
+        return vec3(0);
+    }
    
     vec3 closestPointOnRay = dot(Lunormalized, R) * R;
     vec3 centreToRay = closestPointOnRay - Lunormalized;
     vec3 closestPointOnSphere = Lunormalized + centreToRay * saturate(lightRadius * inversesqrt(dot(centreToRay, centreToRay)));
     
     L = normalize(closestPointOnSphere);
-
-    float NdotL = saturate(dot(N, L));
-    
-    float illuminance;
-    if (light.lightTypeFlag == LightTypeSphereArea) {
-        illuminance = calculateSphereIlluminance(worldSpacePosition, NdotL, sqrDist, light);
-    } else {
-        illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
-    }
-
-    illuminance *= smoothDistanceAtt(sqrDist, light.inverseSquareAttenuationRadius);
+    NdotL = saturate(dot(N, L));
     
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
     vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
+    
+    vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
     return (diffuse + specular) * illuminance * lightColour;
 }
@@ -198,6 +234,7 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             break;
         case LightTypeSphereArea:
         case LightTypeDiskArea:
+        case LightTypeTubeArea:
             return evaluateAreaLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
         default:
