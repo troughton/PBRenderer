@@ -3,8 +3,8 @@
 #version 330 core
 
 uniform sampler2D image;
-uniform float dimension;
 
+in vec2 uv;
 out vec4 FragmentColor;
 
 uniform float offset[3] = float[]( 0.0, 1.3846153846, 3.2307692308 );
@@ -12,10 +12,10 @@ uniform float weight[3] = float[]( 0.2270270270, 0.3162162162, 0.0702702703 );
 
 void main(void)
 {
-    ivec2 location = ivec2(gl_FragCoord.xy);
-	FragmentColor = texelFetch( image, vec2(gl_FragCoord)/dimension ) * weight[0];
-	for (int i=1; i<3; i++) {
-		FragmentColor += texture( image, ( vec2(gl_FragCoord)+vec2(offset[i], 0.0) )/dimension ) * weight[i];
-		FragmentColor += texture( image, ( vec2(gl_FragCoord)-vec2(offset[i], 0.0) )/dimension ) * weight[i];
-	}
+    FragmentColor = texture(image, uv) * weight[0];
+    vec2 scale = uv / gl_FragCoord.xy;
+    for (int i=1; i<3; i++) {
+        FragmentColor += texture( image, ( uv + vec2(offset[i], 0.0)*scale)) * weight[i];
+        FragmentColor += texture( image, ( uv - vec2(offset[i], 0.0)*scale )) * weight[i];
+    }
 }

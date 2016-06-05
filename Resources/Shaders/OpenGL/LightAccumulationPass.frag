@@ -15,7 +15,9 @@ uniform float exposure;
 
 in vec3 cameraDirection;
 
+#ifdef SSR
 layout(location=1) out vec4 reflectionTraceResult;
+#endif
 
 #include "ReflectionTracer.glsl"
 
@@ -41,9 +43,15 @@ vec4 lightAccumulationPass(vec2 projectionTerms, vec2 cameraNearFar,
     
     
     vec3 viewSpaceNormal = (worldToCameraMatrix * vec4(N, 0)).xyz;
+    
+#ifdef SSR
     reflectionTraceResult = traceReflection(cameraSpacePosition.xyz, viewSpaceNormal, renderingMaterial.roughness);
     
-    return vec4(epilogue, (reflectionTraceResult == vec4(0)) ? 0 : 1);
+    return vec4(epilogue, reflectionTraceResult.w == 0.0 ? 0 : 1);
+#else
+    return vec4(epilogue, 1);
+    
+#endif
 }
 
 void main() {

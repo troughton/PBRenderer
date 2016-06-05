@@ -226,6 +226,7 @@ public final class SceneRenderer {
     
     var gBufferPass : GBufferPass
     var lightAccumulationPass : LightAccumulationPass
+    var screenSpaceReflectionPasses : ScreenSpaceReflectionsPasses?
     var finalPass : FinalPass?
     
     public init(window: PBWindow) {
@@ -236,6 +237,7 @@ public final class SceneRenderer {
         
         self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.screenSpaceReflectionPasses = ScreenSpaceReflectionsPasses(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
@@ -248,14 +250,16 @@ public final class SceneRenderer {
         
         self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment, hasSpecularAndReflections: true)
+        self.screenSpaceReflectionPasses = nil
         self.finalPass = nil
     }
     
     class func lightAccumulationAttachment(width: Int32, height: Int32) -> RenderPassColourAttachment {
-        let rgba16Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
+        let rgba16Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: true)
         let texture = Texture(textureWithDescriptor: rgba16Descriptor)
+        texture.setMipRange(0..<1)
         
-        let blendState = BlendState(isBlendingEnabled: true, sourceRGBBlendFactor: GL_ONE, destinationRGBBlendFactor: GL_ONE, rgbBlendOperation: GL_FUNC_ADD, sourceAlphaBlendFactor: GL_ZERO, destinationAlphaBlendFactor: GL_ONE, alphaBlendOperation: GL_FUNC_ADD, writeMask: .All)
+        let blendState = BlendState(isBlendingEnabled: true, sourceRGBBlendFactor: GL_ONE, destinationRGBBlendFactor: GL_SRC_ALPHA, rgbBlendOperation: GL_FUNC_ADD, sourceAlphaBlendFactor: GL_ZERO, destinationAlphaBlendFactor: GL_ONE, alphaBlendOperation: GL_FUNC_ADD, writeMask: .All)
         
         var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         colourAttachment.texture = texture
@@ -270,6 +274,7 @@ public final class SceneRenderer {
         
         self.gBufferPass.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
         self.lightAccumulationPass.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.screenSpaceReflectionPasses?.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
         self.finalPass?.resize(newPixelDimensions: width, height)
     }
     
@@ -293,7 +298,8 @@ public final class SceneRenderer {
 //
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: environmentMap)
-        let lightAccumulationTexture = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+        let (lightAccumulationTexture, rayTracingTexture) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+       // let lightAccumulationAndReflections = self.screenSpaceReflectionPasses?.render(camera: camera, lightAccumulationBuffer: lightAccumulationTexture, rayTracingBuffer: rayTracingTexture!, gBuffers: gBuffers, gBufferDepth: gBufferDepth)
         self.finalPass?.performPass(lightAccumulationTexture: lightAccumulationTexture)
         
         

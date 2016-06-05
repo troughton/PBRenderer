@@ -121,8 +121,7 @@ func main() {
     glGetQueryObjectuiv(query, GL_QUERY_RESULT, &timeElapsed)
     let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
     print(String(format: "Elapsed time to generate light probe: %.2fms", timeElapsedMillis))
-    
-    let spotLight = scene.namesToNodes["spotLight1"]?.lights.first
+
     
     let gui = GUI(window: mainWindow)
 //    gui.drawFunctions.append({ renderFPSCounter()} )
@@ -138,7 +137,7 @@ func main() {
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
-        sceneRenderer.renderScene(scene, camera: camera, environmentMap: nil) //lightProbe.ldTexture)
+        sceneRenderer.renderScene(scene, camera: camera, environmentMap: lightProbe.ldTexture)
         gui.render()
     }
 

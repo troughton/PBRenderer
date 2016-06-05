@@ -1,10 +1,46 @@
+#version 410
+
 #include "Utilities.glsl"
+#include "Encoding.glsl"
+#include "MaterialData.glsl"
+#include "BRDF.glsl"
 
-sampler2D depthBuffer;// scene depth buffer used in ray tracing step
-sampler2D lightAccumulationBuffer; // convolved color buffer - all mip levels
-sampler2D rayTracingBuffer; // ray-tracing buffer
+uniform sampler2D lightAccumulationBuffer; // convolved color buffer - all mip levels
+uniform sampler2D rayTracingBuffer; // ray-tracing buffer
 
-sampler2D indirectSpecularBuffer; // indirect specular light buffer used for fallback
+uniform usampler2D gBuffer0Texture;
+uniform sampler2D gBuffer1Texture;
+uniform sampler2D gBuffer2Texture;
+uniform sampler2D gBufferDepthTexture;
+
+uniform mat4 worldToCameraMatrix;
+
+in vec3 cameraDirection;
+in vec2 uv;
+
+uniform vec2 projectionTerms;
+uniform vec2 nearPlane;
+uniform vec2 depthBufferSize;
+uniform int mipCount;
+uniform float reflectionTraceMaxDistance;
+const float cb_fadeStart = 0.9f;// determines where to start screen edge fading off effect
+const float cb_fadeEnd = 0.98f; // determines where to end screen edge fading off effect
+
+
+vec4 calculateCameraSpacePositionFromWindowZ(float windowZ,
+                                             vec3 cameraDirection,
+                                             vec2 projectionTerms) {
+    
+    float linearDepth = projectionTerms.y / (windowZ - projectionTerms.x);
+    return vec4(cameraDirection * linearDepth, 1);
+}
+
+vec3 viewSpacePositionFromDepth(vec2 uv, float depth) {
+    vec3(nearPlane * ((uv.xy * 2) - 1), -1);
+    float linearDepth = projectionTerms.y / (depth - projectionTerms.x);
+    return cameraDirection * linearDepth;
+    
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Cone tracing methods
@@ -38,7 +74,7 @@ float isoscelesTriangleInRadius(float a, float h)
 
 vec4 coneSampleWeightedColor(vec2 samplePos, float mipChannel, float gloss)
 {
-    vec3 sampleColor = lightAccumulationBuffer.SampleLevel(sampTrilinearClamp, samplePos, mipChannel).rgb;
+    vec3 sampleColor = textureLod(lightAccumulationBuffer, samplePos, mipChannel).rgb;
     return vec4(sampleColor * gloss, gloss);
 }
 
@@ -52,41 +88,35 @@ float isoscelesTriangleNextAdjacent(float adjacentLength, float incircleRadius)
 
 out vec4 blendedColour;
 
-void main() {
-    ivec2 loadIndices = ivec2(gl_FragCoord.xy);
+vec4 calculateScreenSpaceReflection(vec3 cameraSpacePosition, vec3 cameraSpaceNormal, MaterialRenderingData material) {
     // get screen-space ray intersection point
-    vec4 raySS = texelFetch( rayTracingBuffer, loadIndices).xyzw;
-    vec3 fallbackColor = indirectSpecularBuffer.Load(loadIndices).rgb;
+    vec4 raySS = texelFetch( rayTracingBuffer, ivec2(gl_FragCoord.xy), 0).xyzw;
     if(raySS.w <= 0.0f) // either means no hit or the ray faces back towards the camera
     {
         // no data for this point - a fallback like localized environment maps should be used
-        return vec4(fallbackColor, 1.0f);
+        return vec4(0);
     }
-    float depth = depthBuffer.Load(loadIndices).r;
-    vec3 positionSS = vec3(pIn.tex, depth);
-    float linearDepth = linearizeDepth(depth);
-    vec3 positionVS = pIn.viewRay * linearDepth;
+    
+    vec3 positionVS = cameraSpacePosition;
     // since calculations are in view-space, we can just normalize the position to point at it
     vec3 toPositionVS = normalize(positionVS);
-    vec3 normalVS = normalBuffer.Load(loadIndices).rgb;
+    vec3 normalVS = cameraSpaceNormal;
     
     // get specular power from roughness
-    vec4 specularAll = specularBuffer.Load(loadIndices);
-    float gloss = 1.0f - specularAll.a;
-    float specularPower = roughnessToSpecularPower(specularAll.a);
+    float gloss = 1 - material.linearRoughness;
     
     // convert to cone angle (maximum extent of the specular lobe aperture)
     // only want half the full cone angle since we're slicing the isosceles triangle in half to get a right triangle
-    float coneTheta = specularPowerToConeAngle(specularPower) * 0.5f;
+    float coneTheta = roughnessToConeAngle(material.roughness) * 0.5f;
     
     // P1 = positionSS, P2 = raySS, adjacent length = ||P2 - P1||
-    vec2 deltaP = raySS.xy - positionSS.xy;
+    vec2 deltaP = raySS.xy - uv.xy;
     float adjacentLength = length(deltaP);
     vec2 adjacentUnit = normalize(deltaP);
     
     vec4 totalColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
     float remainingAlpha = 1.0f;
-    float maxMipLevel = (float)cb_numMips - 1.0f;
+    float maxMipLevel = float(mipCount) - 1.0f;
     float glossMult = gloss;
     // cone-tracing using an isosceles triangle to approximate a cone in screen space
     for(int i = 0; i < 14; ++i)
@@ -98,10 +128,10 @@ void main() {
         float incircleSize = isoscelesTriangleInRadius(oppositeLength, adjacentLength);
         
         // get the sample position in screen space
-        vec2 samplePos = positionSS.xy + adjacentUnit * (adjacentLength - incircleSize);
+        vec2 samplePos = uv.xy + adjacentUnit * (adjacentLength - incircleSize);
         
         // convert the in-radius into screen size then check what power N to raise 2 to reach it - that power N becomes mip level to sample from
-        float mipChannel = clamp(log2(incircleSize * max(cb_depthBufferSize.x, cb_depthBufferSize.y)), 0.0f, maxMipLevel);
+        float mipChannel = clamp(log2(incircleSize * max(depthBufferSize.x, depthBufferSize.y)), 0.0f, maxMipLevel);
         
         /*
          * Read color and accumulate it using trilinear filtering and weight it.
@@ -127,7 +157,6 @@ void main() {
     }
     
     vec3 toEye = -toPositionVS;
-    vec3 specular = calculateFresnelTerm(specularAll.rgb, abs(dot(normalVS, toEye))) * CNST_1DIVPI;
     
     // fade rays close to screen edge
     vec2 boundary = abs(raySS.xy - vec2(0.5f, 0.5f)) * 2.0f;
@@ -135,12 +164,39 @@ void main() {
     float fadeOnBorder = 1.0f - saturate((boundary.x - cb_fadeStart) * fadeDiffRcp);
     fadeOnBorder *= 1.0f - saturate((boundary.y - cb_fadeStart) * fadeDiffRcp);
     fadeOnBorder = smoothstep(0.0f, 1.0f, fadeOnBorder);
+    
     vec3 rayHitPositionVS = viewSpacePositionFromDepth(raySS.xy, raySS.z);
-    float fadeOnDistance = 1.0f - saturate(distance(rayHitPositionVS, positionVS) / cb_maxDistance);
+    float fadeOnDistance = 1.0f - saturate(distance(rayHitPositionVS, positionVS) / reflectionTraceMaxDistance);
     // ray tracing steps stores rdotv in w component - always > 0 due to check at start of this method
-    float fadeOnPerpendicular = saturate(lerp(0.0f, 1.0f, saturate(raySS.w * 4.0f)));
-    float fadeOnRoughness = saturate(lerp(0.0f, 1.0f, gloss * 4.0f));
+    float fadeOnPerpendicular = saturate(mix(0.0f, 1.0f, saturate(raySS.w * 4.0f)));
+    float fadeOnRoughness = saturate(mix(0.0f, 1.0f, gloss * 4.0f));
     float totalFade = fadeOnBorder * fadeOnDistance * fadeOnPerpendicular * fadeOnRoughness * (1.0f - saturate(remainingAlpha));
     
-    blendedColour = vec4(mix(fallbackColor, totalColor.rgb * specular, totalFade), 1.0f);
+    vec3 specular = F_Schlick(material.f0, material.f90, abs(dot(normalVS, toEye))) * INV_PI;
+    
+    return vec4(totalColor.rgb * specular * totalFade, 1.0f);
+}
+
+void main() {
+    
+    ivec2 pixelCoord = ivec2(gl_FragCoord.xy);
+    
+    float gBufferDepth = texelFetch(gBufferDepthTexture, pixelCoord, 0).r;
+    uint gBuffer0 = texelFetch(gBuffer0Texture, pixelCoord, 0).r;
+    vec4 gBuffer1 = texelFetch(gBuffer1Texture, pixelCoord, 0);
+    vec4 gBuffer2 = texelFetch(gBuffer2Texture, pixelCoord, 0);
+
+    vec3 cameraSpacePosition = calculateCameraSpacePositionFromWindowZ(gBufferDepth, cameraDirection, projectionTerms).xyz;
+    vec3 N;
+    
+    MaterialData material = decodeDataFromGBuffers(N, gBuffer0, gBuffer1, gBuffer2);
+    MaterialRenderingData renderingMaterial = evaluateMaterialData(material);
+    
+    N = (worldToCameraMatrix * vec4(N, 0)).xyz;
+    
+    vec4 lightAccumulation = texelFetch( lightAccumulationBuffer, pixelCoord, 0);
+    
+    vec4 screenSpaceReflections = calculateScreenSpaceReflection(cameraSpacePosition, N, renderingMaterial);
+    
+    blendedColour = lightAccumulation + screenSpaceReflections;
 }

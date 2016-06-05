@@ -167,6 +167,14 @@ public final class Camera {
         let maxLuminance = 1.2 * exp2f(self.EV100)
         return 1.0 / maxLuminance
     }
+    
+    //Calculates the size of a plane positioned at z = -1 (hence the divide by zNear)
+    var nearPlaneSize : vec2 {
+        let tanHalfFoV = 1/(self.projectionMatrix[0][0] * self.aspectRatio)
+        let y = tanHalfFoV * self.zNear
+        let x = y * self.aspectRatio
+        return vec2(x, y) / self.zNear
+    }
 }
 
 public final class Transform {

@@ -11,6 +11,8 @@ import OpenCL
 import SGLMath
 import SGLOpenGL
 
+public let useSSR = false
+
 final class LightAccumulationPass {
     
     var pipelineState : PipelineState
@@ -49,7 +51,7 @@ final class LightAccumulationPass {
     class func lightAccumulationFramebuffer(width: GLint, height: GLint, lightAccumulationAttachment: RenderPassColourAttachment, includeReflectionBuffer: Bool) -> Framebuffer {
         
         var reflectionAttachment : RenderPassColourAttachment? = nil
-        if includeReflectionBuffer {
+        if includeReflectionBuffer && useSSR {
             let reflectionBufferDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false)
             let reflectionTexture = Texture(textureWithDescriptor: reflectionBufferDescriptor)
             
@@ -76,14 +78,6 @@ final class LightAccumulationPass {
     func resize(newPixelDimensions width: GLint, _ height: GLint, lightAccumulationAttachment: RenderPassColourAttachment) {
         self.pipelineState.viewport = Rectangle(x: 0, y: 0, width: width, height: height)
         self.pipelineState.framebuffer = LightAccumulationPass.lightAccumulationFramebuffer(width: width, height: height, lightAccumulationAttachment: lightAccumulationAttachment, includeReflectionBuffer: hasSpecularAndReflections)
-    }
-    
-    //Calculates the size of a plane positioned at z = -1 (hence the divide by zNear)
-    func calculateNearPlaneSize(zNear: Float, cameraAspect: Float, projectionMatrix: mat4) -> vec2 {
-        let tanHalfFoV = 1/(projectionMatrix[0][0] * cameraAspect)
-        let y = tanHalfFoV * zNear
-        let x = y * cameraAspect
-        return vec2(x, y) / zNear
     }
     
     func setupLightGrid(camera: Camera, lights: [Light]) {
@@ -119,7 +113,7 @@ final class LightAccumulationPass {
         }
     }
     
-    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> Texture {
+    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> (Texture, rayTracingBuffer: Texture?) {
         
         self.setupLightGrid(camera: camera, lights: scene.lights)
         
@@ -159,14 +153,14 @@ final class LightAccumulationPass {
             
             shader.setUniform(camera.zNear, camera.zFar, forProperty: LightAccumulationShaderProperty.CameraNearFar)
             
-            let nearPlane = self.calculateNearPlaneSize(zNear: camera.zNear, cameraAspect: camera.aspectRatio, projectionMatrix: camera.projectionMatrix)
+            let nearPlane = camera.nearPlaneSize
             let projectionA = camera.zFar / (camera.zFar - camera.zNear)
             let projectionB = (-camera.zFar * camera.zNear) / (camera.zFar - camera.zNear)
             
             shader.setUniform(nearPlane.x, nearPlane.y, forProperty: LightAccumulationShaderProperty.NearPlane)
             shader.setUniform(projectionA, projectionB, forProperty: LightAccumulationShaderProperty.ProjectionTerms)
             
-            if self.hasSpecularAndReflections {
+            if self.hasSpecularAndReflections && useSSR {
                 shader.setMatrix(camera.transform.worldToNodeMatrix, forProperty: LightAccumulationShaderProperty.WorldToCameraMatrix)
                 
                 
@@ -181,14 +175,13 @@ final class LightAccumulationPass {
                 
                 shader.setUniform(Float(width - 1), Float(height - 1), forProperty: LightAccumulationShaderProperty.DepthBufferSize)
                 
-                let traceDistance = 10.0 //(camera.zFar - camera.zNear) * 0.5
-                shader.setUniform(Float(traceDistance), forProperty: LightAccumulationShaderProperty.ReflectionTraceMaxDistance)
+                shader.setUniform(Float(ScreenSpaceReflectionsPasses.traceMaxDistance(camera: camera)), forProperty: LightAccumulationShaderProperty.ReflectionTraceMaxDistance)
     
             }
             
             GLMesh.fullScreenQuad.render()
         }
         
-        return self.pipelineState.framebuffer.colourAttachments[1]?.texture! ?? self.pipelineState.framebuffer.colourAttachments[0]!.texture!
+        return (self.pipelineState.framebuffer.colourAttachments[0]!.texture!, self.pipelineState.framebuffer.colourAttachments[1]?.texture!)
     }
 }
