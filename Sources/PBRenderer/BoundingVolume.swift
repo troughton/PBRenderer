@@ -70,6 +70,10 @@ struct BoundingBox {
         return vec3(self.centreX, self.centreY, self.centreZ);
     }
     
+    var size : vec3 {
+        return self.maxPoint - self.minPoint
+    }
+    
     func containsPoint(point: vec3) -> Bool {
         return point.x >= self.minX &&
             point.x <= self.maxX &&

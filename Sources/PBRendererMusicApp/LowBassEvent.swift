@@ -20,7 +20,7 @@ var originalSmoothness : Float! = nil
         
         if case let .noteMessage(noteMessage) = event {
             
-            let groundPlane = scene.namesToNodes["GroundPlane"]
+            let groundPlane = scene.idsToNodes["GroundPlane"]
             let material = groundPlane!.materials.values.first!
             if originalSmoothness == nil {
                 originalSmoothness = material.withElementNoUpdate { return $0.smoothness }

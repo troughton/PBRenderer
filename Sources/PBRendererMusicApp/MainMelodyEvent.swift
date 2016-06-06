@@ -20,10 +20,10 @@ let mainMelodyNotes : [UInt8] = [50, 52, 55, 57, 59, 62]
             
             let lightNumber = mainMelodyNotes.index(of: noteMessage.note)!
             
-            let light = scene.namesToNodes["BackgroundAreaLight\(lightNumber + 1)"]?.lights.first
+            let light = scene.idsToNodes["BackgroundAreaLight\(lightNumber + 1)"]?.lights.first
             light?.colour = .Temperature(8000)
             
-            let backgroundAreaLightPlane = scene.namesToNodes["BackgroundAreaLightPlane\(lightNumber + 1)"]!
+            let backgroundAreaLightPlane = scene.idsToNodes["BackgroundAreaLightPlane\(lightNumber + 1)"]!
             let materialElement = backgroundAreaLightPlane.materials.values.first!
             
             let animation = AnimationSystem.Animation(startBeat: beatNumber, duration: Double(noteMessage.duration), repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in

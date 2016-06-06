@@ -17,7 +17,7 @@ func processHighMotifEvent(_ event: MIDIEventType, scene: Scene, beatNumber: Dou
             
             let lightName = highMotifNotes.index(of: Int(noteMessage.note))! + 1
             
-            if let lightNode = scene.namesToNodes["PyramidSpot\(lightName)"] {
+            if let lightNode = scene.idsToNodes["PyramidSpot\(lightName)"] {
                 
                 let animation = AnimationSystem.Animation(startBeat: beatNumber, duration: Double(noteMessage.duration), repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
                     let oneMinusPercentage = 1 - percentage

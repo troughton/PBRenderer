@@ -16,7 +16,7 @@ layout(location = 4) out vec4 out4;
 layout(location = 5) out vec4 out5;
 
 vec4 integrateDiffuseCubeLD(vec3 N) {
-    vec3 accBrdf = vec3(0);
+    vec4 accBrdf = vec3(0);
     for (uint i = 0; i < sampleCount; ++i) {
         vec2 eta = getSample(i, sampleCount);
         vec3 L;
@@ -27,12 +27,11 @@ vec4 integrateDiffuseCubeLD(vec3 N) {
         
         if (NdotL > 0) {
             vec4 colour = textureLod(image, L, 0) * valueMultiplier;
-            accBrdf += colour.xyz;
+            accBrdf += colour;
         }
     }
     
-    vec3 vec3Part = accBrdf * (1.0f / sampleCount);
-    return vec4(vec3Part, 1.0f);
+    return accBrdf * (1.0f / sampleCount);
 }
 
 void main() {

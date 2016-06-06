@@ -17,8 +17,8 @@ private var cameraBaseTranslations : [vec3]! = nil
         
         if case let .noteMessage(noteMessage) = event {
             
-            let camera1 = scene.namesToNodes["camera1"]!
-             let camera2 = scene.namesToNodes["camera2"]!
+            let camera1 = scene.idsToNodes["camera1"]!
+             let camera2 = scene.idsToNodes["camera2"]!
             
             if cameraBaseTranslations == nil {
                 cameraBaseTranslations = [camera1.transform.translation, camera2.transform.translation]
@@ -40,7 +40,7 @@ private var cameraBaseTranslations : [vec3]! = nil
         if case let .noteMessage(noteMessage) = event {
             
             
-            let pyramid = scene.namesToNodes["Pyramid1"]!
+            let pyramid = scene.idsToNodes["Pyramid1"]!
             
             if pyramidBaseScale == nil {
                 pyramidBaseScale = pyramid.transform.scale

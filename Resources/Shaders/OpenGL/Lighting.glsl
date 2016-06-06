@@ -112,11 +112,11 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     
     vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
-    float lobeEnergy = 1;
+   // float lobeEnergy = 1;
     float alpha = sqr(material.roughness);
     
     float sphereAngle = saturate( lightRadius * inverseDistanceToLight);
-    lobeEnergy *= sqr( alpha / saturate( alpha + 0.5 * sphereAngle ) );
+   // lobeEnergy *= sqr( alpha / saturate( alpha + 0.5 * sphereAngle ) );
 
     V = normalize(V);
     N = normalize(N);

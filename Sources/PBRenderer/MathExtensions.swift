@@ -85,6 +85,10 @@ func *<T>(lhs: Matrix4x4<T>, rhs: Quaternion<T>) -> Matrix4x4<T> {
     return lhs * Matrix4x4(withQuaternion: rhs)
 }
 
+func *<T>(lhs: Quaternion<T>, rhs: Matrix4x4<T>) -> Matrix4x4<T> {
+    return Matrix4x4(withQuaternion: lhs) * lhs
+}
+
 func *<T>(quaternion: Quaternion<T>, vector: Vector3<T>) -> Vector3<T> {
     var rotatedQuaternion = Quaternion(vector.x, vector.y, vector.z, 0.0);
     rotatedQuaternion = (quaternion * rotatedQuaternion) * inverse(quaternion)

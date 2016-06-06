@@ -25,7 +25,7 @@ layout(location = 4) out vec4 out4;
 layout(location = 5) out vec4 out5;
 
 vec4 integrateSpecularCubeLD(vec3 V, vec3 N, float roughness) {
-    vec3 accBrdf = vec3(0);
+    vec4 accBrdf = vec4(0);
     float accBrdfWeight = 0;
     
     for (uint i=0; i < sampleCount; ++i) {
@@ -61,12 +61,11 @@ vec4 integrateSpecularCubeLD(vec3 V, vec3 N, float roughness) {
             float sampleMipLevel = clamp(0.5 * log2(omegaS/omegaP), 0, 8);
             vec4 Li = textureLod(image, L, sampleMipLevel) * valueMultiplier;
             
-            accBrdf += Li.rgb * NdotL;
+            accBrdf += Li * NdotL;
             accBrdfWeight += NdotL;
         }
     }
-    vec3 xyz = accBrdf * (1.0f / accBrdfWeight);
-    return vec4(xyz, 1.f);
+    return accBrdf * (1.0f / accBrdfWeight);
 }
 
 void main() {
