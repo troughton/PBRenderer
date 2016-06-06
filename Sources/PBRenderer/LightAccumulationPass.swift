@@ -26,8 +26,6 @@ final class LightAccumulationPass {
     static let lightAccumulationShader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     static let lightAccumulationShaderNoSpecular = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     
-    static let ltcMaterial = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_mat_ggx.dat"), numComponents: 4)
-    
     static let ltcSampler : Sampler = {
         let sampler = Sampler()
         sampler.minificationFilter = GL_LINEAR
@@ -37,8 +35,12 @@ final class LightAccumulationPass {
         return sampler
     }()
     
-    static let ltcAmplitude = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_amp_ggx.dat"), numComponents: 2)
+    static let ltcMaterialGGX = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_mat_ggx.dat"), numComponents: 4)
     
+    static let ltcAmplitudeGGX = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_amp_ggx.dat"), numComponents: 2)
+    
+    static let ltcMaterialDisney = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_mat_disney.dat"), numComponents: 4)
+        
     let hasSpecularAndReflections : Bool
     
     init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment, hasSpecularAndReflections: Bool = true) {
@@ -118,8 +120,9 @@ final class LightAccumulationPass {
         case CameraToPixelClipMatrix = "cameraToPixelClipMatrix"
         case DepthBufferSize = "depthBufferSize"
         case Exposure = "exposure"
-        case LTCMaterial = "ltcMaterial"
-        case LTCAmplitude = "ltcAmplitude"
+        case LTCMaterialGGX = "ltcMaterialGGX"
+        case LTCAmplitudeGGX = "ltcAmplitudeGGX"
+        case LTCMaterialDisney = "ltcMaterialDisney"
         
         case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
         
@@ -160,15 +163,20 @@ final class LightAccumulationPass {
             defer { lightTexture.unbindFromIndex(6) }
             shader.setUniform(GLint(6), forProperty: LightAccumulationShaderProperty.Lights)
             
-            LightAccumulationPass.ltcMaterial.bindToIndex(7)
+            LightAccumulationPass.ltcMaterialGGX.bindToIndex(7)
             LightAccumulationPass.ltcSampler.bindToIndex(7)
             defer { LightAccumulationPass.ltcSampler.unbindFromIndex(7) }
-            shader.setUniform(GLint(7), forProperty: LightAccumulationShaderProperty.LTCMaterial)
+            shader.setUniform(GLint(7), forProperty: LightAccumulationShaderProperty.LTCMaterialGGX)
             
-            LightAccumulationPass.ltcAmplitude.bindToIndex(8)
+            LightAccumulationPass.ltcAmplitudeGGX.bindToIndex(8)
             LightAccumulationPass.ltcSampler.bindToIndex(8)
             defer { LightAccumulationPass.ltcSampler.unbindFromIndex(8) }
-            shader.setUniform(GLint(8), forProperty: LightAccumulationShaderProperty.LTCAmplitude)
+            shader.setUniform(GLint(8), forProperty: LightAccumulationShaderProperty.LTCAmplitudeGGX)
+            
+            LightAccumulationPass.ltcMaterialDisney.bindToIndex(9)
+            LightAccumulationPass.ltcSampler.bindToIndex(9)
+            defer { LightAccumulationPass.ltcSampler.unbindFromIndex(9) }
+            shader.setUniform(GLint(9), forProperty: LightAccumulationShaderProperty.LTCMaterialDisney)
             
             shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             

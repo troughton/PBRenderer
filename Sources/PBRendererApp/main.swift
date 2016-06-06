@@ -34,8 +34,8 @@ final class CameraControl : WindowInputDelegate {
     }
     
     func mouseDrag(delta: (x: Double, y: Double)) {
-//        self.pitch += Float(delta.y) * 0.01
-//        self.yaw += Float(delta.x) * 0.01
+        self.pitch += Float(delta.y) * 0.01
+        self.yaw += Float(delta.x) * 0.01
         
     }
     
@@ -70,7 +70,6 @@ let baseHeight = Int32(800)
 
 // The *main* function; where our program begins running
 func main() {
-
     // Init GLFW
     glfwInit()
     // Terminate GLFW when this function ends
@@ -122,14 +121,16 @@ func main() {
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderFPSCounter(state: &state);
     })
-//      gui.drawFunctions.append({ renderTestUI() })
+    
+    //      gui.drawFunctions.append({ renderTestUI() })
 //    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })
 
+    scene.lights.first?.type = .SphereArea(radius: 1.0)
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
-        sceneRenderer.renderScene(scene, camera: camera, environmentMap: lightProbe.ldTexture)
-        gui.render()
+        sceneRenderer.renderScene(scene, camera: camera, environmentMap: nil)
+//        gui.render()
     }
 
     

@@ -8,8 +8,10 @@
 #include "BRDF.glsl"
 #include "LTC.glsl"
 
-uniform sampler2D ltcMaterial;
-uniform sampler2D ltcAmplitude;
+uniform sampler2D ltcMaterialGGX;
+uniform sampler2D ltcAmplitudeGGX;
+
+uniform sampler2D ltcMaterialDisney;
 
 layout(std140) struct LightData {
     vec4 colourAndIntensity;
@@ -162,16 +164,18 @@ vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialR
     
     vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
     
-    mat3 matrixInverse = LTC_Matrix(ltcMaterial, ltcUV);
+    mat3 matrixInverseDisney = LTC_Matrix(ltcMaterialDisney, ltcUV);
+    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseDisney, points, false);
+    diffuse *= material.albedo;
     
-    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverse, points, false);
-    specular *= texture(ltcAmplitude, ltcUV).w;
-    
-    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, mat3(1), points, false);
+    mat3 matrixInverseGGX = LTC_Matrix(ltcMaterialGGX, ltcUV);
+    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, false);
+    vec2 schlick = texture(ltcAmplitudeGGX, ltcUV).xy;
+    specular *= material.f0 * schlick.x + (material.f90) * schlick.y;
 
     vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
-    vec3 result = (diffuse + specular) * lightColour;
+    vec3 result = (specular + diffuse) * lightColour;
     result /= 2.0 * PI;
     
     return result;
