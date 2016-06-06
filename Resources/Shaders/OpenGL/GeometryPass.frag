@@ -41,8 +41,8 @@ vec3 evaluateEnvironmentMap(vec3 N, vec3 V, MaterialRenderingData material) {
         float NdotV = dot(N, V);
         vec3 R = reflect(-V, N);
     
-        vec3 result = evaluateIBLDiffuse(N, V, NdotV, material.roughness) * material.albedo;
-        result += evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90);
+        vec3 result = evaluateIBLDiffuse(N, V, NdotV, material.roughness).rgb * material.albedo;
+        result += evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90).rgb;
         return result;
         
     } else {

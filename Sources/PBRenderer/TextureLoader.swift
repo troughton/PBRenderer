@@ -141,22 +141,29 @@ public final class TextureLoader {
         
     }
     
-    static func ltcTextureFromFile(_ path: String) -> Texture {
+    static func ltcTextureFromFile(_ path: String, numComponents : Int) -> Texture {
         if let texture = textureCache[path] {
             return texture
         }
         
-        var width = Int32(0)
-        var height = Int32(0)
-        var componentsPerPixel = Int32(0)
-        let data = stbi_load(path, &width, &height, &componentsPerPixel, 0)
-        defer { stbi_image_free(data) }
+        let dimensions = 64
         
-        let pixelFormat = GL_RGBA8
+        let data = NSData(contentsOfFile: path)
+        
+        var pixelFormat : GLenum
+            
+        switch numComponents {
+        case 2:
+            pixelFormat = GL_RG32F
+        case 4:
+            pixelFormat = GL_RGBA32F
+        default:
+            fatalError()
+        }
 
-        let textureDescriptor = TextureDescriptor(texture2DWithPixelFormat: pixelFormat, width: Int(width), height: Int(height), mipmapped: false)
+        let textureDescriptor = TextureDescriptor(texture2DWithPixelFormat: pixelFormat, width: dimensions, height: dimensions, mipmapped: false)
         let texture = Texture(textureWithDescriptor: textureDescriptor)
-        texture.fillSubImage(target: GL_TEXTURE_2D, mipmapLevel: 0, width: Int(width), height: Int(height), type: GL_BYTE, data: data!)
+        texture.fillSubImage(target: GL_TEXTURE_2D, mipmapLevel: 0, width: dimensions, height: dimensions, type: GL_FLOAT, data: data!.bytes)
 
         textureCache[path] = texture
         return texture
