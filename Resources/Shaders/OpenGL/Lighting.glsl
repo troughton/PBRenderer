@@ -6,6 +6,12 @@
 
 #include "Utilities.glsl"
 #include "BRDF.glsl"
+#include "LTC.glsl"
+
+uniform sampler2D ltcMaterialGGX;
+uniform sampler2D ltcAmplitudeGGX;
+
+uniform sampler2D ltcMaterialDisney;
 
 layout(std140) struct LightData {
     vec4 colourAndIntensity;
@@ -143,7 +149,36 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
     vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
     
+    
     return (diffuse + specular) * illuminance * lightColour;
+}
+
+const vec4 points[4] = vec4[4](vec4(5, 0, 0, 1),
+                               vec4(15, 0, 0, 1),
+                               vec4(15, 10, 0, 1),
+                               vec4(5, 10, 0, 1));
+
+// using LTCs
+vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialRenderingData material, LightData light) {
+    float cosTheta = dot(N, V);
+    
+    vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
+    
+    mat3 matrixInverseDisney = LTC_Matrix(ltcMaterialDisney, ltcUV);
+    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseDisney, points, false);
+    diffuse *= material.albedo;
+    
+    mat3 matrixInverseGGX = LTC_Matrix(ltcMaterialGGX, ltcUV);
+    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, false);
+    vec2 schlick = texture(ltcAmplitudeGGX, ltcUV).xy;
+    specular *= material.f0 * schlick.x + (material.f90) * schlick.y;
+
+    vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
+    
+    vec3 result = (specular + diffuse) * lightColour;
+    result /= 2.0 * PI;
+    
+    return result;
 }
 
 vec3 evaluatePunctualLight(vec3 worldSpacePosition,
@@ -197,6 +232,8 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             return evaluatePunctualLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
         case LightTypeSphereArea:
+            return evaluatePolygonAreaLight(worldSpacePosition, N, V, material, light);
+            break;
         case LightTypeDiskArea:
             return evaluateAreaLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
