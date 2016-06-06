@@ -26,6 +26,19 @@ final class LightAccumulationPass {
     static let lightAccumulationShader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     static let lightAccumulationShaderNoSpecular = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     
+    static let ltcMaterial = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_mat_ggx.dat"), numComponents: 4)
+    
+    static let ltcSampler : Sampler = {
+        let sampler = Sampler()
+        sampler.minificationFilter = GL_LINEAR
+        sampler.magnificationFilter = GL_LINEAR
+        sampler.wrapS = GL_CLAMP_TO_EDGE
+        sampler.wrapT = GL_CLAMP_TO_EDGE
+        return sampler
+    }()
+    
+    static let ltcAmplitude = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_amp_ggx.dat"), numComponents: 2)
+    
     let hasSpecularAndReflections : Bool
     
     init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment, hasSpecularAndReflections: Bool = true) {
@@ -105,6 +118,8 @@ final class LightAccumulationPass {
         case CameraToPixelClipMatrix = "cameraToPixelClipMatrix"
         case DepthBufferSize = "depthBufferSize"
         case Exposure = "exposure"
+        case LTCMaterial = "ltcMaterial"
+        case LTCAmplitude = "ltcAmplitude"
         
         case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
         
@@ -137,7 +152,6 @@ final class LightAccumulationPass {
             defer { LightAccumulationPass.lightGridBuilder.lightGridTexture.unbindFromIndex(4) }
             shader.setUniform(GLint(4), forProperty: LightAccumulationShaderProperty.LightGrid)
             
-            
             gBufferColours[0].bindToIndex(5)
             defer { gBufferColours[0].unbindFromIndex(5) }
             shader.setUniform(GLint(5), forProperty: LightAccumulationShaderProperty.GBuffer0Texture)
@@ -146,6 +160,15 @@ final class LightAccumulationPass {
             defer { lightTexture.unbindFromIndex(6) }
             shader.setUniform(GLint(6), forProperty: LightAccumulationShaderProperty.Lights)
             
+            LightAccumulationPass.ltcMaterial.bindToIndex(7)
+            LightAccumulationPass.ltcSampler.bindToIndex(7)
+            defer { LightAccumulationPass.ltcSampler.unbindFromIndex(7) }
+            shader.setUniform(GLint(7), forProperty: LightAccumulationShaderProperty.LTCMaterial)
+            
+            LightAccumulationPass.ltcAmplitude.bindToIndex(8)
+            LightAccumulationPass.ltcSampler.bindToIndex(8)
+            defer { LightAccumulationPass.ltcSampler.unbindFromIndex(8) }
+            shader.setUniform(GLint(8), forProperty: LightAccumulationShaderProperty.LTCAmplitude)
             
             shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             

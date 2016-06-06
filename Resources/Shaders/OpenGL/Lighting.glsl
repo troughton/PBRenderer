@@ -6,6 +6,10 @@
 
 #include "Utilities.glsl"
 #include "BRDF.glsl"
+#include "LTC.glsl"
+
+uniform sampler2D ltcMaterial;
+uniform sampler2D ltcAmplitude;
 
 layout(std140) struct LightData {
     vec4 colourAndIntensity;
@@ -143,7 +147,34 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
     vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
     
+    
     return (diffuse + specular) * illuminance * lightColour;
+}
+
+const vec4 points[4] = vec4[4](vec4(5, 0, 0, 1),
+                               vec4(15, 0, 0, 1),
+                               vec4(15, 10, 0, 1),
+                               vec4(5, 10, 0, 1));
+
+// using LTCs
+vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialRenderingData material, LightData light) {
+    float cosTheta = dot(N, V);
+    
+    vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
+    
+    mat3 matrixInverse = LTC_Matrix(ltcMaterial, ltcUV);
+    
+    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverse, points, false);
+    specular *= texture(ltcAmplitude, ltcUV).w;
+    
+    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, mat3(1), points, false);
+
+    vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
+    
+    vec3 result = (diffuse + specular) * lightColour;
+    result /= 2.0 * PI;
+    
+    return result;
 }
 
 vec3 evaluatePunctualLight(vec3 worldSpacePosition,
@@ -197,6 +228,8 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             return evaluatePunctualLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
         case LightTypeSphereArea:
+            return evaluatePolygonAreaLight(worldSpacePosition, N, V, material, light);
+            break;
         case LightTypeDiskArea:
             return evaluateAreaLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
