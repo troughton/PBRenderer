@@ -10,7 +10,7 @@ import Foundation
 import CPBRendererLibs
 import SGLOpenGL
 
-final class TextureLoader {
+public final class TextureLoader {
     private static var textureCache = [String : Texture]()
     
     static func textureFromVerticalCrossHDRCubeMapAtPath(_ path: String) -> Texture {
@@ -139,6 +139,27 @@ final class TextureLoader {
         textureCache[path] = texture
         return texture
         
+    }
+    
+    static func ltcTextureFromFile(_ path: String) -> Texture {
+        if let texture = textureCache[path] {
+            return texture
+        }
+        
+        var width = Int32(0)
+        var height = Int32(0)
+        var componentsPerPixel = Int32(0)
+        let data = stbi_load(path, &width, &height, &componentsPerPixel, 0)
+        defer { stbi_image_free(data) }
+        
+        let pixelFormat = GL_RGBA8
+
+        let textureDescriptor = TextureDescriptor(texture2DWithPixelFormat: pixelFormat, width: Int(width), height: Int(height), mipmapped: false)
+        let texture = Texture(textureWithDescriptor: textureDescriptor)
+        texture.fillSubImage(target: GL_TEXTURE_2D, mipmapLevel: 0, width: Int(width), height: Int(height), type: GL_BYTE, data: data!)
+
+        textureCache[path] = texture
+        return texture
     }
     
     
