@@ -296,8 +296,7 @@ class Texture {
                             height: GLsizei(descriptor.height),
                             depth: GLsizei(descriptor.depth))
         
-        glTexParameteri(descriptor.textureType, GL_TEXTURE_BASE_LEVEL, 0)
-        glTexParameteri(descriptor.textureType, GL_TEXTURE_MAX_LEVEL, Int32(descriptor.mipmapLevelCount - 1))
+        self.setMipRange(0..<descriptor.mipmapLevelCount)
         
         glTexParameteri(descriptor.textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(descriptor.textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
@@ -376,6 +375,11 @@ class Texture {
         return OpenCLMemory(memory: mem!)
     }
     
+    func setMipRange(_ range: Range<UInt>) {
+        glBindTexture(descriptor.textureType, _glTexture)
+        glTexParameteri(descriptor.textureType, GL_TEXTURE_BASE_LEVEL, Int32(range.lowerBound))
+        glTexParameteri(descriptor.textureType, GL_TEXTURE_MAX_LEVEL, Int32(range.upperBound))
+    }
     
     deinit {
         if var glTexture = _glTexture {

@@ -254,6 +254,7 @@ extension SceneNode {
             let projectionMatrix : mat4
             switch camera.optics.techniqueCommon.projection {
             case let .Perspective(xFov, yFov, aspectRatio, zNear, zFar):
+                
                 if let yFov = yFov, let aspectRatio = aspectRatio {
                     projectionMatrix = SGLMath.perspective(radians(degrees: yFov), aspectRatio, zNear, zFar)
                 } else if let xFov = xFov, let aspectRatio = aspectRatio {
