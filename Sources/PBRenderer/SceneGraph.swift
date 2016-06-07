@@ -30,7 +30,7 @@ public final class Scene {
     let lightBuffer : GPUBuffer<GPULight>
     let lightTexture : Texture
     public var idsToNodes : [String : SceneNode]! = nil
-    let environmentMap : LightProbe?
+    public var environmentMap : LightProbe?
 
     init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>, environmentMap : LightProbe?) {
         self.nodes = nodes

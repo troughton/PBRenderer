@@ -139,7 +139,7 @@ final class GBufferPass {
         return result
     }
     
-    func renderNode(_ node: SceneNode, camera: Camera, shader: Shader, sortedLightProbes : [LightProbe], environmentMap: LightProbe? = nil) {
+    func renderNode(_ node: SceneNode, camera: Camera, shader: Shader, sortedLightProbes : [LightProbe], environmentMap: LightProbe?) {
         
         let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
         let cameraToClip = camera.projectionMatrix
@@ -183,10 +183,10 @@ final class GBufferPass {
         }
     }
     
-    func renderScene(_ scene: Scene, camera: Camera) -> (colourTextures: [Texture], depthTexture: Texture) {
+    func renderScene(_ scene: Scene, camera: Camera, useLightProbes: Bool) -> (colourTextures: [Texture], depthTexture: Texture) {
         let dfg = DFGTexture.defaultTexture //this will generate it the first time, so we need to call it outside of the render pass method.
         
-        let sortedLightProbes = scene.lightProbesSorted
+        let sortedLightProbes = useLightProbes ? scene.lightProbesSorted : []
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             
@@ -241,7 +241,7 @@ final class GBufferPass {
             shader.setUniform(cameraPositionWorld.x, cameraPositionWorld.y, cameraPositionWorld.z, forProperty: BasicShaderProperty.CameraPositionWorld)
             
             for node in scene.nodes {
-                self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes)
+                self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: scene.environmentMap)
             }
         }
         
@@ -351,7 +351,7 @@ public final class SceneRenderer {
     
 //    var timingQuery : GLuint? = nil
     
-    public func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture? = nil) {
+    public func renderScene(_ scene: Scene, camera: Camera, useLightProbes: Bool = true) {
 //        
 //        var timeElapsed = GLuint(0)
 //        
@@ -368,7 +368,7 @@ public final class SceneRenderer {
 //        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
 //
         
-        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
+        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, useLightProbes: useLightProbes)
         let (lightAccumulationTexture, _) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
        // let lightAccumulationAndReflections = self.screenSpaceReflectionPasses?.render(camera: camera, lightAccumulationBuffer: lightAccumulationTexture, rayTracingBuffer: rayTracingTexture!, gBuffers: gBuffers, gBufferDepth: gBufferDepth)
         self.finalPass?.performPass(lightAccumulationTexture: lightAccumulationTexture)

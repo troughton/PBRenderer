@@ -28,7 +28,7 @@ public final class LightProbe {
     static var lightProbeCount = 0
     
     
-    let sceneNode : SceneNode
+    let sceneNode : SceneNode!
     
     var transform : Transform {
         return self.sceneNode.transform
@@ -69,8 +69,7 @@ public final class LightProbe {
         return self.backingElement.bufferIndex
     }
     
-    /** If there's no position, we assume it's an environment map. */
-    public init(resolution: Int, sceneNode: SceneNode, position: vec3? = nil) {
+    public init(localLightProbeWithResolution resolution: Int, sceneNode: SceneNode, position: vec3) {
         
         self.sceneNode = sceneNode
         
@@ -103,9 +102,46 @@ public final class LightProbe {
         self.backingElement.withElement { (backingElement) -> Void in
             backingElement.boundingVolumeWorldToLocal = self.transform.worldToNodeMatrix
             backingElement.cubeMapPosition = vec4(self.cubeMapWorldSpacePosition, 1)
-            backingElement.isEnvironmentMap = (position == nil) ? 1 : 0
+            backingElement.isEnvironmentMap = 0
             backingElement.mipMaxLevel = Int32(self.ldTexture.specularTexture.descriptor.mipmapLevelCount - 1)
         }
+    }
+    
+    /** If there's no position, we assume it's an environment map. */
+    public init(environmentMapWithResolution resolution: Int, texture: Texture, exposureMultiplier: Float) {
+        
+        self.sceneNode = nil
+        
+        self.localCubeMap = texture
+        
+        self.resolution = resolution
+        self.ldTexture = LDTexture(specularResolution: resolution)
+        
+        self.colourAttachments = (0..<UInt(6)).map { (slice) -> RenderPassColourAttachment in
+            let blendState = BlendState(isBlendingEnabled: true, sourceRGBBlendFactor: GL_ONE, destinationRGBBlendFactor: GL_ONE, rgbBlendOperation: GL_FUNC_ADD, sourceAlphaBlendFactor: GL_ZERO, destinationAlphaBlendFactor: GL_ONE, alphaBlendOperation: GL_FUNC_ADD, writeMask: .All)
+            
+            var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+            colourAttachment.texture = texture
+            colourAttachment.loadAction = .Load
+            colourAttachment.storeAction = .Store
+            colourAttachment.blendState = blendState
+            colourAttachment.textureSlice = slice
+            return colourAttachment
+        }
+        
+        self.sceneRenderers = []
+        
+        self.backingElement = LightProbe.lightProbeBuffer[viewForIndex: LightProbe.lightProbeCount]
+        LightProbe.lightProbeCount += 1
+        
+        self.cubeMapWorldSpacePosition = vec3(0)
+        
+        self.backingElement.withElement { (backingElement) -> Void in
+            backingElement.isEnvironmentMap = 0
+            backingElement.mipMaxLevel = Int32(self.ldTexture.specularTexture.descriptor.mipmapLevelCount - 1)
+        }
+        
+        LDTexture.fillLDTexturesFromCubeMaps(textures: [self.ldTexture], cubeMaps: [self.localCubeMap], valueMultipliers: [exposureMultiplier])
     }
     
     func transformDidChange() {
@@ -151,7 +187,7 @@ public final class LightProbe {
                 break
             }
             
-            sceneRenderer.renderScene(scene, camera: camera, environmentMap: nil)
+            sceneRenderer.renderScene(scene, camera: camera, useLightProbes: false)
         }
         
         self.localCubeMap.generateMipmaps()

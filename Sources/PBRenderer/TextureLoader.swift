@@ -13,7 +13,7 @@ import SGLOpenGL
 public final class TextureLoader {
     private static var textureCache = [String : Texture]()
     
-    static func textureFromVerticalCrossHDRCubeMapAtPath(_ path: String) -> Texture {
+    public static func textureFromVerticalCrossHDRCubeMapAtPath(_ path: String) -> Texture {
         if let texture = textureCache[path] {
             return texture
         }
