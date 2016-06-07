@@ -43,11 +43,18 @@ final class LightGridBuilder {
     private var coverageLists = [[UInt64]]()
     private var allocatedBytes : size_t = 0
     
-    let lightGridBuffer = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
-    let lightGridTexture : Texture
+    let lightGridBuffer1 = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
+    let lightGridBuffer2 = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
+    let lightGridTexture1 : Texture
+    let lightGridTexture2 : Texture
+    var lightGridBuffer : GPUBuffer<LightGridEntry>
+    var lightGridTexture : Texture
     
     init() {
-        self.lightGridTexture = Texture(buffer: lightGridBuffer, internalFormat: GL_RGBA32UI)
+        self.lightGridTexture1 = Texture(buffer: lightGridBuffer1, internalFormat: GL_RGBA32UI)
+        self.lightGridTexture2 = Texture(buffer: lightGridBuffer2, internalFormat: GL_RGBA32UI)
+        self.lightGridTexture = lightGridTexture1
+        self.lightGridBuffer = lightGridBuffer1
     }
     
     let fineIndexTable =
@@ -168,6 +175,16 @@ final class LightGridBuilder {
         coverageLists[cellIndex].append(coverage)
     }
     
+    func swapBuffers() {
+        if self.lightGridBuffer === self.lightGridBuffer1 {
+            self.lightGridBuffer = self.lightGridBuffer2
+            self.lightGridTexture = self.lightGridTexture2
+        } else {
+            self.lightGridBuffer = self.lightGridBuffer1
+            self.lightGridTexture = self.lightGridTexture1
+        }
+    }
+    
     func buildAndUpload() {
         
         let headerBytes = self.cellCount * 64 * 16; // uint4: 16 bytes per entry
@@ -180,8 +197,8 @@ final class LightGridBuilder {
                 }
             }
         }
-        self.lightGridBuffer.orphanBuffer()
         self.lightGridBuffer.didModifyRange(0..<self.allocatedBytes/sizeof(LightGridEntry))
+        self.swapBuffers()
     }
     
 }

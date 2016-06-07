@@ -337,11 +337,13 @@ public class Texture {
     func bindToIndex(_ index: Int) {
         glActiveTexture(GL_TEXTURE0 + index)
         glBindTexture(descriptor.textureType, _glTexture)
+        glActiveTexture(GL_TEXTURE0)
     }
     
     func unbindFromIndex(_ index: Int) {
         glActiveTexture(GL_TEXTURE0 + index)
         glBindTexture(descriptor.textureType, 0)
+        glActiveTexture(GL_TEXTURE0)
     }
     
     func bindToFramebuffer(_ framebuffer: SGLOpenGL.GLenum, attachment: SGLOpenGL.GLenum, mipmapLevel: Int, textureSlice: Int, depthPlane: Int) {

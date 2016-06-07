@@ -210,15 +210,11 @@ final class GBufferPass {
             
             for i in 0..<LightProbe.maxLightProbesPerPass {
                 
-                let ldTexture = LDTexture.emptyTexture
-                
                 let diffuseIndex = 8 + i * 2
-                ldTexture.diffuseTexture.bindToIndex(diffuseIndex)
                 GBufferPass.diffuseLDSampler.bindToIndex(diffuseIndex)
                 diffuseTextureIndices.append(GLint(diffuseIndex))
                 
                 let specularIndex = diffuseIndex + 1
-                ldTexture.specularTexture.bindToIndex(specularIndex)
                 GBufferPass.specularLDSampler.bindToIndex(diffuseIndex)
                 specularTextureIndices.append(GLint(specularIndex))
             }
