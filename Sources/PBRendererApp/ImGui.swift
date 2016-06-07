@@ -139,6 +139,12 @@ private func renderTransformControls(transform: Transform) {
         _ = igDragFloat(label: "y_r", value: &transform.rotation.y, vSpeed: 0.01, vMin: 0.0, vMax: 6)
         _ = igDragFloat(label: "z_r", value: &transform.rotation.z, vSpeed: 0.01, vMin: 0.0, vMax: 6)
         _ = igDragFloat(label: "w_r", value: &transform.rotation.w, vSpeed: 0.01, vMin: 0.0, vMax: 6)
+        
+        igText("Scale")
+        _ = igDragFloat(label: "x_s", value: &transform.scale.x, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+        _ = igDragFloat(label: "y_s", value: &transform.scale.y, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+        _ = igDragFloat(label: "z_s", value: &transform.scale.z, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+
     }
 }
 
@@ -146,7 +152,9 @@ private let lightTypes : [(String, LightType)] = [("Point", LightType.Point),
                                                  ("Spot", LightType.Spot(innerCutoff: 0.1, outerCutoff: 1.0)),
                                                  ("Directional", LightType.Directional),
                                                  ("Sphere Area", LightType.SphereArea(radius: 1.0)),
-                                                 ("Disk Area", LightType.DiskArea(radius: 1.0))]
+                                                 ("Disk Area", LightType.DiskArea(radius: 1.0)),
+                                                 ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0))]
+
 
 private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
                              ("cd/m²", LightIntensity.Luminance(1.0)),
@@ -187,6 +195,11 @@ private func renderLightControls(light: Light) {
         case .SphereArea(var radius):
             igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .SphereArea(radius: radius)
+            break
+        case .RectangleArea(var width, var height):
+            _ = igDragFloat(label: "Width", value: &width, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            _ = igDragFloat(label: "Height", value: &height, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            light.type = .RectangleArea(width: width, height: height)
             break
         default:
             break

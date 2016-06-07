@@ -3,6 +3,7 @@
 #define LightTypeSpot 2
 #define LightTypeSphereArea 3
 #define LightTypeDiskArea 4
+#define LightTypeRectangleArea 5
 
 #include "Utilities.glsl"
 #include "BRDF.glsl"
@@ -12,6 +13,8 @@ uniform sampler2D ltcMaterialGGX;
 uniform sampler2D ltcAmplitudeGGX;
 
 uniform sampler2D ltcMaterialDisney;
+
+uniform samplerBuffer lightPoints;
 
 layout(std140) struct LightData {
     vec4 colourAndIntensity;
@@ -153,13 +156,17 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     return (diffuse + specular) * illuminance * lightColour;
 }
 
-const vec4 points[4] = vec4[4](vec4(5, 0, 0, 1),
-                               vec4(15, 0, 0, 1),
-                               vec4(15, 10, 0, 1),
-                               vec4(5, 10, 0, 1));
-
 // using LTCs
 vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialRenderingData material, LightData light) {
+    
+    int lightPointsOffset = floatBitsToInt(light.extraData.x);
+    
+    vec4 points[4] = vec4[4](texelFetch(lightPoints, lightPointsOffset),
+                             texelFetch(lightPoints, lightPointsOffset + 1),
+                             texelFetch(lightPoints, lightPointsOffset + 2),
+                             texelFetch(lightPoints, lightPointsOffset + 3));
+    
+    
     float cosTheta = dot(N, V);
     
     vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
@@ -232,10 +239,11 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             return evaluatePunctualLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
         case LightTypeSphereArea:
-            return evaluatePolygonAreaLight(worldSpacePosition, N, V, material, light);
-            break;
         case LightTypeDiskArea:
             return evaluateAreaLight(worldSpacePosition, V, N, NdotV, material, light);
+            break;
+        case LightTypeRectangleArea:
+            return evaluatePolygonAreaLight(worldSpacePosition, N, V, material, light);
             break;
         default:
             return vec3(0);

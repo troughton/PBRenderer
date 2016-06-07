@@ -8,6 +8,7 @@
 
 import Foundation
 import SGLMath
+import SGLOpenGL
 
 public typealias Kelvin = Float
 
@@ -120,6 +121,8 @@ public enum LightIntensity {
                 fallthrough
             case .Spot(innerCutoff: _, outerCutoff: _):
                 return lumens * Float(M_PI) //not correct, but prevents the intensity from changing as the angle changes.
+            case .RectangleArea(_, _):
+                return lumens // TODO this is not correct at all.
             default:
                 fatalError()
             }
@@ -188,6 +191,7 @@ public enum LightType {
     case Directional
     case SphereArea(radius: Float)
     case DiskArea(radius: Float)
+    case RectangleArea(width: Float, height: Float)
     
     private var lightTypeFlag : LightTypeFlag {
         switch self {
@@ -201,6 +205,8 @@ public enum LightType {
             return .SphereArea
         case .DiskArea(_):
             return .DiskArea
+        case .RectangleArea(_, _):
+            return .RectangleArea
         }
     }
     
@@ -210,6 +216,8 @@ public enum LightType {
         fallthrough
         case .Spot(_, _):
             return [.LuminousPower(1.0)]
+        case .RectangleArea(_, _):
+            fallthrough
         case .DiskArea(_):
             fallthrough
         case .SphereArea(_):
@@ -219,7 +227,7 @@ public enum LightType {
         }
     }
     
-    func fillGPULight(gpuLight: inout GPULight) {
+    func fillGPULight(gpuLight: inout GPULight, light: Light) {
         gpuLight.lightTypeFlag = self.lightTypeFlag
         
         switch self {
@@ -234,6 +242,9 @@ public enum LightType {
             gpuLight.extraData = vec4(radius, 0, 0, 0)
         case let .DiskArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
+        case let .RectangleArea(_, _):
+            let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
+            gpuLight.extraData = vec4(bufferIndex, 0, 0, 0)
         default:
             break
         }
@@ -245,6 +256,8 @@ public enum LightType {
             return 4 * Float(M_PI) * radius * radius
         case let .DiskArea(radius: radius):
             return Float(M_PI) * radius * radius
+        case let .RectangleArea(width: width, height: height):
+            return width * height
         default:
             fatalError()
         }
@@ -270,11 +283,28 @@ public enum LightType {
             } else {
                 return false
             }
+        case .RectangleArea(_, _):
+            if case .RectangleArea(_, _) = other {
+                return true
+            } else {
+                return false
+            }
         }
     }
 }
 
+
 public final class Light {
+    
+    private static let initialLightPointBufferCapacity = 128
+
+    private static let maxPointsPerLight = 4
+
+    private static var lightPointCount = 0
+    private static var lightPointsGPUBuffer = GPUBuffer<vec4>(capacity: initialLightPointBufferCapacity, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+    
+    static let pointsTexture = Texture(buffer: Light.lightPointsGPUBuffer, internalFormat: GL_RGBA32F)
+    
     public var sceneNode : SceneNode! = nil {
         didSet {
             self.transformDidChange()
@@ -283,7 +313,8 @@ public final class Light {
     
     public var type : LightType {
         didSet {
-            self.backingGPULight.withElement { self.type.fillGPULight(gpuLight: &$0) }
+            self.backingGPULight.withElement { self.type.fillGPULight(gpuLight: &$0, light: self) }
+            self.lightPointsDidChange()
         }
     }
     
@@ -317,6 +348,7 @@ public final class Light {
     }
     
     var backingGPULight : GPUBufferElement<GPULight>
+    var lightPointsBufferIndex : Int
     
     init(type: LightType, colour: LightColourMode, intensity: LightIntensity, falloffRadius: Float, backingGPULight: GPUBufferElement<GPULight>) {
         self.type = type
@@ -325,13 +357,23 @@ public final class Light {
         self.falloffRadius = falloffRadius
         self.intensity = intensity
         
+        // every light has space for points allocated to it even if it doesn't use it
+        // TODO: wrap GPUBuffer in a dynamic array that can resize
+        self.lightPointsBufferIndex = Light.lightPointCount
+        Light.lightPointCount += Light.maxPointsPerLight
+        
+        // double the light points buffer if we run out of space
+        if Light.lightPointCount > Light.lightPointsGPUBuffer.capacity {
+            Light.lightPointsGPUBuffer.reserveCapacity(capacity: Light.lightPointsGPUBuffer.capacity * 2)
+        }
+        
         self.backingGPULight.withElement { gpuLight in
             let radiusSquared = self.falloffRadius * self.falloffRadius
             let inverseRadiusSquared = 1.0 / radiusSquared
             gpuLight.inverseSquareAttenuationRadius = inverseRadiusSquared
             
             gpuLight.colourAndIntensity = vec4(self.colour.rgbColour, intensity.toStoredIntensity(forLightType: self.type))
-            self.type.fillGPULight(gpuLight: &gpuLight)
+            self.type.fillGPULight(gpuLight: &gpuLight, light: self)
         }
     }
     
@@ -339,6 +381,37 @@ public final class Light {
         self.backingGPULight.withElement { gpuLight in
             gpuLight.worldSpacePosition  = self.sceneNode.transform.worldSpacePosition;
             gpuLight.worldSpaceDirection = self.sceneNode.transform.worldSpaceDirection;
+        }
+        
+        self.lightPointsDidChange()
+    }
+
+    
+    private func lightPointsDidChange() {
+        switch self.type {
+        case let .RectangleArea(width, height):
+                let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
+                let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
+                
+                let centre = self.sceneNode.transform.worldSpacePosition
+                
+                var topRight = centre + width * 0.5 * rightInWorldSpace
+                topRight += height * 0.5 * upInWorldSpace
+                
+                var topLeft = centre - width * 0.5 * rightInWorldSpace
+                topLeft += height * 0.5 * upInWorldSpace
+                
+                var bottomLeft = centre - width * 0.5 * rightInWorldSpace
+                bottomLeft -= height * 0.5 * upInWorldSpace
+                
+                var bottomRight = centre + width * 0.5 * rightInWorldSpace
+                bottomRight -= height * 0.5 * upInWorldSpace
+                
+                let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 4
+                Light.lightPointsGPUBuffer[range] = [topRight, topLeft, bottomLeft, bottomRight]
+                Light.lightPointsGPUBuffer.didModifyRange(range)
+        default:
+            break
         }
     }
 }
@@ -349,6 +422,7 @@ enum LightTypeFlag : UInt32 {
     case Spot = 2
     case SphereArea = 3
     case DiskArea = 4
+    case RectangleArea = 5
 }
 
 
