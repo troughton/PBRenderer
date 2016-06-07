@@ -123,6 +123,7 @@ final class LightAccumulationPass {
         case LTCMaterialGGX = "ltcMaterialGGX"
         case LTCAmplitudeGGX = "ltcAmplitudeGGX"
         case LTCMaterialDisney = "ltcMaterialDisney"
+        case LightPoints = "lightPoints"
         
         case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
         
@@ -178,12 +179,16 @@ final class LightAccumulationPass {
             defer { LightAccumulationPass.ltcSampler.unbindFromIndex(9) }
             shader.setUniform(GLint(9), forProperty: LightAccumulationShaderProperty.LTCMaterialDisney)
             
+            Light.pointsTexture.bindToIndex(10)
+            defer { Light.pointsTexture.unbindFromIndex(10) }
+            shader.setUniform(GLint(10), forProperty: LightAccumulationShaderProperty.LightPoints)
+            
             shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             
             shader.setMatrix(camera.transform.nodeToWorldMatrix, forProperty: LightAccumulationShaderProperty.CameraToWorldMatrix)
             
             shader.setUniform(camera.zNear, camera.zFar, forProperty: LightAccumulationShaderProperty.CameraNearFar)
-            
+                        
             let nearPlane = camera.nearPlaneSize
             let projectionA = camera.zFar / (camera.zFar - camera.zNear)
             let projectionB = (-camera.zFar * camera.zNear) / (camera.zFar - camera.zNear)

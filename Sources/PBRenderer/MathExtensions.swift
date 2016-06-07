@@ -346,7 +346,7 @@ public func distanceSquared<T: FloatingPointArithmeticType
 }
 
 extension Matrix4x4 {
-    //From G3D10
+    //From the G3D10 engine source code
     init(pixelScaleMatrixWithWidth screenWidth: T, height screenHeight: T) {
         let sx = screenWidth * T(0.5)
         let sy = screenHeight * T(0.5)
@@ -356,4 +356,10 @@ extension Matrix4x4 {
                           0, 0, 1, 0,
                           sx, sy, 0, 1)
     }
+}
+
+extension Vector4 {
+    static var up : Vector4 { return Vector4(0, 1, 0, 0) }
+    static var right : Vector4 { return Vector4(1, 0, 0, 0) }
+    static var forward : Vector4 { return Vector4(0, 0, 1, 0) }
 }
