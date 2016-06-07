@@ -23,20 +23,26 @@ final class CameraControl : WindowInputDelegate {
     }
     var heldKeys = Set<InputKey>()
     
+    var mouseEnabled = false
+    
     func keyAction(key: InputKey, action: InputAction, modifiers: InputModifiers) {
         switch action {
         case .Press:
             heldKeys.insert(key)
         case .Release:
             heldKeys.remove(key)
+            if key == .Space {
+                mouseEnabled = !mouseEnabled
+            }
         default: break
         }
     }
     
     func mouseDrag(delta: (x: Double, y: Double)) {
-        self.pitch += Float(delta.y) * 0.01
-        self.yaw += Float(delta.x) * 0.01
-        
+        if (mouseEnabled) {
+            self.pitch += Float(delta.y) * 0.01
+            self.yaw += Float(delta.x) * 0.01
+        }
     }
     
     func mouseAction(position: (x: Double, y: Double), button: MouseButton, action: InputAction, modifiers: InputModifiers) {
@@ -134,7 +140,7 @@ func main() {
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
         sceneRenderer.renderScene(scene, camera: camera)
-//        gui.render()
+        gui.render()
     }
 
     
