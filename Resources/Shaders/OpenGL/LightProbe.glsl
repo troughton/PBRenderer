@@ -1,11 +1,27 @@
 uniform sampler2D dfg; //constant term for light probe parametised on (NdotV, roughness)
-uniform samplerCube diffuseLD; //per-probe integrated light for diffuse reflection
-uniform samplerCube specularLD; //per-probe integrated light for specular reflection. Mip-levels map to different roughness values.
-uniform int ldMipMaxLevel;
 
 /**************************************
  * Light probe texture-based sampling *
  *************************************/
+#define MaxTotalLightProbeCount 64
+#define MaxLightProbeCount 4
+
+layout(std140) struct LightProbe {
+    mat4 boundingVolumeWorldToLocal;
+    vec4 cubeMapPosition;
+    int isEnvironmentMap;
+    int ldMipMaxLevel;
+    int padding2;
+    int padding3;
+};
+
+layout(std140) uniform LightProbes {
+    LightProbe lightProbes[MaxTotalLightProbeCount];
+};
+
+uniform int lightProbeIndices[MaxLightProbeCount + 1];
+uniform samplerCube lightProbeDiffuseTextures[MaxLightProbeCount];
+uniform samplerCube lightProbeSpecularTextures[MaxLightProbeCount];
 
 // N is the normal direction
 // R is the mirror vector
@@ -27,9 +43,9 @@ vec3 getDiffuseDominantDir(vec3 N, vec3 V, float NdotV, float roughness) {
     return mix(N, V, lerpFactor);
 }
 
-vec4 evaluateIBLDiffuse(vec3 N, vec3 V, float NdotV, float roughness) {
+vec4 evaluateIBLDiffuse(vec3 N, vec3 V, float NdotV, float roughness, int samplerIndex) {
     vec3 dominantN = getDiffuseDominantDir(N, V, NdotV, roughness);
-    vec4 diffuseLighting = texture(diffuseLD, dominantN);
+    vec4 diffuseLighting = texture(lightProbeDiffuseTextures[samplerIndex], dominantN);
     
     float diffF = texture(dfg, vec2(NdotV, roughness)).z;
     return vec4(diffuseLighting.rgb * diffF, diffuseLighting.a);
@@ -41,7 +57,7 @@ float linearRoughnessToMipLevel(float linearRoughness, int mipCount) {
 
 const int DFG_TEXTURE_SIZE = 128;
 
-vec4 evaluateIBLSpecular(vec3 N, vec3 R, float NdotV, float linearRoughness, float roughness, vec3 f0, float f90) {
+vec4 evaluateIBLSpecular(vec3 N, vec3 R, float NdotV, float linearRoughness, float roughness, vec3 f0, float f90, int samplerIndex, int ldMipMaxLevel) {
     vec3 dominantR = getSpecularDominantDir(N, R, roughness);
     
     // Rebuild the function
@@ -49,7 +65,7 @@ vec4 evaluateIBLSpecular(vec3 N, vec3 R, float NdotV, float linearRoughness, flo
     NdotV = max(NdotV, 0.5f/DFG_TEXTURE_SIZE);
     float mipLevel = linearRoughnessToMipLevel(linearRoughness, ldMipMaxLevel);
     
-    vec4 preLD = textureLod(specularLD, dominantR, mipLevel);
+    vec4 preLD = textureLod(lightProbeSpecularTextures[samplerIndex], dominantR, mipLevel);
     
     // Sample pre-integrated DFG
     // Fc = (1-H.L)^5
@@ -98,16 +114,7 @@ float computeDistanceBasedLinearRoughness(
     return mix(newLinearRoughness, linearRoughness, linearRoughness);
 }
 
-layout(std140) struct LightProbe {
-    mat4 boundingVolumeWorldToLocal;
-    vec4 cubeMapPosition;
-    int isEnvironmentMap;
-    int padding;
-    int padding2;
-    int padding3;
-};
-
-vec4 evaluateLightProbe(vec4 worldSpacePosition, vec3 N, vec3 V, float NdotV, vec3 R, MaterialRenderingData material, LightProbe lightProbe) {
+vec4 evaluateLightProbe(vec4 worldSpacePosition, vec3 N, vec3 V, float NdotV, vec3 R, MaterialRenderingData material, LightProbe lightProbe, int lightProbeSamplerIndex) {
     
     float roughness;
     float linearRoughness;
@@ -124,16 +131,11 @@ vec4 evaluateLightProbe(vec4 worldSpacePosition, vec3 N, vec3 V, float NdotV, ve
         roughness = material.roughness;
         linearRoughness = material.linearRoughness;
     }
-        
-    vec3 diffuseResult = evaluateIBLDiffuse(N, V, NdotV, material.roughness).rgb * material.albedo;
-    vec4 specularResult = evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90);
+
+    vec3 diffuseResult = evaluateIBLDiffuse(N, V, NdotV, material.roughness, lightProbeSamplerIndex).rgb * material.albedo;
+    vec4 specularResult = evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90, lightProbeSamplerIndex, lightProbe.ldMipMaxLevel);
     return vec4(diffuseResult + specularResult.rgb, specularResult.a);
 }
-
-#define MaxLightProbeCount 64
-
-uniform LightProbe lightProbes[MaxLightProbeCount];
-uniform int lightProbeIndices[MaxLightProbeCount + 1];
 
 vec3 evaluateIBL(vec4 worldSpacePosition, vec3 N, vec3 V, float NdotV, vec3 R, MaterialRenderingData material) {
     vec4 total = vec4(0);
@@ -141,9 +143,10 @@ vec3 evaluateIBL(vec4 worldSpacePosition, vec3 N, vec3 V, float NdotV, vec3 R, M
     int lightProbeCount = lightProbeIndices[0];
     // Medium and long range reflections
     for (int i = 0; i < lightProbeCount && total.a < 1.0; i++) {
-        LightProbe probe = lightProbes[i + 1];
+        int probeIndex = lightProbeIndices[i + 1];
+        LightProbe probe = lightProbes[probeIndex];
         
-        vec4 evaluationResult = evaluateLightProbe(worldSpacePosition, N, V, NdotV, R, material, probe);
+        vec4 evaluationResult = evaluateLightProbe(worldSpacePosition, N, V, NdotV, R, material, probe, i);
         float alpha = saturate(evaluationResult.a - total.a);
         total.rgb += evaluationResult.rgb;
         total.a = saturate(alpha + total.a);

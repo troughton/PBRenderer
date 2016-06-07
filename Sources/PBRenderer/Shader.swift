@@ -281,4 +281,12 @@ extension Shader {
             break;
         }
     }
+    
+    func setUniformArray(_ values : [GLint], forProperty property: ShaderProperty) {
+        guard let uniformRef = self.uniformLocation(forProperty: property) else {
+            return
+        }
+
+        glUniform1iv(uniformRef, GLsizei(values.count), values)
+    }
 }

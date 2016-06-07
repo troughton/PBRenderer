@@ -38,6 +38,31 @@ final class GBufferPass {
         return sampler
     }()
     
+    enum GBufferShaderProperty : String, ShaderProperty {
+        case Materials = "materials"
+        case GBuffer0 = "gBuffer0Texture"
+        case GBuffer1 = "gBuffer1Texture"
+        case GBuffer2 = "gBuffer2Texture"
+        case GBuffer3 = "gBuffer3Texture"
+        case GBufferDepth = "gBufferDepthTexture"
+        
+        case MaterialIndex = "materialIndex"
+        
+        case DFGTexture = "dfg"
+        case LDMipMaxLevel = "ldMipMaxLevel"
+        
+        case lightProbes = "LightProbes"
+        case lightProbeIndices;
+        case lightProbeDiffuseTextures;
+        case lightProbeSpecularTextures;
+        
+        case Exposure = "exposure"
+        
+        var name : String {
+            return self.rawValue
+        }
+    }
+    
     init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment) {
         
         var depthState = DepthStencilState()
@@ -104,7 +129,17 @@ final class GBufferPass {
         return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, lightAccumulationAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
-    func renderNode(_ node: SceneNode, camera: Camera, shader: Shader) {
+    func lightProbesAffectingPoint(_ point: vec3, sortedLightProbes : [LightProbe], environmentMap : LightProbe?) -> [LightProbe] {
+        let filteredLightProbes = sortedLightProbes.lazy.filter { $0.boxContainsPoint(point) }
+        let lightProbesToUse = [LightProbe](filteredLightProbes.prefix(LightProbe.maxLightProbesPerPass - ((environmentMap != nil) ? 1 : 0)))
+        var result = lightProbesToUse
+        if let environmentMap = environmentMap {
+            result.append(environmentMap)
+        }
+        return result
+    }
+    
+    func renderNode(_ node: SceneNode, camera: Camera, shader: Shader, sortedLightProbes : [LightProbe], environmentMap: LightProbe? = nil) {
         
         let worldToCamera = camera.sceneNode.transform.worldToNodeMatrix
         let cameraToClip = camera.projectionMatrix
@@ -123,54 +158,90 @@ final class GBufferPass {
                 shader.setUniform(GLint(material.bufferIndex), forProperty: GBufferShaderProperty.MaterialIndex)
             }
             
+            let lightProbes = self.lightProbesAffectingPoint(node.transform.worldSpacePosition.xyz, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+            let lightProbeIndices = lightProbes.map { GLint($0.indexInBuffer) }
+            
+            //Find the indices for the light probes (available texture indices start from 8)
+            shader.setUniformArray([GLint(lightProbeIndices.count)] + lightProbeIndices, forProperty: GBufferShaderProperty.lightProbeIndices)
+            
+            
+            for (i, lightProbe) in lightProbes.enumerated() {
+                let ldTexture = lightProbe.ldTexture
+                
+                let diffuseIndex = 8 + i * 2
+                ldTexture.diffuseTexture.bindToIndex(diffuseIndex)
+                
+                let specularIndex = diffuseIndex + 1
+                ldTexture.specularTexture.bindToIndex(specularIndex)
+            }
+            
             mesh.render()
         }
         
         for child in node.children {
-            self.renderNode(child, camera: camera, shader: shader)
+            self.renderNode(child, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
         }
     }
     
-    func renderScene(_ scene: Scene, camera: Camera, environmentMap: LDTexture?) -> (colourTextures: [Texture], depthTexture: Texture) {
+    func renderScene(_ scene: Scene, camera: Camera) -> (colourTextures: [Texture], depthTexture: Texture) {
         let dfg = DFGTexture.defaultTexture //this will generate it the first time, so we need to call it outside of the render pass method.
-    
+        
+        let sortedLightProbes = scene.lightProbesSorted
         
         self.gBufferPassState.renderPass { (framebuffer, shader) in
             
-            shader.setUniform(GLint(environmentMap != nil ? 1 : 0), forProperty: GBufferShaderProperty.UseEnvironmentMap)
-            
-            let environmentMap = environmentMap ?? LDTexture.emptyTexture
+            shader.setUniformBlockBindingPoints(forProperties: [GBufferShaderProperty.lightProbes])
+            LightProbe.lightProbeBuffer.bindToUniformBlockIndex(0)
                 
-                dfg.texture.bindToIndex(0)
-                defer { dfg.texture.unbindFromIndex(0) }
-                GBufferPass.dfgSampler.bindToIndex(0)
+            dfg.texture.bindToIndex(0)
+            defer { dfg.texture.unbindFromIndex(0) }
+            GBufferPass.dfgSampler.bindToIndex(0)
             defer { GBufferPass.dfgSampler.unbindFromIndex(0) }
-                shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.DFGTexture)
+            shader.setUniform(GLint(0), forProperty: GBufferShaderProperty.DFGTexture)
             
-                environmentMap.diffuseTexture.bindToIndex(1)
-            defer { environmentMap.diffuseTexture.unbindFromIndex(1) }
-                GBufferPass.diffuseLDSampler.bindToIndex(1)
-            defer { GBufferPass.diffuseLDSampler.unbindFromIndex(1) }
-                shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.DiffuseLDTexture)
             
-                environmentMap.specularTexture.bindToIndex(2)
-            defer { environmentMap.specularTexture.unbindFromIndex(2) }
-                GBufferPass.specularLDSampler.bindToIndex(2)
-            defer { GBufferPass.specularLDSampler.unbindFromIndex(2) }
-                shader.setUniform(GLint(2), forProperty: GBufferShaderProperty.SpecularLDTexture)
-                shader.setUniform(GLint(environmentMap.specularTexture.descriptor.mipmapLevelCount - 1), forProperty: GBufferShaderProperty.LDMipMaxLevel)
+            scene.materialTexture.bindToIndex(1)
+            shader.setUniform(GLint(1), forProperty: GBufferShaderProperty.Materials)
             
             shader.setUniform(camera.exposure, forProperty: GBufferShaderProperty.Exposure)
             
+            var specularTextureIndices = [GLint]()
+            var diffuseTextureIndices = [GLint]()
             
-            scene.materialTexture.bindToIndex(3)
-            shader.setUniform(GLint(3), forProperty: GBufferShaderProperty.Materials)
+            for i in 0..<LightProbe.maxLightProbesPerPass {
+                
+                let ldTexture = LDTexture.emptyTexture
+                
+                let diffuseIndex = 8 + i * 2
+                ldTexture.diffuseTexture.bindToIndex(diffuseIndex)
+                GBufferPass.diffuseLDSampler.bindToIndex(diffuseIndex)
+                diffuseTextureIndices.append(GLint(diffuseIndex))
+                
+                let specularIndex = diffuseIndex + 1
+                ldTexture.specularTexture.bindToIndex(specularIndex)
+                GBufferPass.specularLDSampler.bindToIndex(diffuseIndex)
+                specularTextureIndices.append(GLint(specularIndex))
+            }
+            
+            defer {
+                for index in specularTextureIndices {
+                    GBufferPass.specularLDSampler.unbindFromIndex(Int(index))
+                }
+                
+                for index in diffuseTextureIndices {
+                    GBufferPass.diffuseLDSampler.unbindFromIndex(Int(index))
+                }
+            }
+            
+            shader.setUniformArray(specularTextureIndices, forProperty: GBufferShaderProperty.lightProbeSpecularTextures)
+            shader.setUniformArray(diffuseTextureIndices, forProperty: GBufferShaderProperty.lightProbeDiffuseTextures)
+            
             
             let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz
             shader.setUniform(cameraPositionWorld.x, cameraPositionWorld.y, cameraPositionWorld.z, forProperty: BasicShaderProperty.CameraPositionWorld)
             
             for node in scene.nodes {
-                self.renderNode(node, camera: camera, shader: shader)
+                self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes)
             }
         }
         
@@ -297,7 +368,7 @@ public final class SceneRenderer {
 //        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
 //
         
-        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, environmentMap: environmentMap)
+        let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera)
         let (lightAccumulationTexture, _) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
        // let lightAccumulationAndReflections = self.screenSpaceReflectionPasses?.render(camera: camera, lightAccumulationBuffer: lightAccumulationTexture, rayTracingBuffer: rayTracingTexture!, gBuffers: gBuffers, gBufferDepth: gBufferDepth)
         self.finalPass?.performPass(lightAccumulationTexture: lightAccumulationTexture)

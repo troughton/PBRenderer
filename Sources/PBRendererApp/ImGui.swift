@@ -391,7 +391,7 @@ private final class ImGui : WindowInputDelegate {
         io?.pointee.MouseWheel += Float(offsets.y);
     }
     
-    public func render() {
+    private func render() {
         igRender()
     }
     
@@ -596,11 +596,11 @@ private final class ImGui : WindowInputDelegate {
 
 }
 
-func igTextColoredV(color: ImVec4, format: String, args: [CVarArg] = []) {
-    return withVaList(args) { (pointer: CVaListPointer) -> () in
-        return NSPredicate(format: format, arguments: pointer)
-    }
-}
+//func igTextColoredV(color: ImVec4, format: String, args: [CVarArg] = []) {
+//    return withVaList(args) { (pointer: CVaListPointer) -> () in
+//        return NSPredicate(format: format, arguments: pointer)
+//    }
+//}
 
 func igCombo<T: Sequence where T.Iterator.Element == String>(label: String, currentItem: inout Int, items: T, heightInItems: Int32 = -1) {
     let cItems = items.joined(separator: "\0") + "\0"

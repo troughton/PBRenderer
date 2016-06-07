@@ -97,8 +97,8 @@ func main() {
     let cameraControl = CameraControl(camera: camera)
     mainWindow.inputDelegates.append(cameraControl)
     
-    let lightProbe = LocalLightProbe(resolution: 256)
-    lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
+//    let lightProbe = LocalLightProbe(resolution: 256)
+//    lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
 
     
     let gui = GUI(window: mainWindow)
@@ -121,6 +121,9 @@ func main() {
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderFPSCounter(state: &state);
     })
+    
+    var MaxTextureImageUnits = GLint(0)
+     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MaxTextureImageUnits);
     
     //      gui.drawFunctions.append({ renderTestUI() })
 //    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })

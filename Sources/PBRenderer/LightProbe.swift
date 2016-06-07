@@ -1,146 +1,180 @@
 //
-//  LightProbe.swift
+//  LocalLightProbe.swift
 //  PBRenderer
 //
-//  Created by Thomas Roughton on 19/05/16.
+//  Created by Thomas Roughton on 2/06/16.
 //
 //
 
 import Foundation
+import SGLMath
 import SGLOpenGL
 
-//final class LightProbe {
-//    
-//    static let ldDiffuseShader : Shader = {
-//        let vertexText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
-//        let fragmentText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LDTextureDiffuse.frag"))
-//        return Shader(withVertexShader: vertexText, fragmentShader: fragmentText)
-//    }()
-//    
-//    static let ldSpecularShader : Shader = {
-//        let vertexText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
-//        let fragmentText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LDTextureSpecular.frag"))
-//        return Shader(withVertexShader: vertexText, fragmentShader: fragmentText)
-//    }()
-//    
-//    let ldDiffuseTexture : Texture
-//    let ldSpecularTexture : Texture
-//    let cubeMap : Texture
-//    
-//    let cubeMapFaces = [ GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_X ]
-//    
-//    func generateLDTextures(cubeMap: Texture, resolution: Int = 256) -> (diffuse: Texture, specular: Texture) {
-//        let textureDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGB16F, width: resolution, height: resolution, mipmapped: true)
-//        let diffuseTexture = Texture(textureWithDescriptor: textureDescriptor, type: nil, format: nil, data: nil as [Void]?)
-//        
-//        //Remember sampler parameters
-//        
-//        for face in cubeMapFaces {
-//            
-//            //use face as texture slice
-//        }
-//    
-//    for (GLenum face : cubeMapFaces) {
-//    
-//    float step = 1.f / (resolution - 2);
-//    
-//    for (int y = 0; y < resolution; ++y) {
-//    for (int x = 0; x < resolution; ++x) {
-//    float u = 0.5 * step + x * step;
-//    float v = 0.5 * step + y * step;
-//    vec3 direction = cubeMapFaceUVToDirection(vec2(u, v), face);
-//    
-//    textureData[y * resolution + x] = integrateDiffuseCubeLD(direction, image);
-//    }
-//    }
-//    
-//    glTexImage2D(face, 0, GL_RGBA16F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, textureData);
-//    }
-//    
-//    free(textureData);
-//
-//    
-//    return glTexture;
-//    }
-//    
-//    void generateLDSpecularTexture(CubeMap& image, int fullResolution, int mipLevel, int mipCount) {
-//    
-//    int resolution = fullResolution >> mipLevel;
-//    float mip = (float)mipLevel/mipCount;
-//    float perceptuallyLinearRoughness = mip * mip;
-//    float roughness = perceptuallyLinearRoughness * perceptuallyLinearRoughness;
-//    
-//    vec4 *textureData = (vec4*)calloc(sizeof(vec4), resolution * resolution);
-//    
-//    for (GLenum face : cubeMapFaces) {
-//    
-//    float step = 1.f / (resolution - 2);
-//    
-//    for (int y = 0; y < resolution; ++y) {
-//    for (int x = 0; x < resolution; ++x) {
-//    float u = 0.5 * step + x * step;
-//    float v = 0.5 * step + y * step;
-//    vec3 direction = cubeMapFaceUVToDirection(vec2(u, v), face);
-//    
-//    textureData[y * resolution + x] = integrateSpecularCubeLD(direction, direction, roughness, image);
-//    }
-//    }
-//    
-//    glTexImage2D(face, mipLevel, GL_RGBA16F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, textureData);
-//    }
-//    
-//    free(textureData);
-//    }
-//    
-//    GLuint generateLDSpecularTexture(CubeMap& image, int resolution) {
-//    
-//    const int maxMipLevel = 6;
-//    
-//    GLuint glTexture = 0;
-//    glGenTextures(1, &glTexture);
-//    glBindTexture(GL_TEXTURE_CUBE_MAP, glTexture);
-//    
-//    glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//    glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    
-//    glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//    glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//    
-//    for (GLenum face : cubeMapFaces) {
-//    vec4 *textureData = (vec4*)calloc(sizeof(vec4), resolution * resolution);
-//    
-//    float step = 1.f / (resolution - 2);
-//    
-//    for (int y = 0; y < resolution; ++y) {
-//    for (int x = 0; x < resolution; ++x) {
-//    float u = 0.5 * step + x * step;
-//    float v = 0.5 * step + y * step;
-//    vec3 direction = cubeMapFaceUVToDirection(vec2(u, v), face);
-//    textureData[y * resolution + x] = image.sample(direction);
-//    }
-//    }
-//    
-//    glTexImage2D(face, 0, GL_RGBA16F, resolution, resolution, 0, GL_RGBA, GL_FLOAT, textureData);
-//    
-//    free(textureData);
-//    }
-//    
-//    for (int mipLevel = 1; mipLevel <= maxMipLevel; ++mipLevel) {
-//    generateLDSpecularTexture(image, resolution, mipLevel, maxMipLevel);
-//    }
-//    
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, maxMipLevel);
-//    
-//    return glTexture;
-//    }
-//    
-//    func generateLDTextures(cubeMap: Texture) -> (diffuseTexture: Texture, specularTexture: Texture) {
-//        let resolution = 512;
-//    
-//        let diffuseTexture = generateLDDiffuseTexture(cubeMap: cubeMap, resolution: resolution)
-//        let specularTexture = generateLDSpecularTexture(cubeMap, resolution)
-//        
-//        return (diffuseTexture, specularTexture)
-//    }
-//}
+struct GPULightProbe {
+    var boundingVolumeWorldToLocal : mat4
+    var cubeMapPosition : vec4
+    var isEnvironmentMap : Int32
+    var mipMaxLevel : Int32
+    let padding2 = Int32(0)
+    let padding3 = Int32(0)
+};
+
+public final class LightProbe {
+    
+    static let maxTotalLightProbes = 64
+    static let maxLightProbesPerPass = 4 //because we're limited by the amount of available texture units.
+    
+    static let lightProbeBuffer = GPUBuffer<GPULightProbe>(capacity: maxTotalLightProbes, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+    static var lightProbeCount = 0
+    
+    
+    let sceneNode : SceneNode
+    
+    var transform : Transform {
+        return self.sceneNode.transform
+    }
+    
+    var worldSpaceVertices : [vec3] {
+        let vertices = [vec4(-1, -1, -1, 1), vec4(-1, -1, 1, 1), vec4(-1, 1, -1, 1), vec4(-1, 1, 1, 1), vec4(1, -1, -1, 1), vec4(1, -1, 1, 1), vec4(1, 1, -1, 1), vec4(1, 1, 1, 1)]
+        return vertices.map { (self.transform.nodeToWorldMatrix * $0).xyz }
+    }
+    
+    var boundingVolumeSize : Float {
+        let minX = self.transform.nodeToWorldMatrix * vec4(-1, 0, 0, 1)
+        let maxX = self.transform.nodeToWorldMatrix * vec4(1, 0, 0, 1)
+        let minY = self.transform.nodeToWorldMatrix * vec4(0, -1, 0, 1)
+        let maxY = self.transform.nodeToWorldMatrix * vec4(0, 1, 0, 1)
+        let minZ = self.transform.nodeToWorldMatrix * vec4(0, 0, -1, 1)
+        let maxZ = self.transform.nodeToWorldMatrix * vec4(0, 0, 1, 1)
+        
+        let width = distance(p0: minX, maxX)
+        let height = distance(p0: minY, maxY)
+        let depth = distance(p0: minZ, maxZ)
+        
+        return width * height * depth
+    }
+    
+    var cubeMapWorldSpacePosition : vec3
+    
+    let localCubeMap : Texture
+    public let ldTexture : LDTexture
+    public let resolution : Int
+    
+    private let colourAttachments : [RenderPassColourAttachment]
+    private let sceneRenderers : [SceneRenderer]
+    
+    private let backingElement : GPUBufferElement<GPULightProbe>
+    
+    public var indexInBuffer : Int {
+        return self.backingElement.bufferIndex
+    }
+    
+    /** If there's no position, we assume it's an environment map. */
+    public init(resolution: Int, sceneNode: SceneNode, position: vec3? = nil) {
+        
+        self.sceneNode = sceneNode
+        
+        let cubeMapDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: resolution, height: resolution, mipmapped: true)
+        let localCubeMap = Texture(textureWithDescriptor: cubeMapDescriptor)
+        self.localCubeMap = localCubeMap
+        
+        self.resolution = resolution
+        self.ldTexture = LDTexture(specularResolution: resolution)
+        
+        self.colourAttachments = (0..<UInt(6)).map { (slice) -> RenderPassColourAttachment in
+            let blendState = BlendState(isBlendingEnabled: true, sourceRGBBlendFactor: GL_ONE, destinationRGBBlendFactor: GL_ONE, rgbBlendOperation: GL_FUNC_ADD, sourceAlphaBlendFactor: GL_ZERO, destinationAlphaBlendFactor: GL_ONE, alphaBlendOperation: GL_FUNC_ADD, writeMask: .All)
+            
+            var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
+            colourAttachment.texture = localCubeMap
+            colourAttachment.loadAction = .Load
+            colourAttachment.storeAction = .Store
+            colourAttachment.blendState = blendState
+            colourAttachment.textureSlice = slice
+            return colourAttachment
+        }
+        
+        self.sceneRenderers = self.colourAttachments.map { SceneRenderer(lightProbeRendererWithLightAccumulationAttachment: $0) }
+        
+        self.backingElement = LightProbe.lightProbeBuffer[viewForIndex: LightProbe.lightProbeCount]
+        LightProbe.lightProbeCount += 1
+        
+        self.cubeMapWorldSpacePosition = position ?? vec3(0)
+        
+        self.backingElement.withElement { (backingElement) -> Void in
+            backingElement.boundingVolumeWorldToLocal = self.transform.worldToNodeMatrix
+            backingElement.cubeMapPosition = vec4(self.cubeMapWorldSpacePosition, 1)
+            backingElement.isEnvironmentMap = (position == nil) ? 1 : 0
+            backingElement.mipMaxLevel = Int32(self.ldTexture.specularTexture.descriptor.mipmapLevelCount - 1)
+        }
+    }
+    
+    func transformDidChange() {
+        self.backingElement.withElement { (backingElement) -> Void in
+            backingElement.boundingVolumeWorldToLocal = self.transform.worldToNodeMatrix
+        }
+    }
+    
+    func renderSceneToCubeMap(_ scene: Scene, atPosition worldSpacePosition: vec3, zNear: Float, zFar: Float) -> Float {
+        
+        let projectionMatrix = SGLMath.perspective(Float(M_PI_2), 1.0, zNear, zFar)
+        
+        let transform = Transform(parent: nil, translation: worldSpacePosition)
+        let camera = Camera(id: nil, name: nil, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar, aspectRatio: 1.0)
+        
+        camera.shutterTime = 1.0
+        camera.aperture = 1.0
+        
+        let _ = SceneNode(id: nil, name: nil, transform: transform, cameras: [camera])
+        
+        for (i, sceneRenderer) in self.sceneRenderers.enumerated() {
+            
+            switch (i + GL_TEXTURE_CUBE_MAP_POSITIVE_X) {
+            case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+                transform.rotation = quat(angle: Float(-M_PI_2), axis: vec3(0, 1, 0))
+                transform.rotation *= quat(angle: Float(M_PI), axis: vec3(0, 0, 1))
+            case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+                transform.rotation = quat(angle: Float(M_PI_2), axis: vec3(0, 1, 0))
+                transform.rotation *= quat(angle: Float(M_PI), axis: vec3(0, 0, 1))
+                
+            case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+                transform.rotation = quat(angle: Float(M_PI_2), axis: vec3(1, 0, 0))
+            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+                transform.rotation = quat(angle: Float(-M_PI_2), axis: vec3(1, 0, 0))
+            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+                transform.rotation = quat(angle: 0, axis: vec3(0, 1, 0))
+                transform.rotation *= quat(angle: Float(M_PI), axis: vec3(0, 0, 1))
+            case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+                transform.rotation = quat(angle: Float(M_PI), axis: vec3(0, 1, 0))
+                transform.rotation *= quat(angle: Float(M_PI), axis: vec3(0, 0, 1))
+            default:
+                fatalError()
+                break
+            }
+            
+            sceneRenderer.renderScene(scene, camera: camera, environmentMap: nil)
+        }
+        
+        self.localCubeMap.generateMipmaps()
+
+        return camera.exposure
+    }
+    
+    public func boxContainsPoint(_ point: vec3) -> Bool {
+        let localSpacePoint = vec4(point, 1) * self.transform.worldToNodeMatrix
+        return localSpacePoint.x >= -1 && localSpacePoint.y >= -1 && localSpacePoint.z >= -1 && localSpacePoint.x <= 1 && localSpacePoint.y <= 1 && localSpacePoint.z <= 1
+    }
+    
+    public func render(scene: Scene, zNear: Float = 0.1) {
+        
+        let zFar = self.worldSpaceVertices.lazy
+            .map { distanceSquared($0, self.cubeMapWorldSpacePosition) }
+            .sorted { $0 < $1 }
+            .last
+            .map { 1.5 * sqrt($0) } ?? 100.0
+        
+        let exposureUsed = self.renderSceneToCubeMap(scene, atPosition: cubeMapWorldSpacePosition, zNear: zNear, zFar: zFar)
+        
+        LDTexture.fillLDTexturesFromCubeMaps(textures: [self.ldTexture], cubeMaps: [self.localCubeMap], valueMultipliers: [1.0 / exposureUsed])
+    }
+    
+}

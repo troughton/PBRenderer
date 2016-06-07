@@ -30,8 +30,9 @@ public final class Scene {
     let lightBuffer : GPUBuffer<GPULight>
     let lightTexture : Texture
     public var idsToNodes : [String : SceneNode]! = nil
+    let environmentMap : LightProbe?
 
-    init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>) {
+    init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>, environmentMap : LightProbe?) {
         self.nodes = nodes
         self.meshes = meshes
         self.materialBuffer = materials
@@ -39,6 +40,8 @@ public final class Scene {
         
         self.lightTexture = Texture(buffer: self.lightBuffer, internalFormat: GL_RGBA32F)
         self.materialTexture = Texture(buffer: self.materialBuffer, internalFormat: GL_RGBA32F)
+        
+        self.environmentMap = environmentMap
         
         var dictionary = [String : SceneNode]()
         self.flattenedScene.forEach({ (node) in
@@ -81,6 +84,15 @@ public final class Scene {
         }
         return cameras
     }
+    
+    public var lightProbesSorted : [LightProbe] {
+        var lightProbes = [LightProbe]()
+        
+        for node in self.flattenedScene {
+            lightProbes.append(contentsOf: node.lightProbes)
+        }
+        return lightProbes.sorted { $0.boundingVolumeSize < $1.boundingVolumeSize }
+    }
 }
 
 public final class SceneNode {
@@ -92,6 +104,8 @@ public final class SceneNode {
     public let cameras : [Camera]
     public let lights : [Light]
     public let materials : [String : GPUBufferElement<Material>]
+    public let lightProbes : [LightProbe]
+    
     
     func initialiseComponents() {
         self.transform.sceneNode = self
@@ -99,7 +113,7 @@ public final class SceneNode {
         self.lights.forEach { $0.sceneNode = self }
     }
     
-    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:]) {
+    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:], lightProbes : [LightProbe] = []) {
         
         self.id = id.map { $0.characters.first == "_" ? $0.substring(from: $0.index(after: $0.startIndex)) : $0 }
         
@@ -110,6 +124,7 @@ public final class SceneNode {
         self.cameras = cameras
         self.materials = materials
         self.lights = lights
+        self.lightProbes = lightProbes
         
         self.initialiseComponents()
     }
@@ -118,6 +133,8 @@ public final class SceneNode {
         self.lights.forEach { (light) in
             light.transformDidChange()
         }
+        
+        self.lightProbes.forEach { $0.transformDidChange() }
     }
 }
 
