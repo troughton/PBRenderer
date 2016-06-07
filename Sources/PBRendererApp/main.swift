@@ -96,9 +96,10 @@ func main() {
     
     let cameraControl = CameraControl(camera: camera)
     mainWindow.inputDelegates.append(cameraControl)
-    
-    let lightProbe = LocalLightProbe(resolution: 256)
-    lightProbe.render(scene: scene, atPosition: vec3(0, 2.0, 3.0), zNear: 1.0, zFar: 100.0)
+
+    let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))
+    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 2.0)
+    scene.environmentMap = environmentMapProbe
 
     
     let gui = GUI(window: mainWindow)
@@ -122,6 +123,9 @@ func main() {
         renderFPSCounter(state: &state);
     })
     
+    var MaxTextureImageUnits = GLint(0)
+     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MaxTextureImageUnits);
+    
     //      gui.drawFunctions.append({ renderTestUI() })
 //    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })
 
@@ -129,7 +133,7 @@ func main() {
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
-        sceneRenderer.renderScene(scene, camera: camera, environmentMap: nil)
+        sceneRenderer.renderScene(scene, camera: camera)
 //        gui.render()
     }
 

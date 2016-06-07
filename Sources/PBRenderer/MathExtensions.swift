@@ -334,6 +334,17 @@ public func lerp<genType:VectorType where
     return from + t * (to - from)
 }
 
+@warn_unused_result
+public func distanceSquared<T: FloatingPointArithmeticType
+    >(_ a: Vector3<T>, _ b: Vector3<T>) -> T {
+    
+    let dX = a.x - b.x
+    let dY = a.y - b.y
+    let dZ = a.z - b.z
+    
+    return dX * dX + dY * dY + dZ * dZ
+}
+
 extension Matrix4x4 {
     //From the G3D10 engine source code
     init(pixelScaleMatrixWithWidth screenWidth: T, height screenHeight: T) {

@@ -192,7 +192,7 @@ extension Scene {
             nodes.append(SceneNode(colladaNode: node, root: root, sourcesToMeshes: sourcesToMeshes, materials: materialIdsToElements, lights: lightIdsToLights, parentTransform: nil))
         }
         
-        self.init(nodes: nodes, meshes: [[GLMesh]](sourcesToMeshes.values), materials: materialBuffer, lights: lightBuffer)
+        self.init(nodes: nodes, meshes: [[GLMesh]](sourcesToMeshes.values), materials: materialBuffer, lights: lightBuffer, environmentMap: nil)
     }
 }
 

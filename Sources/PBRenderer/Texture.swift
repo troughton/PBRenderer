@@ -75,7 +75,7 @@ struct TextureDescriptor {
     }
 }
 
-class Texture {
+public class Texture {
     
     static func formatForInternalFormat(_ pixelFormat: SGLOpenGL.GLenum) -> SGLOpenGL.GLenum {
         switch pixelFormat {

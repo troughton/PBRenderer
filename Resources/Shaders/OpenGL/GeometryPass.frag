@@ -12,6 +12,7 @@ layout(location = 1) out vec4 gBuffer1;
 layout(location = 2) out vec4 gBuffer2;
 layout(location = 3) out vec4 gBuffer3;
 
+in vec4 worldSpacePosition;
 in vec3 worldSpaceViewDirection;
 in vec3 vertexNormal;
 
@@ -34,27 +35,13 @@ MaterialData materialAtIndex(int materialIndex) {
     return data;
 }
 
-vec3 evaluateEnvironmentMap(vec3 N, vec3 V, MaterialRenderingData material) {
-    
-    if (useEnvironmentMap) {
-    
-        float NdotV = dot(N, V);
-        vec3 R = reflect(-V, N);
-    
-        vec3 result = evaluateIBLDiffuse(N, V, NdotV, material.roughness).rgb * material.albedo;
-        result += evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90).rgb;
-        return result;
-        
-    } else {
-        return vec3(0);
-    }
-}
-
 uniform float exposure;
 
 void main() {
     vec3 N = normalize(vertexNormal);
     vec3 V = normalize(worldSpaceViewDirection);
+    float NdotV = saturate(dot(N, V));
+    vec3 R = reflect(-V, N);
     
     MaterialData material = materialAtIndex(materialIndex);
     
@@ -64,7 +51,7 @@ void main() {
     vec4 out1 = vec4(0);
     vec4 out2 = vec4(0);
     
-    vec3 radiosity = evaluateEnvironmentMap(N, V, renderingMaterial) + material.emissive.rgb;
+    vec3 radiosity = material.emissive.rgb + evaluateIBL(worldSpacePosition, N, V, NdotV, R, renderingMaterial);
     vec4 out3 = vec4(epilogueLighting(radiosity, exposure), 1);
     
     encodeDataToGBuffers(material, N, out0, out1, out2);

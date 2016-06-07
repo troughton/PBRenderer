@@ -172,11 +172,11 @@ vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialR
     vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
     
     mat3 matrixInverseDisney = LTC_Matrix(ltcMaterialDisney, ltcUV);
-    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseDisney, points, false);
+    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseDisney, points, true);
     diffuse *= material.albedo;
     
     mat3 matrixInverseGGX = LTC_Matrix(ltcMaterialGGX, ltcUV);
-    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, false);
+    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, true);
     vec2 schlick = texture(ltcAmplitudeGGX, ltcUV).xy;
     specular *= material.f0 * schlick.x + (material.f90) * schlick.y;
 

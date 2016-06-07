@@ -8,8 +8,8 @@
 
 import Foundation
 
-final class Resources {
-    static func pathForResource(named name: String) -> String {
+public final class Resources {
+    public static func pathForResource(named name: String) -> String {
         if let pathExtension = name.components(separatedBy: ".").last {
             switch pathExtension {
             case "cl":
