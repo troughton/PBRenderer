@@ -113,6 +113,8 @@ public enum LightIntensity {
             return candelasPerMetreSq * lightType.surfaceArea
         case let .LuminousPower(lumens):
             switch lightType {
+            case .SunArea(_):
+                fallthrough
             case .SphereArea(_):
                 fallthrough
             case .Point:
@@ -195,6 +197,7 @@ public enum LightType {
     case DiskArea(radius: Float)
     case RectangleArea(width: Float, height: Float)
     case TriangleArea(base: Float, height: Float)
+    case SunArea(radius: Float)
     
     private var lightTypeFlag : LightTypeFlag {
         switch self {
@@ -212,6 +215,8 @@ public enum LightType {
             return .RectangleArea
         case .TriangleArea(_, _):
             return .TriangleArea
+        case .SunArea(_):
+            return .SunArea
         }
     }
     
@@ -230,6 +235,8 @@ public enum LightType {
         case .SphereArea(_):
             return [.LuminousPower(1.0), .Luminance(1.0)]
         case .Directional:
+            return [.Illuminance(1.0)]
+        case .SunArea(_):
             return [.Illuminance(1.0)]
         }
     }
@@ -254,6 +261,8 @@ public enum LightType {
         case .RectangleArea(_, _):
             let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
             gpuLight.extraData = vec4(bufferIndex, 0, 0, 0)
+        case let .SunArea(radius):
+            gpuLight.extraData = vec4(radius, 0, 0, 0)
         default:
             break
         }
@@ -300,6 +309,12 @@ public enum LightType {
             }
         case .TriangleArea(_, _):
             if case .TriangleArea(_, _) = other {
+                return true
+            } else {
+                return false
+            }
+        case .SunArea(_):
+            if case .SunArea(_) = other {
                 return true
             } else {
                 return false
@@ -443,7 +458,6 @@ public final class Light {
             let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 3 // 3 vertices for triangle
             Light.lightPointsGPUBuffer[range] = [top, bottomLeft, bottomRight]
             Light.lightPointsGPUBuffer.didModifyRange(range)
-            
         default:
             break
         }
@@ -458,6 +472,7 @@ enum LightTypeFlag : UInt32 {
     case DiskArea = 4
     case RectangleArea = 5
     case TriangleArea = 6
+    case SunArea = 7
 }
 
 

@@ -5,6 +5,7 @@
 #define LightTypeDiskArea 4
 #define LightTypeRectangleArea 5
 #define LightTypeTriangleArea 6
+#define LightTypeSunArea 7
 
 #include "Utilities.glsl"
 #include "BRDF.glsl"
@@ -60,6 +61,34 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness) {
     
     return normalize(mix(N, R, lerpFactor));
 }
+
+vec3 evaluateSunArea(vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, MaterialRenderingData material, LightData light) {
+    float sunIlluminanceInLux = light.colourAndIntensity.w;
+    vec3 sunDirection = light.worldSpaceDirection.xyz;
+    float sunAngularRadius = light.extraData.x;
+    
+    vec3 D = sunDirection;
+    float r = sin(sunAngularRadius);
+    float d = cos(sunAngularRadius);
+    
+    vec3 R = reflect(-V, N);
+    
+    // closest point to a disk (since radius is small, this is a good approxmation)
+    float DdotR = dot(D, R);
+    vec3 S = R - DdotR * D;
+    vec3 L = DdotR < d ? normalize(d * D + normalize(S) * r) : R;
+    
+    float illuminance = sunIlluminanceInLux * saturate(dot(N, D));
+    
+    float NdotD = dot(N, D);
+    float NdotL = dot(N, L);
+    
+    vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
+    vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
+    
+    return (diffuse * material.albedo + specular) * illuminance;
+}
+
 
 float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr) {
     float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
@@ -263,6 +292,9 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             break;
         case LightTypeTriangleArea:
             return evaluateTriangleAreaLight(worldSpacePosition, N, V, material, light);
+            break;
+        case LightTypeSunArea:
+            return evaluateSunArea(worldSpacePosition, N, V, NdotV, material, light);
             break;
         default:
             return vec3(0);
