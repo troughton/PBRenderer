@@ -282,7 +282,25 @@ extension SceneNode {
         
         let lightObjects : [Light] = node.instanceLight.map { lights[$0.url.substring(from: $0.url.index(after: $0.url.startIndex))]! }
         
-        self.init(id: node.id, name: node.name, transform: transform, meshes: meshes, children: children, cameras: cameras, lights: lightObjects, materials: instanceMaterialNamesToMaterials)
+        let lightProbes : [LightProbe]
+        if let attributes = node.extra.first?.technique.first?.attributes {
+            if attributes["originalMayaNodeId"]?.contains("Probe") ?? false {
+                let location = [Float](attributes["param"]!)!
+                if location.isEmpty {
+                    lightProbes = []
+                } else {
+                    let lightProbeLocation = vec3(location[0], location[1], location[2])
+                    let lightProbe = LightProbe(localLightProbeWithResolution: 256, position: lightProbeLocation)
+                    lightProbes = [lightProbe]
+                }
+            } else {
+                lightProbes = []
+            }
+        } else {
+            lightProbes = []
+        }
+        
+        self.init(id: node.id, name: node.name, transform: transform, meshes: meshes, children: children, cameras: cameras, lights: lightObjects, materials: instanceMaterialNamesToMaterials, lightProbes: lightProbes)
     }
 
 }

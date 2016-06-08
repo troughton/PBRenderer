@@ -86,7 +86,7 @@ vec3 reflectionDirectionForLocalLightProbe(vec4 worldSpacePosition, vec3 worldSp
     vec3 rayLS = mat3(cubeMapVolumeWorldToLocal) * worldSpaceReflectionDirection;
     vec3 positionLS = (cubeMapVolumeWorldToLocal * worldSpacePosition).xyz;
     
-    vec3 unitary = vec3(0.5f);
+    vec3 unitary = vec3(1.f);
     vec3 firstPlaneIntersect = (unitary - positionLS) / rayLS;
     vec3 secondPlaneIntersect = (-unitary - positionLS) / rayLS;
     
