@@ -88,6 +88,20 @@ final class AudioVisualManager : SongDelegate {
             
         }
         
+        for i in 1...6 {
+            let backgroundAreaLightNode = scene.idsToNodes["BackgroundAreaLight\(i)"]!
+            let lightNode = backgroundAreaLightNode.lights.first!
+            
+            lightNode.type = .RectangleArea(width: 0.95, height: 4.34)
+        }
+        
+        for i in 1...4 {
+            let pyramidAreaLightNode = scene.idsToNodes["PyramidSpot\(i)"]!
+            let lightNode = pyramidAreaLightNode.lights.first!
+            
+            lightNode.type = .TriangleArea(base: 2.0, height: 2.9)
+        }
+        
         let endCamera = scene.idsToNodes["camera2"]!.cameras.first!
         self.camera.shutterTime = 1.0
         self.camera.aperture = 1.0

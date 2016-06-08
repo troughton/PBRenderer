@@ -9,6 +9,20 @@
 import Foundation
 import SGLMath
 
+public struct MaterialTextureMask : OptionSet {
+    public let rawValue : Int32
+
+    public init(rawValue: Int32) {
+        self.rawValue = rawValue
+    }
+    
+    public static let baseColour = MaterialTextureMask(rawValue: 1)
+    public static let emissive = MaterialTextureMask(rawValue: 2)
+    public static let smoothness = MaterialTextureMask(rawValue: 4)
+    public static let metalMask = MaterialTextureMask(rawValue: 8)
+    public static let reflectance = MaterialTextureMask(rawValue: 16)
+}
+
 //See p13 of Moving Frostbite to PBR course notes
 public struct Material {
     
@@ -18,7 +32,7 @@ public struct Material {
     public var smoothness : Float = 0.5
     public var metalMask : Float = 0
     public var reflectance : Float = 0.5
-    private let padding : Float = 0.0
+    public var materialTextureMask : MaterialTextureMask = []
     
     public var f0 : Float {
         return 0.16 * reflectance * reflectance

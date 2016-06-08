@@ -19,7 +19,7 @@ public class XMLDocument {
     public var rootElement : XMLElement? = nil
     
     public init?(contentsOfFile filePath: String) {
-        _documentPointer = xmlReadFile(filePath, nil, 0)
+        _documentPointer = xmlReadFile(filePath, nil, Int32(XML_PARSE_HUGE.rawValue))
         
         if _documentPointer == nil {
             return nil
@@ -30,7 +30,8 @@ public class XMLDocument {
     }
     
     deinit {
-         xmlFreeDoc(_documentPointer)
+        xmlFreeDoc(_documentPointer)
+        xmlCleanupParser()
     }
     
 }

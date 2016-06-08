@@ -104,6 +104,56 @@ extension Matrix4x4 {
     }
 }
 
+func cos<T : FloatingPointArithmeticType>(_ x : T) -> T {
+    if let x = x as? Float {
+        return T(cosf(x))
+    } else if let x = x as? Double {
+        return T(cos(x))
+    } else {
+        fatalError()
+    }
+}
+
+func sin<T : FloatingPointArithmeticType>(_ x : T) -> T {
+    if let x = x as? Float {
+        return T(sinf(x))
+    } else if let x = x as? Double {
+        return T(sin(x))
+    } else {
+        fatalError()
+    }
+}
+
+func atan2<T : FloatingPointArithmeticType>(_ x : T, _ y: T) -> T {
+    if let x = x as? Float, y = y as? Float {
+        return T(atan2f(x, y))
+    } else if let x = x as? Double, y = y as? Double {
+        return T(atan2(x, y))
+    } else {
+        fatalError()
+    }
+}
+
+func asin<T : FloatingPointArithmeticType>(_ x : T) -> T {
+    if let x = x as? Float {
+        return T(asinf(x))
+    } else if let x = x as? Double {
+        return T(asin(x))
+    } else {
+        fatalError()
+    }
+}
+
+func clamp<T : FloatingPointArithmeticType>(_ x : T, _ low: T, _ high: T) -> T {
+    if let x = x as? Float, low = low as? Float, high = high as? Float  {
+        return T(min(max(x, low), high))
+    } else if let x = x as? Double, low = low as? Double, high = high as? Double {
+        return T(min(max(x, low), high))
+    } else {
+        fatalError()
+    }
+}
+
 extension Quaternion where T : FloatingPoint {
     public init(angle: T, axis: Vector3<T>) {
         let halfAngle = angle * 0.5;
@@ -121,62 +171,65 @@ extension Quaternion where T : FloatingPoint {
         self = Quaternion(scale * axis.x, scale * axis.y, scale * axis.z, w);
     }
     
-    public static func fromEuler(euler: Vector3<T>) -> Quaternion<T> {
-        var quaternion = Quaternion(angle: euler.z, axis: Vector3<T>(0, 0, 1))
-        quaternion *= Quaternion(angle: euler.y, axis: Vector3<T>(0, 1, 0))
-        quaternion *= Quaternion(angle: euler.x, axis: Vector3<T>(1, 0, 0))
+    public init(eulerAngles: Vector3<T>) {
         
-        return quaternion
+        let cX = cos(eulerAngles.x * T(0.5));
+        let cY = cos(eulerAngles.y * T(0.5));
+        let cZ = cos(eulerAngles.z * T(0.5));
+        
+        let sX = sin(eulerAngles.x * T(0.5));
+        let sY = sin(eulerAngles.y * T(0.5));
+        let sZ = sin(eulerAngles.z * T(0.5))
+        
+        self.w = cX * cY * cZ + sX * sY * sZ;
+        self.x = sX * cY * cZ - cX * sY * sZ;
+        self.y = cX * sY * cZ + sX * cY * sZ;
+        self.z = cX * cY * sZ - sX * sY * cZ;
     }
     
-    func toEuler() -> Vector3<T> {
-        var euler = Vector3<T>(0)
-        
-        let x1a = 2*self.y*self.w
-        let x1b = -2*self.x*self.z
-        let x1 = x1a - x1b
-        
-        let x2a = 1 - 2*self.y*self.y
-        let x2b = 2*self.z*self.z
-        let x2 = x2a - x2b
-        
-        if let x1 = x1 as? Float, x2 = x2 as? Float {
-            euler.x = unsafeBitCast(atan2(x1, x2), to: T.self)
-        } else if let x1 = x1 as? Double, x2 = x2 as? Double {
-            euler.x = unsafeBitCast(atan2(x1, x2), to: T.self)
-        } else {
-            fatalError()
-        }
-        
-        let ya = 2*self.x*self.y
-        let yb = 2*self.z*self.w
-        let y = ya + yb
-        
-        if let y = y as? Float {
-            euler.y = unsafeBitCast(asin(y), to: T.self)
-        } else if  let y = y as? Double {
-            euler.y = unsafeBitCast(asin(y), to: T.self)
-        } else {
-            fatalError()
-        }
-        
-        let z1a = 2*self.x*self.w
-        let z1b = 2*self.y*self.z
-        let z1 = z1a - z1b
-        
-        let z2a = 1 - 2*self.x*self.x
-        let z2b = 2*self.z*self.x
-        let z2 = z2a - z2b
-        
-        if let z1 = z1 as? Float, z2 = z2 as? Float {
-            euler.z = unsafeBitCast(atan2(z1, z2), to: T.self)
-        } else if let z1 = z1 as? Double, z2 = z2 as? Double {
-            euler.z = unsafeBitCast(atan2(z1, z2), to: T.self)
-        } else {
-            fatalError()
-        }
-        
-        return euler
+    public var eulerAngles : Vector3<T> {
+        return Vector3(self.pitch, self.yaw, self.roll);
+    }
+    
+    var roll : T {
+        let factor1 = (self.x * self.y + self.w * self.z)
+        let factor2 = self.w * self.w + self.x * self.x - self.y * self.y - self.z * self.z
+        let result = atan2(T(2) * factor1, factor2);
+        return result
+    }
+    
+    var pitch : T {
+        let factor1 = (self.y * self.z + self.w * self.x)
+        var factor2 = self.w * self.w
+            factor2 -= self.x * self.x - self.y * self.y
+            factor2 += self.z * self.z
+        return atan2(T(2) * factor1, factor2);
+    }
+    
+    var yaw : T {
+        let factor = (self.x * self.z - self.w * self.y)
+        let clamped = clamp(-2 * factor, -1, 1)
+        return asin(clamped);
+    }
+}
+
+@warn_unused_result
+public func normalize<T : FloatingPointArithmeticType>(_ x: Quaternion<T>) -> Quaternion<T> {
+    //http://stackoverflow.com/questions/11667783/quaternion-and-normalization
+    let qmagsq : Double
+    if let x = x as? quat {
+        qmagsq = Double(x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w)
+    } else if let x = x as? Quaternion<Double> {
+        qmagsq = x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w
+    } else {
+        fatalError()
+    }
+    
+    if (abs(1.0 - qmagsq) < 2.107342e-08) {
+        return x * T(2.0 / (1.0 + qmagsq));
+    }
+    else {
+        return x * (1.0 / T(sqrt(qmagsq)));
     }
 }
 

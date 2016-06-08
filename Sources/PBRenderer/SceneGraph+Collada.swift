@@ -192,11 +192,6 @@ extension Scene {
             nodes.append(SceneNode(colladaNode: node, root: root, sourcesToMeshes: sourcesToMeshes, materials: materialIdsToElements, lights: lightIdsToLights, parentTransform: nil))
         }
         
-        let lightProbeTransform = Transform(parent: nil, translation: vec3(1.0, 3.0, 1.0), rotation: quat.identity, scale: vec3(20))
-        
-        let lightProbe = LightProbe(localLightProbeWithResolution: 256, position: vec3(1.0, 3.0, 1.0))
-        nodes.append(SceneNode(id: nil, name: nil, transform: lightProbeTransform, lightProbes: [lightProbe]))
-        
         self.init(nodes: nodes, meshes: [([GLMesh], BoundingBox)](sourcesToMeshes.values), materials: materialBuffer, lights: lightBuffer, environmentMap: nil)
     }
 }
