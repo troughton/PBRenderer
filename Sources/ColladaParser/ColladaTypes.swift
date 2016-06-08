@@ -2,28 +2,28 @@ import Foundation
 
 
 public protocol ColladaType { }
-protocol StringInitialisable {
+public protocol StringInitialisable {
 	init?(_ text: String)
 }
 
 extension Int : StringInitialisable {
-	init?(_ string: String) {
+	public init?(_ string: String) {
 		self.init(string, radix: 10)
 	}
 }
 extension UInt : StringInitialisable {
-	init?(_ string: String) {
+	public init?(_ string: String) {
 		self.init(string, radix: 10)
 	}
 }
 extension UInt8 : StringInitialisable {
-	init?(_ string: String) {
+	public init?(_ string: String) {
 		self.init(string, radix: 10)
 	}
 }
 
 extension Bool : StringInitialisable {
-	init?(_ string: String) {
+	public init?(_ string: String) {
 		if string == "true" {
 			 self = true
 		} else if string == "false" {
@@ -37,8 +37,8 @@ extension Float : StringInitialisable {}
 extension String : StringInitialisable {}
 extension Double : StringInitialisable {}
 
-extension Array where Element : StringInitialisable {
-	init?(_ string: String) {
+public extension Array where Element : StringInitialisable {
+	public init?(_ string: String) {
         let components = string.components(separatedBy: .whitespaces())
 		self = components.flatMap { Element($0) }
 	}

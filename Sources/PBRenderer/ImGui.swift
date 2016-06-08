@@ -125,7 +125,16 @@ public func renderPropertyEditor(state: inout GUIDisplayState, scene: Scene) {
     igEnd()
 }
 
+private var currentTransform : Transform? = nil
+private var currentEulerRotation : vec3! = nil
+
 private func renderTransformControls(transform: Transform) {
+    
+    if transform !== currentTransform {
+        currentTransform = transform
+        currentEulerRotation = transform.rotation.eulerAngles
+    }
+    
     if(igCollapsingHeader(label: "Transform")) {
         igText("Translation")
         _ = igDragFloat(label: "x", value: &transform.translation.x, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
@@ -133,17 +142,20 @@ private func renderTransformControls(transform: Transform) {
         _ = igDragFloat(label: "z", value: &transform.translation.z, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
         
         igText("Rotation")
-        let eulerRotationDegrees = degrees(radians: transform.rotation.eulerAngles)
+        var eulerRotationDegrees = currentEulerRotation
         igText("x:\(eulerRotationDegrees.x), y:\(eulerRotationDegrees.y), z:\(eulerRotationDegrees.z)")
-        _ = igDragFloat(label: "x_r", value: &transform.rotation.x, vSpeed: 0.01, vMin: 0, vMax: 6)
-        _ = igDragFloat(label: "y_r", value: &transform.rotation.y, vSpeed: 0.01, vMin: 0.0, vMax: 6)
-        _ = igDragFloat(label: "z_r", value: &transform.rotation.z, vSpeed: 0.01, vMin: 0.0, vMax: 6)
-        _ = igDragFloat(label: "w_r", value: &transform.rotation.w, vSpeed: 0.01, vMin: 0.0, vMax: 6)
+        _ = igDragFloat(label: "x_r", value: &eulerRotationDegrees.x, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
+        _ = igDragFloat(label: "y_r", value: &eulerRotationDegrees.y, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
+        _ = igDragFloat(label: "z_r", value: &eulerRotationDegrees.z, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
+        
+        currentEulerRotation = eulerRotationDegrees
+        let rotation = quat(eulerAngles: radians(degrees: eulerRotationDegrees))
+        transform.rotation = rotation
         
         igText("Scale")
-        _ = igDragFloat(label: "x_s", value: &transform.scale.x, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
-        _ = igDragFloat(label: "y_s", value: &transform.scale.y, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
-        _ = igDragFloat(label: "z_s", value: &transform.scale.z, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
+        _ = igDragFloat(label: "x_s", value: &transform.scale.x, vSpeed: 0.1, vMin: 0.01, vMax: 100.0)
+        _ = igDragFloat(label: "y_s", value: &transform.scale.y, vSpeed: 0.1, vMin: 0.01, vMax: 100.0)
+        _ = igDragFloat(label: "z_s", value: &transform.scale.z, vSpeed: 0.1, vMin: 0.01, vMax: 100.0)
         
     }
 }
