@@ -153,7 +153,10 @@ private let lightTypes : [(String, LightType)] = [("Point", LightType.Point),
                                                  ("Directional", LightType.Directional),
                                                  ("Sphere Area", LightType.SphereArea(radius: 1.0)),
                                                  ("Disk Area", LightType.DiskArea(radius: 1.0)),
-                                                 ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0))]
+                                                 ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0)),
+                                                 ("Triangle Area", LightType.TriangleArea(base:1.0, height: 1.0)),
+                                                 ("Sun Area", LightType.SunArea(radius: radians(degrees: 0.263)))]
+
 
 
 private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
@@ -189,18 +192,28 @@ private func renderLightControls(light: Light) {
         
         switch(light.type) {
         case .DiskArea(var radius):
-            igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            _ = igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .DiskArea(radius: radius)
             break
         case .SphereArea(var radius):
-            igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            _ = igDragFloat(label: "Radius", value: &radius, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .SphereArea(radius: radius)
+            break
+        case .SunArea(var radius):
+            _ = igDragFloat(label: "Radius", value: &radius, vSpeed: 0.001, vMin: 0.005, vMax: 5)
+            light.type = .SunArea(radius: radius)
             break
         case .RectangleArea(var width, var height):
             _ = igDragFloat(label: "Width", value: &width, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             _ = igDragFloat(label: "Height", value: &height, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .RectangleArea(width: width, height: height)
             break
+        case .TriangleArea(var base, var height):
+            _ = igDragFloat(label: "Base", value: &base, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            _ = igDragFloat(label: "Height", value: &height, vSpeed: 0.01, vMin: 0.1, vMax: 100)
+            light.type = .TriangleArea(base: base, height: height)
+            break
+
         default:
             break
         }

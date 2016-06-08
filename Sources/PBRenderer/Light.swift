@@ -69,11 +69,11 @@ public enum LightColourMode {
                 colour.b = clamp(colour.b, min: 0.0, max: 255.0)
             }
         }
-
+        
         return colour * vec3(1.0/255.0)
     }
     
-   public var rgbColour : vec3 {
+    public var rgbColour : vec3 {
         switch self {
         case .Colour(let colour):
             return colour
@@ -113,6 +113,8 @@ public enum LightIntensity {
             return candelasPerMetreSq * lightType.surfaceArea
         case let .LuminousPower(lumens):
             switch lightType {
+            case .SunArea(_):
+                fallthrough
             case .SphereArea(_):
                 fallthrough
             case .Point:
@@ -121,6 +123,8 @@ public enum LightIntensity {
                 fallthrough
             case .Spot(innerCutoff: _, outerCutoff: _):
                 return lumens * Float(M_PI) //not correct, but prevents the intensity from changing as the angle changes.
+            case .TriangleArea(_, _):
+                fallthrough
             case .RectangleArea(_, _):
                 return lumens // TODO this is not correct at all.
             default:
@@ -156,7 +160,7 @@ public enum LightIntensity {
                 self = .Illuminance(newValue)
             }
         }
-
+        
     }
     
     
@@ -182,7 +186,7 @@ public enum LightIntensity {
             if case .LuminousPower = other { return true } else { return false }
         }
     }
-
+    
 }
 
 public enum LightType {
@@ -192,6 +196,8 @@ public enum LightType {
     case SphereArea(radius: Float)
     case DiskArea(radius: Float)
     case RectangleArea(width: Float, height: Float)
+    case TriangleArea(base: Float, height: Float)
+    case SunArea(radius: Float)
     
     private var lightTypeFlag : LightTypeFlag {
         switch self {
@@ -207,15 +213,21 @@ public enum LightType {
             return .DiskArea
         case .RectangleArea(_, _):
             return .RectangleArea
+        case .TriangleArea(_, _):
+            return .TriangleArea
+        case .SunArea(_):
+            return .SunArea
         }
     }
     
     public var validUnits : [LightIntensity] {
         switch self {
         case .Point:
-        fallthrough
+            fallthrough
         case .Spot(_, _):
             return [.LuminousPower(1.0)]
+        case .TriangleArea(_, _):
+            fallthrough
         case .RectangleArea(_, _):
             fallthrough
         case .DiskArea(_):
@@ -223,6 +235,8 @@ public enum LightType {
         case .SphereArea(_):
             return [.LuminousPower(1.0), .Luminance(1.0)]
         case .Directional:
+            return [.Illuminance(1.0)]
+        case .SunArea(_):
             return [.Illuminance(1.0)]
         }
     }
@@ -245,6 +259,8 @@ public enum LightType {
         case .RectangleArea(_, _):
             let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
             gpuLight.extraData = vec4(bufferIndex, 0, 0, 0)
+        case let .SunArea(radius):
+            gpuLight.extraData = vec4(radius, 0, 0, 0)
         default:
             break
         }
@@ -289,6 +305,18 @@ public enum LightType {
             } else {
                 return false
             }
+        case .TriangleArea(_, _):
+            if case .TriangleArea(_, _) = other {
+                return true
+            } else {
+                return false
+            }
+        case .SunArea(_):
+            if case .SunArea(_) = other {
+                return true
+            } else {
+                return false
+            }
         }
     }
 }
@@ -297,9 +325,9 @@ public enum LightType {
 public final class Light {
     
     private static let initialLightPointBufferCapacity = 128
-
+    
     private static let maxPointsPerLight = 4
-
+    
     private static var lightPointCount = 0
     private static var lightPointsGPUBuffer = GPUBuffer<vec4>(capacity: initialLightPointBufferCapacity, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
     
@@ -365,6 +393,7 @@ public final class Light {
         // double the light points buffer if we run out of space
         if Light.lightPointCount > Light.lightPointsGPUBuffer.capacity {
             Light.lightPointsGPUBuffer.reserveCapacity(capacity: Light.lightPointsGPUBuffer.capacity * 2)
+            print("Doubling light points capacity. (This may or may not work)")
         }
         
         self.backingGPULight.withElement { gpuLight in
@@ -385,31 +414,48 @@ public final class Light {
         
         self.lightPointsDidChange()
     }
-
+    
     
     private func lightPointsDidChange() {
         switch self.type {
         case let .RectangleArea(width, height):
-                let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
-                let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
-                
-                let centre = self.sceneNode.transform.worldSpacePosition
-                
-                var topRight = centre + width * 0.5 * rightInWorldSpace
-                topRight += height * 0.5 * upInWorldSpace
-                
-                var topLeft = centre - width * 0.5 * rightInWorldSpace
-                topLeft += height * 0.5 * upInWorldSpace
-                
-                var bottomLeft = centre - width * 0.5 * rightInWorldSpace
-                bottomLeft -= height * 0.5 * upInWorldSpace
-                
-                var bottomRight = centre + width * 0.5 * rightInWorldSpace
-                bottomRight -= height * 0.5 * upInWorldSpace
-                
-                let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 4
-                Light.lightPointsGPUBuffer[range] = [topRight, topLeft, bottomLeft, bottomRight]
-                Light.lightPointsGPUBuffer.didModifyRange(range)
+            let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
+            let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
+            
+            let centre = self.sceneNode.transform.worldSpacePosition
+            
+            var topRight = centre + width * 0.5 * rightInWorldSpace
+            topRight += height * 0.5 * upInWorldSpace
+            
+            var topLeft = centre - width * 0.5 * rightInWorldSpace
+            topLeft += height * 0.5 * upInWorldSpace
+            
+            var bottomLeft = centre - width * 0.5 * rightInWorldSpace
+            bottomLeft -= height * 0.5 * upInWorldSpace
+            
+            var bottomRight = centre + width * 0.5 * rightInWorldSpace
+            bottomRight -= height * 0.5 * upInWorldSpace
+            
+            let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 4 //4 vertices for a rectangle
+            Light.lightPointsGPUBuffer[range] = [topRight, topLeft, bottomLeft, bottomRight]
+            Light.lightPointsGPUBuffer.didModifyRange(range)
+        case let .TriangleArea(base, height):
+            let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
+            let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
+            
+            let centre = self.sceneNode.transform.worldSpacePosition
+            
+            let top = centre + height * 0.5 * upInWorldSpace
+            
+            var bottomLeft = centre - base * 0.5 * rightInWorldSpace
+            bottomLeft -= height * 0.5 * upInWorldSpace
+            
+            var bottomRight = centre + base * 0.5 * rightInWorldSpace
+            bottomRight -= height * 0.5 * upInWorldSpace
+            
+            let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 3 // 3 vertices for triangle
+            Light.lightPointsGPUBuffer[range] = [top, bottomLeft, bottomRight]
+            Light.lightPointsGPUBuffer.didModifyRange(range)
         default:
             break
         }
@@ -423,6 +469,8 @@ enum LightTypeFlag : UInt32 {
     case SphereArea = 3
     case DiskArea = 4
     case RectangleArea = 5
+    case TriangleArea = 6
+    case SunArea = 7
 }
 
 
