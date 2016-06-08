@@ -4,6 +4,7 @@
 #define LightTypeSphereArea 3
 #define LightTypeDiskArea 4
 #define LightTypeRectangleArea 5
+#define LightTypeTriangleArea 6
 
 #include "Utilities.glsl"
 #include "BRDF.glsl"
@@ -156,17 +157,9 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     return (diffuse + specular) * illuminance * lightColour;
 }
 
+
 // using LTCs
-vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialRenderingData material, LightData light) {
-    
-    int lightPointsOffset = floatBitsToInt(light.extraData.x);
-    
-    vec4 points[4] = vec4[4](texelFetch(lightPoints, lightPointsOffset),
-                             texelFetch(lightPoints, lightPointsOffset + 1),
-                             texelFetch(lightPoints, lightPointsOffset + 2),
-                             texelFetch(lightPoints, lightPointsOffset + 3));
-    
-    
+vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, vec4 points[4], MaterialRenderingData material, LightData light) {
     float cosTheta = dot(N, V);
     
     vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
@@ -179,13 +172,36 @@ vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialR
     vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, true);
     vec2 schlick = texture(ltcAmplitudeGGX, ltcUV).xy;
     specular *= material.f0 * schlick.x + (material.f90) * schlick.y;
-
+    
     vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
     vec3 result = (specular + diffuse) * lightColour;
     result /= 2.0 * PI;
     
     return result;
+}
+
+vec3 evaluateTriangleAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialRenderingData material, LightData light) {
+    int lightPointsOffset = floatBitsToInt(light.extraData.x);
+    
+    vec4 lastTwoPoints = texelFetch(lightPoints, lightPointsOffset + 2);
+    vec4 points[4] = vec4[4](texelFetch(lightPoints, lightPointsOffset),
+                             texelFetch(lightPoints, lightPointsOffset + 1),
+                             lastTwoPoints,
+                             lastTwoPoints);
+    
+    return evaluatePolygonAreaLight(worldSpacePosition, N, V, points, material, light);
+}
+
+vec3 evaluateRectangleAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, MaterialRenderingData material, LightData light) {
+    int lightPointsOffset = floatBitsToInt(light.extraData.x);
+    
+    vec4 points[4] = vec4[4](texelFetch(lightPoints, lightPointsOffset),
+                             texelFetch(lightPoints, lightPointsOffset + 1),
+                             texelFetch(lightPoints, lightPointsOffset + 2),
+                             texelFetch(lightPoints, lightPointsOffset + 3));
+    
+    return evaluatePolygonAreaLight(worldSpacePosition, N, V, points, material, light);
 }
 
 vec3 evaluatePunctualLight(vec3 worldSpacePosition,
@@ -243,7 +259,10 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             return evaluateAreaLight(worldSpacePosition, V, N, NdotV, material, light);
             break;
         case LightTypeRectangleArea:
-            return evaluatePolygonAreaLight(worldSpacePosition, N, V, material, light);
+            return evaluateRectangleAreaLight(worldSpacePosition, N, V, material, light);
+            break;
+        case LightTypeTriangleArea:
+            return evaluateTriangleAreaLight(worldSpacePosition, N, V, material, light);
             break;
         default:
             return vec3(0);
