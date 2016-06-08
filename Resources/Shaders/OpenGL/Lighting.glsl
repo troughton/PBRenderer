@@ -18,6 +18,10 @@ uniform sampler2D ltcMaterialDisney;
 
 uniform samplerBuffer lightPoints;
 
+uniform sampler2DArray shadowMapDepthTexture;
+
+in vec4 lightSpacePosition;
+
 layout(std140) struct LightData {
     vec4 colourAndIntensity;
     vec4 worldSpacePosition;
@@ -62,9 +66,24 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness) {
     return normalize(mix(N, R, lerpFactor));
 }
 
+float ShadowCalculation()
+{
+    vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    
+    float closestDepth = texture(shadowMapDepthTexture, vec3(projCoords.xy, 0)).r;
+    
+    float currentDepth = projCoords.z;
+    
+    float bias = 0.0002;
+    float shadow = currentDepth - bias > closestDepth  ? 0.0 : 1.0;
+    
+    return shadow;
+}
+
 vec3 evaluateSunArea(vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, MaterialRenderingData material, LightData light) {
     float sunIlluminanceInLux = light.colourAndIntensity.w;
-    vec3 sunDirection = light.worldSpaceDirection.xyz;
+    vec3 sunDirection = -light.worldSpaceDirection.xyz;
     float sunAngularRadius = light.extraData.x;
     
     vec3 D = sunDirection;
@@ -86,7 +105,7 @@ vec3 evaluateSunArea(vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, Mater
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
     vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
     
-    return (diffuse * material.albedo + specular) * illuminance;
+    return (diffuse * material.albedo + specular) * illuminance * ShadowCalculation();
 }
 
 
@@ -278,7 +297,7 @@ vec3 evaluatePunctualLight(vec3 worldSpacePosition,
     // i.e with point light and luminous power unit: lightColor = color * phi / (4 * PI)
     vec3 luminance = BRDF(V, L, N, NdotV, NdotL, material) * NdotL * lightColour * attenuation;
     
-    return luminance;
+    return vec3(ShadowCalculation());
 }
 
 vec3 evaluateLighting(vec3 worldSpacePosition,

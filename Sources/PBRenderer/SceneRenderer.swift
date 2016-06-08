@@ -306,6 +306,7 @@ public final class SceneRenderer {
     
     var gBufferPass : GBufferPass
     var lightAccumulationPass : LightAccumulationPass
+    var shadowMapPass : ShadowMapPass
     var screenSpaceReflectionPasses : ScreenSpaceReflectionsPasses?
     var outlinePass : OutlinePass?
     var finalPass : FinalPass?
@@ -323,6 +324,8 @@ public final class SceneRenderer {
         
         self.outlinePass = OutlinePass(pixelDimensions: pixelDimensions, gBufferPassState: gBufferPass.gBufferPassState, lightAccumulationAttachment: lightAccumulationAttachment)
         
+        self.shadowMapPass = ShadowMapPass()
+        
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
@@ -334,6 +337,7 @@ public final class SceneRenderer {
         let pixelDimensions = Size(Int32(lightAccumulationAttachment.texture!.descriptor.width), Int32(lightAccumulationAttachment.texture!.descriptor.height))
         
         self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.shadowMapPass = ShadowMapPass()
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment, hasSpecularAndReflections: true)
         self.screenSpaceReflectionPasses = nil
         self.finalPass = nil
@@ -367,12 +371,12 @@ public final class SceneRenderer {
     public func renderScene(_ scene: Scene, camera: Camera, outlineMeshes: [(GLMesh, modelToWorld: mat4)] = [], useLightProbes: Bool = true) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, useLightProbes: useLightProbes)
-        let (lightAccumulationTexture, _) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
+        let (shadowMapDepthTexture, worldToLightClipMatrices) = self.shadowMapPass.performPass(scene: scene)
+        let (lightAccumulationTexture, _) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth, shadowMapDepthTexture: shadowMapDepthTexture, worldToLightClipMatrices: worldToLightClipMatrices)
        // let lightAccumulationAndReflections = self.screenSpaceReflectionPasses?.render(camera: camera, lightAccumulationBuffer: lightAccumulationTexture, rayTracingBuffer: rayTracingTexture!, gBuffers: gBuffers, gBufferDepth: gBufferDepth)
         let _ = self.outlinePass?.performPass(meshes: outlineMeshes, camera: camera) //operates on the light accumulation texture.
         
-        self.finalPass?.performPass(lightAccumulationTexture: lightAccumulationTexture)
-        
+        self.finalPass?.performPass(lightAccumulationTexture: shadowMapDepthTexture)
     }
     
 
