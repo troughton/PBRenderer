@@ -242,7 +242,7 @@ public enum LightType {
             gpuLight.extraData = vec4(radius, 0, 0, 0)
         case let .DiskArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
-        case let .RectangleArea(_, _):
+        case .RectangleArea(_, _):
             let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
             gpuLight.extraData = vec4(bufferIndex, 0, 0, 0)
         default:

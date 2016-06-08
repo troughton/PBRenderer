@@ -8938,51 +8938,27 @@ public final class NodeType : ColladaType {
 							The node element may contain any number of translate elements.
 							*/
 		case translate(TranslateType)
-	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
-if xmlElement.name == "lookat" {	self = .lookat(LookatType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if let element = xmlElement.elements(forName: "lookat").first {
-	self = .lookat(LookatType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if xmlElement.name == "matrix" {	self = .matrix(MatrixType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if let element = xmlElement.elements(forName: "matrix").first {
-	self = .matrix(MatrixType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if xmlElement.name == "rotate" {	self = .rotate(RotateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if let element = xmlElement.elements(forName: "rotate").first {
-	self = .rotate(RotateType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if xmlElement.name == "scale" {	self = .scale(ScaleType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if let element = xmlElement.elements(forName: "scale").first {
-	self = .scale(ScaleType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if xmlElement.name == "skew" {	self = .skew(SkewType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if let element = xmlElement.elements(forName: "skew").first {
-	self = .skew(SkewType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if xmlElement.name == "translate" {	self = .translate(TranslateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
-	return
-}
-if let element = xmlElement.elements(forName: "translate").first {
-	self = .translate(TranslateType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
-	return
-}
-return nil
-}
+        init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
+            if xmlElement.name == "lookat" {	self = .lookat(LookatType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+                return
+            }
+            if xmlElement.name == "matrix" {	self = .matrix(MatrixType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+                return
+            }
+            if xmlElement.name == "rotate" {	self = .rotate(RotateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+                return
+            }
+            if xmlElement.name == "scale" {	self = .scale(ScaleType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+                return
+            }
+            if xmlElement.name == "skew" {	self = .skew(SkewType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+                return
+            }
+            if xmlElement.name == "translate" {	self = .translate(TranslateType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+                return
+            }
+            return nil
+        }
 	}
 
 	/***/

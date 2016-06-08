@@ -152,7 +152,7 @@ final class GBufferPass {
         shader.setMatrix(node.transform.nodeToWorldMatrix, forProperty: BasicShaderProperty.ModelToWorldMatrix)
         shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToWorldMatrix)
         
-        for mesh in node.meshes {
+        node.meshes.0.forEach { mesh in
             if let materialName = mesh.materialName, let material = node.materials[materialName] {
                 
                 shader.setUniform(GLint(material.bufferIndex), forProperty: GBufferShaderProperty.MaterialIndex)
@@ -163,7 +163,6 @@ final class GBufferPass {
             
             //Find the indices for the light probes (available texture indices start from 8)
             shader.setUniformArray([GLint(lightProbeIndices.count)] + lightProbeIndices, forProperty: GBufferShaderProperty.lightProbeIndices)
-            
             
             for (i, lightProbe) in lightProbes.enumerated() {
                 let ldTexture = lightProbe.ldTexture
@@ -177,9 +176,22 @@ final class GBufferPass {
             
             mesh.render()
         }
+    }
+    
+    private func recurseTree(node: OctreeNode<SceneNode>, frustum: Frustum, camera: Camera, shader: Shader, sortedLightProbes : [LightProbe], environmentMap: LightProbe?) {
         
-        for child in node.children {
-            self.renderNode(child, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+        if !frustum.containsBox(node.boundingVolume) {
+            return
+        }
+        
+        for node in node.values where !node.meshes.0.isEmpty {
+            self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+        }
+        
+        for i in 0..<Extent.LastElement.rawValue {
+            if let child = node[Extent(rawValue: i)!] {
+                recurseTree(node: child, frustum: frustum, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+            }
         }
     }
     
@@ -236,9 +248,10 @@ final class GBufferPass {
             let cameraPositionWorld = camera.sceneNode.transform.worldSpacePosition.xyz
             shader.setUniform(cameraPositionWorld.x, cameraPositionWorld.y, cameraPositionWorld.z, forProperty: BasicShaderProperty.CameraPositionWorld)
             
-            for node in scene.nodes {
-                self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: scene.environmentMap)
-            }
+            
+            let frustum = Frustum(worldToCameraMatrix: camera.transform.worldToNodeMatrix, projectionMatrix: camera.projectionMatrix)
+            
+            self.recurseTree(node: scene.octree, frustum: frustum, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: scene.environmentMap)
         }
         
         return (colourTextures: self.gBufferPassState.framebuffer.colourAttachments.flatMap { $0?.texture! }, depthTexture: self.gBufferPassState.framebuffer.depthAttachment.texture!)
@@ -294,6 +307,7 @@ public final class SceneRenderer {
     var gBufferPass : GBufferPass
     var lightAccumulationPass : LightAccumulationPass
     var screenSpaceReflectionPasses : ScreenSpaceReflectionsPasses?
+    var outlinePass : OutlinePass?
     var finalPass : FinalPass?
     
     public init(window: PBWindow) {
@@ -304,7 +318,11 @@ public final class SceneRenderer {
         
         self.gBufferPass = GBufferPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
         self.lightAccumulationPass = LightAccumulationPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
-        self.screenSpaceReflectionPasses = ScreenSpaceReflectionsPasses(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)
+        
+        self.screenSpaceReflectionPasses = useSSR ? ScreenSpaceReflectionsPasses(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment) : nil
+        
+        self.outlinePass = OutlinePass(pixelDimensions: pixelDimensions, gBufferPassState: gBufferPass.gBufferPassState, lightAccumulationAttachment: lightAccumulationAttachment)
+        
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
         window.registerForFramebufferResize(onResize: self.framebufferDidResize)
@@ -342,35 +360,19 @@ public final class SceneRenderer {
         self.gBufferPass.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
         self.lightAccumulationPass.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
         self.screenSpaceReflectionPasses?.resize(newPixelDimensions: width, height, lightAccumulationAttachment: lightAccumulationAttachment)
+        self.outlinePass?.resize(newPixelDimensions: width, height, gBufferPassState: self.gBufferPass.gBufferPassState, lightAccumulationAttachment: lightAccumulationAttachment)
         self.finalPass?.resize(newPixelDimensions: width, height)
     }
     
-//    var timingQuery : GLuint? = nil
-    
-    public func renderScene(_ scene: Scene, camera: Camera, useLightProbes: Bool = true) {
-//        
-//        var timeElapsed = GLuint(0)
-//        
-//        if let query = timingQuery {
-//            glGetQueryObjectuiv(query, GL_QUERY_RESULT, &timeElapsed)
-//            let timeElapsedMillis = Double(timeElapsed) * 1.0e-6
-//            print(String(format: "Elapsed frame time: %.2fms", timeElapsedMillis))
-//        } else {
-//            var query : GLuint = 0
-//            glGenQueries(1, &query)
-//            self.timingQuery = query
-//        }
-        
-//        glBeginQuery(GLenum(GL_TIME_ELAPSED), self.timingQuery!)
-//
+    public func renderScene(_ scene: Scene, camera: Camera, outlineMeshes: [(GLMesh, modelToWorld: mat4)] = [], useLightProbes: Bool = true) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, useLightProbes: useLightProbes)
         let (lightAccumulationTexture, _) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth)
        // let lightAccumulationAndReflections = self.screenSpaceReflectionPasses?.render(camera: camera, lightAccumulationBuffer: lightAccumulationTexture, rayTracingBuffer: rayTracingTexture!, gBuffers: gBuffers, gBufferDepth: gBufferDepth)
+        let _ = self.outlinePass?.performPass(meshes: outlineMeshes, camera: camera) //operates on the light accumulation texture.
+        
         self.finalPass?.performPass(lightAccumulationTexture: lightAccumulationTexture)
         
-        
-//        glEndQuery(GLenum(GL_TIME_ELAPSED))
     }
     
 

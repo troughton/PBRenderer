@@ -41,7 +41,6 @@ final class DFGTexture {
         let pipelineState = PipelineState(viewport: Rectangle(x: 0, y: 0, width: Int32(resolution), height: Int32(resolution)), framebuffer: framebuffer, shader: shader, depthStencilState: depthStencilState)
         
             pipelineState.renderPass { (framebuffer, shader) in
-            shader.setUniform(GLint(resolution), forProperty: StringShaderProperty("textureSize"))
             
             GLMesh.fullScreenQuad.render()
         }

@@ -9,6 +9,7 @@
 import Foundation
 import ColladaParser
 import SGLOpenGL
+import SGLMath
 
 private struct VertexLayout {
     var size : Int = 0
@@ -68,7 +69,16 @@ private class Vertex : Hashable {
         }
         
         memcpy(self.data.advanced(by: offset), value, lengthInBytes)
-
+    }
+    
+    //Note: this assumes that the data is in the form of floats, which may not always be the case.
+    var position : vec3 {
+        guard let (_, offset, _) = layout.attributes[.Position] else {
+            fatalError("No attribute for position in layout.")
+        }
+        
+        let xPositionPointer = UnsafePointer<Float>(self.data.advanced(by: offset))
+        return vec3(xPositionPointer.pointee, xPositionPointer.successor().pointee, xPositionPointer.advanced(by: 2).pointee)
     }
     
     deinit {
@@ -115,7 +125,7 @@ extension GLMesh {
 
     }
     
-    static func meshesFromCollada(_ colladaMesh: MeshType, root: Collada) -> [GLMesh] {
+    static func meshesFromCollada(_ colladaMesh: MeshType, root: Collada) -> ([GLMesh], boundingBox: BoundingBox) {
         var attributesToSources = [AttributeType : (offset: Int, source: SourceType)]()
         
         var meshes = [GLMesh]()
@@ -154,9 +164,12 @@ extension GLMesh {
             }
         }
         
+        var minVertex = vec3(Float.infinity)
+        var maxVertex = vec3(-Float.infinity)
+        
         let drawCommands = colladaMesh.choice0.flatMap { (primitive) -> DrawCommand? in
             if case let .triangles(tris) = primitive {
-                var indices = [UInt16]()
+                var indices = [UInt32]()
                 
                 let stride = tris.input.count
                 for i in 0..<tris.count {
@@ -191,22 +204,27 @@ extension GLMesh {
                         }
                         
                         
+                        
                         if let existingIndex = vertexIndices[vertex] {
-                            indices.append(UInt16(existingIndex))
+                            indices.append(UInt32(existingIndex))
                             
                         } else {
+                            let position = vertex.position
+                            minVertex = min(position, minVertex)
+                            maxVertex = max(position, maxVertex)
+                            
                             vertexIndices[vertex] = vertices.count
-                            indices.append(UInt16(vertices.count))
+                            indices.append(UInt32(vertices.count))
                             vertices.append(vertex)
                         }
                     }
                 }
                 
-                let indexBuffer = GPUBuffer<GLushort>(capacity: Int(tris.count * 3), data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+                let indexBuffer = GPUBuffer<GLuint>(capacity: Int(tris.count * 3), data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
                 
                 materialNames.append(tris.material)
                 
-                return DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_SHORT, bufferOffsetInBytes: 0)
+                return DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLES, elementCount: Int(tris.count * 3), glElementType: GL_UNSIGNED_INT, bufferOffsetInBytes: 0)
             
             } else {
                 print("Warning: mesh of type \(primitive) not supported.")
@@ -234,6 +252,6 @@ extension GLMesh {
             meshes.append(GLMesh(drawCommand: drawCommand, attributes: attributeTypesToVertexAttributes, materialName: material))
         }
 
-        return meshes
+        return (meshes, BoundingBox(minPoint: minVertex, maxPoint: maxVertex))
     }
 }

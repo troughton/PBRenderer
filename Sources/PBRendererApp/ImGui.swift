@@ -240,32 +240,35 @@ public func renderSceneHierachy(state: inout GUIDisplayState, scene: Scene) {
     igSeparator()
     
     func renderChild(sceneNode: SceneNode) {
-        igPushIdStr(sceneNode.id!)
+        
+        let sceneNodeID = sceneNode.id ?? "No ID"
+        
+        igPushIdStr(sceneNodeID)
         igAlignFirstTextHeightToWidgets()
         
-        let node_open = igTreeNode("\(sceneNode.id!)")
+        let node_open = igTreeNode("\(sceneNodeID)")
         igNextColumn()
         igAlignFirstTextHeightToWidgets()
         
         
-        if state.editorSceneNodeId == sceneNode.id {
+        if state.editorSceneNodeId == sceneNodeID {
             igPushStyleColor(Int32(ImGuiCol_Button.rawValue), ImVec4 (x: 0.8, y: 0.52, z: 0.82, w: 1))
             igPushStyleColor(Int32(ImGuiCol_ButtonHovered.rawValue), ImVec4 (x: 0.9, y: 0.52, z: 0.92, w: 1))
 
             if (igButton(label: "Edit")) {
-                state.editorSceneNodeId = sceneNode.id!
+                state.editorSceneNodeId = sceneNodeID
             }
             igPopStyleColor(2)
         } else {
             if (igButton(label: "Edit")) {
-                state.editorSceneNodeId = sceneNode.id!
+                state.editorSceneNodeId = sceneNodeID
             }
         }
       
         igNextColumn()
         
         if (node_open) {
-            igText("\(sceneNode.name!)")
+            igText("\(sceneNodeID)")
             
             sceneNode.children.forEach({ (child) in
                 renderChild(sceneNode: child)

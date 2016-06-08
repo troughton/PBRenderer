@@ -24,15 +24,17 @@ extension Matrix4x4 {
 public final class Scene {
     
     public let nodes : [SceneNode]
-    let meshes : [[GLMesh]]
+    let meshes : [([GLMesh], BoundingBox)]
     let materialBuffer : GPUBuffer<Material>
     let materialTexture : Texture
     let lightBuffer : GPUBuffer<GPULight>
     let lightTexture : Texture
     public var idsToNodes : [String : SceneNode]! = nil
     public var environmentMap : LightProbe?
+    
+    var octree : OctreeNode<SceneNode>! = nil
 
-    init(nodes: [SceneNode], meshes: [[GLMesh]], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>, environmentMap : LightProbe?) {
+    init(nodes: [SceneNode], meshes: [([GLMesh], BoundingBox)], materials: GPUBuffer<Material>, lights: GPUBuffer<GPULight>, environmentMap : LightProbe?) {
         self.nodes = nodes
         self.meshes = meshes
         self.materialBuffer = materials
@@ -50,9 +52,21 @@ public final class Scene {
             }
         })
         self.idsToNodes = dictionary
+        
+        let sceneBoundingVolume = self.flattenedScene.reduce(BoundingBox.baseBox) { (boundingBox, node) -> BoundingBox in
+            return BoundingBox.combine(boundingBox, node.meshes.1)
+        }
+        
+        let octree = OctreeNode<SceneNode>(boundingVolume: sceneBoundingVolume)
+        for node in self.flattenedScene where !node.meshes.0.isEmpty {
+            let boundingBox = node.meshes.1.axisAlignedBoundingBoxInSpace(nodeToSpaceTransform: node.transform.nodeToWorldMatrix)
+            octree.append(node, boundingBox: boundingBox)
+        }
+        
+        self.octree = octree
     }
 
-    private var flattenedScene : [SceneNode] {
+    public var flattenedScene : [SceneNode] {
         var nodes = [SceneNode]()
         var stack = [SceneNode]()
         
@@ -99,21 +113,21 @@ public final class SceneNode {
     public let id : String?
     public let name : String?
     public let transform : Transform
-    let meshes : [GLMesh]
+    public let meshes : ([GLMesh], BoundingBox)
     public let children : [SceneNode]
     public let cameras : [Camera]
     public let lights : [Light]
     public let materials : [String : GPUBufferElement<Material>]
     public let lightProbes : [LightProbe]
     
-    
     func initialiseComponents() {
         self.transform.sceneNode = self
         self.cameras.forEach { $0.sceneNode = self }
         self.lights.forEach { $0.sceneNode = self }
+        self.lightProbes.forEach { $0.sceneNode = self }
     }
     
-    init(id: String?, name: String?, transform: Transform, meshes: [GLMesh] = [], children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:], lightProbes : [LightProbe] = []) {
+    init(id: String?, name: String?, transform: Transform, meshes: ([GLMesh], BoundingBox) = ([], BoundingBox.baseBox), children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:], lightProbes : [LightProbe] = []) {
         
         self.id = id.map { $0.characters.first == "_" ? $0.substring(from: $0.index(after: $0.startIndex)) : $0 }
         

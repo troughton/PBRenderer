@@ -28,9 +28,15 @@ public final class LightProbe {
     static var lightProbeCount = 0
     
     
-    let sceneNode : SceneNode!
+    public var sceneNode : SceneNode! = nil {
+        didSet {
+            self.backingElement.withElement { (backingElement) -> Void in
+                backingElement.boundingVolumeWorldToLocal = self.transform.worldToNodeMatrix
+            }
+        }
+    }
     
-    var transform : Transform {
+    public var transform : Transform {
         return self.sceneNode.transform
     }
     
@@ -69,9 +75,7 @@ public final class LightProbe {
         return self.backingElement.bufferIndex
     }
     
-    public init(localLightProbeWithResolution resolution: Int, sceneNode: SceneNode, position: vec3) {
-        
-        self.sceneNode = sceneNode
+    public init(localLightProbeWithResolution resolution: Int, position: vec3) {
         
         let cubeMapDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: resolution, height: resolution, mipmapped: true)
         let localCubeMap = Texture(textureWithDescriptor: cubeMapDescriptor)
@@ -100,7 +104,6 @@ public final class LightProbe {
         self.cubeMapWorldSpacePosition = position ?? vec3(0)
         
         self.backingElement.withElement { (backingElement) -> Void in
-            backingElement.boundingVolumeWorldToLocal = self.transform.worldToNodeMatrix
             backingElement.cubeMapPosition = vec4(self.cubeMapWorldSpacePosition, 1)
             backingElement.isEnvironmentMap = 0
             backingElement.mipMaxLevel = Int32(self.ldTexture.specularTexture.descriptor.mipmapLevelCount - 1)

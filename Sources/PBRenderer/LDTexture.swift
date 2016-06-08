@@ -60,11 +60,11 @@ public final class LDTexture {
     init(specularResolution: Int) {
         self.specularResolution = specularResolution
         
-        let diffuseCubeDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGB16F, width: self.diffuseResolution, height: self.diffuseResolution, mipmapped: false)
+        let diffuseCubeDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: self.diffuseResolution, height: self.diffuseResolution, mipmapped: false)
         self.diffuseTexture = Texture(textureWithDescriptor: diffuseCubeDescriptor)
         
         let specularMipMapCount = UInt(log2(Double(specularResolution)) - 3)
-        let specularCubeDescriptor = TextureDescriptor(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: GL_RGB16F, width: specularResolution, height: specularResolution, depth: 1, mipmapLevelCount: specularMipMapCount, arrayLength: 1, multisampleCount: 1)
+        let specularCubeDescriptor = TextureDescriptor(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: GL_RGBA16F, width: specularResolution, height: specularResolution, depth: 1, mipmapLevelCount: specularMipMapCount, arrayLength: 1, multisampleCount: 1)
         self.specularTexture = Texture(textureWithDescriptor: specularCubeDescriptor)
         
         

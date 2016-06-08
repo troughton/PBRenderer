@@ -51,6 +51,9 @@ vec3 BRDFDiffuse(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRende
 
 vec3 BRDFSpecular(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRenderingData material) {
     
+#ifdef NoSpecular
+    return vec3(0);
+#else
     vec3 H = normalize(V + L);
     float LdotH = saturate(dot(L, H));
     float NdotH = saturate(dot(N, H));
@@ -62,6 +65,7 @@ vec3 BRDFSpecular(vec3 V, vec3 L, vec3 N, float NdotV, float NdotL, MaterialRend
     vec3 Fr = D * F * Vis * INV_PI;
     
     return Fr;
+#endif
 }
 
 #ifdef NoSpecular

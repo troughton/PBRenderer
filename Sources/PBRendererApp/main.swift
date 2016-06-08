@@ -11,7 +11,7 @@ let mainWindow : PBWindow
 
 final class CameraControl : WindowInputDelegate {
     let camera : Camera
-    let movementSpeed = Float(0.4)
+    let movementSpeed = Float(0.9)
     
     let baseRotation : quat
     var yaw = Float(0)
@@ -101,6 +101,7 @@ func main() {
     let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 2.0)
     scene.environmentMap = environmentMapProbe
 
+    scene.lightProbesSorted.forEach { $0.render(scene: scene) }
     
     let gui = GUI(window: mainWindow)
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
@@ -123,18 +124,31 @@ func main() {
         renderFPSCounter(state: &state);
     })
     
-    var MaxTextureImageUnits = GLint(0)
-     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MaxTextureImageUnits);
-    
-    //      gui.drawFunctions.append({ renderTestUI() })
-//    gui.drawFunctions.append({ renderLightEditor(light: spotLight!) })
-
-    scene.lights.first?.type = .SphereArea(radius: 1.0)
-    
     mainWindow.registerForUpdate { (window, deltaTime) in
         cameraControl.update(delta: deltaTime)
+        
+//        let lightProbeOutlines = scene.lightProbesSorted.map { (probe) -> (GLMesh, modelToWorld: mat4) in
+//            let transform = probe.transform.nodeToWorldMatrix
+//            let mesh = GLMesh.unitBox
+//            return (mesh, modelToWorld: transform)
+//        }
+        
+//        let lightProbeOutlines = scene.flattenedScene.flatMap { (node) -> (GLMesh, modelToWorld: mat4)? in
+//            if node.meshes.0.isEmpty {
+//                return nil
+//            }
+//            
+//            let boundingBox = node.meshes.1.axisAlignedBoundingBoxInSpace(nodeToSpaceTransform: node.transform.nodeToWorldMatrix)
+//            
+//            var transform = SGLMath.translate(mat4(1), boundingBox.centre)
+//            transform = SGLMath.scale(transform, boundingBox.size)
+//            
+//            return (GLMesh.unitBox, modelToWorld: transform)
+//        }
+        
+        
         sceneRenderer.renderScene(scene, camera: camera)
-//        gui.render()
+        gui.render()
     }
 
     

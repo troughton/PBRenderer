@@ -12,8 +12,8 @@ import SGLMath
 import SGLOpenGL
 
 extension Scene {
-    static func parseMeshesFromCollada(_ root: Collada) -> [String: [GLMesh]] {
-        var meshes = [String : [GLMesh]]()
+    static func parseMeshesFromCollada(_ root: Collada) -> [String: ([GLMesh], BoundingBox)] {
+        var meshes = [String : ([GLMesh], BoundingBox)]()
         
         for libraryGeometry in root.libraryGeometries {
             for geometry in libraryGeometry.geometry {
@@ -73,7 +73,7 @@ extension Scene {
                 let warningFalloffIsHardCoded = true
                 
                 let intensityWithUnits = LightIntensity(unit: type.validUnits.first!, value: intensity)
-                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensityWithUnits, falloffRadius: 70.0, backingGPULight: lightBuffer[viewForIndex: i])
+                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensityWithUnits, falloffRadius: 200.0, backingGPULight: lightBuffer[viewForIndex: i])
                 elementsInBuffer[light.id!] = pbLight
                     i += 1
                 }
@@ -192,12 +192,17 @@ extension Scene {
             nodes.append(SceneNode(colladaNode: node, root: root, sourcesToMeshes: sourcesToMeshes, materials: materialIdsToElements, lights: lightIdsToLights, parentTransform: nil))
         }
         
-        self.init(nodes: nodes, meshes: [[GLMesh]](sourcesToMeshes.values), materials: materialBuffer, lights: lightBuffer, environmentMap: nil)
+        let lightProbeTransform = Transform(parent: nil, translation: vec3(1.0, 3.0, 1.0), rotation: quat.identity, scale: vec3(20))
+        
+        let lightProbe = LightProbe(localLightProbeWithResolution: 256, position: vec3(1.0, 3.0, 1.0))
+        nodes.append(SceneNode(id: nil, name: nil, transform: lightProbeTransform, lightProbes: [lightProbe]))
+        
+        self.init(nodes: nodes, meshes: [([GLMesh], BoundingBox)](sourcesToMeshes.values), materials: materialBuffer, lights: lightBuffer, environmentMap: nil)
     }
 }
 
 extension SceneNode {
-    convenience init(colladaNode node: NodeType, root: Collada, sourcesToMeshes: [String : [GLMesh]], materials: [String: GPUBufferElement<Material>], lights: [String: Light], parentTransform: Transform? = nil) {
+    convenience init(colladaNode node: NodeType, root: Collada, sourcesToMeshes: [String : ([GLMesh], BoundingBox)], materials: [String: GPUBufferElement<Material>], lights: [String: Light], parentTransform: Transform? = nil) {
         var currentTransform = mat4(1)
         
         for transform in node.transforms {
@@ -234,7 +239,7 @@ extension SceneNode {
         //    self.transform = Transform(parent: nil, translation: translation, rotation: rotation, scale: scale)
         let transform = Transform(parent: parentTransform, translation: translation, rotation: rotation, scale: scale)
         
-        var meshes = [GLMesh]()
+        var meshes : ([GLMesh], BoundingBox) = ([], BoundingBox(minPoint: vec3(Float.infinity), maxPoint: vec3(-Float.infinity)))
         var instanceMaterialNamesToMaterials = [String : GPUBufferElement<Material>]()
         node.instanceGeometry.forEach { instance in
             instance.bindMaterial?.techniqueCommon.instanceMaterial.forEach { material in
@@ -244,7 +249,8 @@ extension SceneNode {
             }
             
             if let m = sourcesToMeshes[instance.url.substring(from: instance.url.index(after: instance.url.startIndex))] {
-                meshes.append(contentsOf: m)
+                meshes.0.append(contentsOf: m.0)
+                meshes.1 = BoundingBox.combine(meshes.1, m.1)
             }
         }
         

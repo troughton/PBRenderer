@@ -33,8 +33,7 @@ struct DrawCommand {
     let bufferOffsetInBytes : Int
 }
 
-final class GLMesh {
-    
+public final class GLMesh {
     let materialName : String?
     
     private let _vertexArrayObject : GLuint
@@ -75,7 +74,7 @@ final class GLMesh {
         glBindVertexArray(0);
     }
     
-    static let fullScreenQuad : GLMesh = {
+    public static let fullScreenQuad : GLMesh = {
         let vertices = [vec4(-1, -1, 0, 1), vec4(-1, 1, 0, 1), vec4(1, -1, 0, 1), vec4(1, 1, 0, 1)]
         let indices : [UInt8] = [0, 2, 1, 3, 1, 2]
         let vertexBuffer = GPUBuffer(capacity: vertices.count, data: vertices, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
@@ -87,7 +86,7 @@ final class GLMesh {
         return GLMesh(drawCommand: drawCommand, attributes: vertexAttributes)
     }()
     
-    static let unitBox : GLMesh = {
+    public static let unitBox : GLMesh = {
         let vertices = [vec3(-0.5, -0.5, 0.5),
             vec3(-0.5, -0.5, -0.5),
             vec3(-0.5, 0.5, -0.5),
@@ -105,4 +104,74 @@ final class GLMesh {
         
         return GLMesh(drawCommand: drawCommand, attributes: vertexAttributes)
     }()
+    
+    public static let unitSphere : [GLMesh] = {
+        let radius = Float(0.5)
+        let slices = 10
+        let stacks = 10
+        
+        let dualSlices = slices * 2
+        
+        var cosPhiList = [Float]()
+        var sinPhiList = [Float]()
+        
+        for sliceCount in 0...dualSlices {
+            let phi = Float(2 * M_PI) * Float(sliceCount) / Float(dualSlices)
+            cosPhiList.append(cos(phi))
+            sinPhiList.append(sin(phi))
+        }
+        
+        var vertices = [vec3]()
+        
+        for stackCount in 0...stacks {
+            let theta = Float(M_PI) * Float(stackCount) / Float(stacks)
+            let sinTheta = sin(theta)
+            let cosTheta = cos(theta)
+            
+            for sliceCount in 0...dualSlices {
+                vertices.append(vec3(sinTheta * cosPhiList[sliceCount], sinTheta * sinPhiList[sliceCount], cosTheta) * radius)
+            }
+        }
+        
+        let vertexBuffer = GPUBuffer(capacity: vertices.count, data: vertices, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        
+        var meshes = [GLMesh]()
+        
+        var indices = [UInt8]()
+        
+        var indexOffsets = [Int]()
+        
+        var currentIndexOffset = 0
+        
+        for stackCount in 0..<stacks {
+            
+            indexOffsets.append(currentIndexOffset)
+            
+            for sliceCount in 0...dualSlices {
+                let h = sliceCount + stackCount * (dualSlices + 1)
+                let l = sliceCount + (stackCount + 1) * (dualSlices + 1)
+                indices.append(UInt8(h))
+                indices.append(UInt8(l))
+                
+                currentIndexOffset += 2
+            }
+        }
+        
+        let elementCount = 2 * (dualSlices + 1)
+        
+        let indexBuffer = GPUBuffer(capacity: indices.count, data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        
+        let vertexAttributes = [AttributeType.Position : VertexAttribute(data: GPUBuffer<UInt8>(vertexBuffer), glTypeName: GL_FLOAT, componentsPerAttribute: 3, isNormalised: false, strideInBytes: 0, bufferOffsetInBytes: 0)]
+        
+        for indexOffset in indexOffsets {
+            
+            let drawCommand = DrawCommand(data: GPUBuffer<UInt8>(indexBuffer), glPrimitiveType: GL_TRIANGLE_STRIP, elementCount: elementCount, glElementType: GL_UNSIGNED_BYTE, bufferOffsetInBytes: 2 * indexOffset)
+            meshes.append(GLMesh(drawCommand: drawCommand, attributes: vertexAttributes))
+        }
+        
+        return meshes
+       
+    }()
+    
+    
 }

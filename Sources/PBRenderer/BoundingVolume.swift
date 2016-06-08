@@ -9,7 +9,7 @@
 import Foundation
 import SGLMath
 
-enum Extent : Int {
+public enum Extent : Int {
     case MinX_MinY_MinZ = 0b000
     case MinX_MinY_MaxZ = 0b001
     case MinX_MaxY_MinZ = 0b010
@@ -27,54 +27,57 @@ enum Extent : Int {
     static let values = (0..<Extent.LastElement.rawValue).map { rawValue -> Extent in return Extent(rawValue: rawValue)! }
 }
 
-struct BoundingBox {
-    let minPoint : vec3, maxPoint: vec3
+public struct BoundingBox {
     
-    var width : Float {
+    public static let baseBox = BoundingBox(minPoint: vec3(Float.infinity), maxPoint: vec3(-Float.infinity))
+    
+    public let minPoint : vec3, maxPoint: vec3
+    
+    public var width : Float {
         return self.maxX - self.minX;
     }
     
-    var depth : Float {
+    public var depth : Float {
         return self.maxZ - self.minZ;
     }
     
-    var height : Float {
+    public var height : Float {
         return self.maxY - self.minY;
     }
     
-    var volume : Float {
+    public var volume : Float {
         return self.depth * self.width * self.height;
     }
     
-    var minX : Float { return self.minPoint.x }
-    var minY : Float { return self.minPoint.y }
-    var minZ : Float { return self.minPoint.z }
-    var maxX : Float { return self.maxPoint.x }
-    var maxY : Float { return self.maxPoint.y }
-    var maxZ : Float { return self.maxPoint.z }
+    public var minX : Float { return self.minPoint.x }
+    public var minY : Float { return self.minPoint.y }
+    public var minZ : Float { return self.minPoint.z }
+    public var maxX : Float { return self.maxPoint.x }
+    public var maxY : Float { return self.maxPoint.y }
+    public var maxZ : Float { return self.maxPoint.z }
     
     
-    var centreX : Float {
+    public var centreX : Float {
         return (self.minX + self.maxX)/2;
     }
     
-    var centreY : Float {
+    public var centreY : Float {
         return (self.minY + self.maxY)/2;
     }
     
-    var centreZ : Float {
+    public var centreZ : Float {
         return (self.minZ + self.maxZ)/2
     }
     
-    var centre : vec3 {
+    public var centre : vec3 {
         return vec3(self.centreX, self.centreY, self.centreZ);
     }
     
-    var size : vec3 {
+    public var size : vec3 {
         return self.maxPoint - self.minPoint
     }
     
-    func containsPoint(point: vec3) -> Bool {
+    public func containsPoint(_ point: vec3) -> Bool {
         return point.x >= self.minX &&
             point.x <= self.maxX &&
             point.y >= self.minY &&
@@ -88,7 +91,7 @@ struct BoundingBox {
      * @param direction The direction to look in.
      * @return The vertex in that direction.
      */
-    func pointAtExtent(extent: Extent) -> vec3 {
+    public func pointAtExtent(_ extent: Extent) -> vec3 {
         let useMaxX = extent.rawValue & Extent.MaxXFlag != 0
         let useMaxY = extent.rawValue & Extent.MaxYFlag != 0
         let useMaxZ = extent.rawValue & Extent.MaxZFlag != 0
@@ -100,7 +103,7 @@ struct BoundingBox {
      * @param otherBox The box to check intersection with.
      * @return Whether self box is intersecting with the other box.
      */
-    func intersectsWith(otherBox: BoundingBox) -> Bool {
+    public func intersectsWith(_ otherBox: BoundingBox) -> Bool {
         return !(self.maxX < otherBox.minX ||
             self.minX > otherBox.maxX ||
             self.maxY < otherBox.minY ||
@@ -109,7 +112,7 @@ struct BoundingBox {
             self.minZ > otherBox.maxZ);
     }
     
-    func contains(otherBox: BoundingBox) -> Bool {
+    public func contains(_ otherBox: BoundingBox) -> Bool {
         return
             self.minX < otherBox.minX &&
                 self.maxX > otherBox.maxX &&
@@ -117,6 +120,10 @@ struct BoundingBox {
                 self.maxY > otherBox.maxY &&
                 self.minZ < otherBox.minZ &&
                 self.maxZ > otherBox.maxZ
+    }
+    
+    public static func combine(_ a : BoundingBox, _ b : BoundingBox) -> BoundingBox {
+        return BoundingBox(minPoint: min(a.minPoint, b.minPoint), maxPoint: max(a.maxPoint, b.maxPoint))
     }
     
     
@@ -127,7 +134,7 @@ struct BoundingBox {
      * @param nodeToSpaceTransform The transformation from local to the destination space.
      * @return this box in the destination coordinate system.
      */
-    func axisAlignedBoundingBoxInSpace(nodeToSpaceTransform : mat4) -> BoundingBox {
+    public func axisAlignedBoundingBoxInSpace(nodeToSpaceTransform : mat4) -> BoundingBox {
         
         var minX = Float.infinity, minY = Float.infinity, minZ = Float.infinity
         var maxX = -Float.infinity, maxY = -Float.infinity, maxZ = -Float.infinity
@@ -155,7 +162,7 @@ struct BoundingBox {
         return BoundingBox(minPoint: vec3(minX, minY, minZ), maxPoint: vec3(maxX, maxY, maxZ));
     }
     
-    func maxZForBoundingBoxInSpace(nodeToSpaceTransform : mat4) -> Float {
+    public func maxZForBoundingBoxInSpace(nodeToSpaceTransform : mat4) -> Float {
         
         var maxZ = -Float.infinity
         
