@@ -132,7 +132,7 @@ private func renderTransformControls(transform: Transform) {
     
     if transform !== currentTransform {
         currentTransform = transform
-        currentEulerRotation = transform.rotation.eulerAngles
+        currentEulerRotation = degrees(radians: transform.rotation.eulerAngles)
     }
     
     if(igCollapsingHeader(label: "Transform")) {
@@ -142,13 +142,11 @@ private func renderTransformControls(transform: Transform) {
         _ = igDragFloat(label: "z", value: &transform.translation.z, vSpeed: 0.1, vMin: -100.0, vMax: 100.0)
         
         igText("Rotation")
-        var eulerRotationDegrees = currentEulerRotation
-        igText("x:\(eulerRotationDegrees.x), y:\(eulerRotationDegrees.y), z:\(eulerRotationDegrees.z)")
-        _ = igDragFloat(label: "x_r", value: &eulerRotationDegrees.x, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
-        _ = igDragFloat(label: "y_r", value: &eulerRotationDegrees.y, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
-        _ = igDragFloat(label: "z_r", value: &eulerRotationDegrees.z, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
+        igText("x:\(currentEulerRotation.x), y:\(currentEulerRotation.y), z:\(currentEulerRotation.z)")
+        _ = igDragFloat(label: "x_r", value: &currentEulerRotation.x, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
+        _ = igDragFloat(label: "y_r", value: &currentEulerRotation.y, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
+        _ = igDragFloat(label: "z_r", value: &currentEulerRotation.z, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
         
-        currentEulerRotation = eulerRotationDegrees
         let rotation = quat(eulerAngles: radians(degrees: eulerRotationDegrees))
         transform.rotation = rotation
         
