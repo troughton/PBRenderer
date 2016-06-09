@@ -1,4 +1,5 @@
 #version 410
+in vec4 lightSpacePosition;
 
 #include "LightAccumulation.glsl"
 
@@ -54,6 +55,7 @@ vec4 lightAccumulationPass(vec2 projectionTerms, vec2 cameraNearFar,
 #endif
 }
 
+
 void main() {
     
     ivec2 pixelCoord = ivec2(gl_FragCoord.xy);
@@ -64,17 +66,6 @@ void main() {
     vec4 gBuffer2 = texelFetch(gBuffer2Texture, pixelCoord, 0);
     
     vec4 accumulatedLight = lightAccumulationPass(projectionTerms, cameraNearFar, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, uv, cameraToWorldMatrix);
-    
-//    if (reflectionTraceResult.xy != vec2(0)) {
-//        pixelCoord = ivec2(reflectionTraceResult.xy);
-//        
-//        gBufferDepth = texelFetch(gBufferDepthTexture, pixelCoord, 0).r;
-//        gBuffer0 = texelFetch(gBuffer0Texture, pixelCoord, 0).r;
-//        gBuffer1 = texelFetch(gBuffer1Texture, pixelCoord, 0);
-//        gBuffer2 = texelFetch(gBuffer2Texture, pixelCoord, 0);
-//        
-//        accumulatedLight += lightAccumulationPass(projectionTerms, cameraNearFar, gBuffer0, gBuffer1, gBuffer2, gBufferDepth, uv, cameraToWorldMatrix);
-//    }
     
     outputColour = accumulatedLight;
 }

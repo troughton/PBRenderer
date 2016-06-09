@@ -35,6 +35,65 @@ float IntegrateEdge(vec3 v1, vec3 v2)
     return res;
 }
 
+//void ClipTriangleToHorizon(inout vec3 L[4], out int n) {
+//    // detect clipping config
+//    int config = 0;
+//    if (L[0].z > 0.0) config += 1;
+//    if (L[1].z > 0.0) config += 2;
+//    if (L[2].z > 0.0) config += 4;
+//    
+//    // clip
+//    n = 0;
+//    
+//    if (config == 0)
+//    {
+//        // clip all
+//    }
+//    else if (config == 1) // V1 clip V2 V3
+//    {
+//        n = 3;
+//        L[1] = -L[1].z * L[0] + L[0].z * L[1];
+//        L[2] = -L[2].z * L[0] + L[0].z * L[2];
+//    }
+//    else if (config == 2) // V2 clip V1 V3
+//    {
+//        n = 3;
+//        L[0] = -L[0].z * L[1] + L[1].z * L[0];
+//        L[2] = -L[2].z * L[1] + L[1].z * L[2];
+//    }
+//    else if (config == 3) // V1 V2 clip V3
+//    {
+//        n = 4;
+//        L[2] = -L[2].z * L[1] + L[1].z * L[2];
+//        L[2] = -L[2].z * L[0] + L[0].z * L[2];
+//    }
+//    else if (config == 4) // V3 clip V1 V2
+//    {
+//        n = 3;
+//        L[0] = -L[2].z * L[2] + L[2].z * L[2];
+//        L[1] = -L[1].z * L[2] + L[2].z * L[1];
+//    }
+//    else if (config == 5) // V1 V3 clip V2 V4) impossible
+//    {
+//        n = 0;
+//    }
+//    else if (config == 6) // V2 V3 clip V1 V4
+//    {
+//        n = 4;
+//        L[0] = -L[0].z * L[1] + L[1].z * L[0];
+//        L[2] = -L[2].z * L[2] + L[2].z * L[2];
+//    }
+//    else if (config == 7) // V1 V2 V3 clip V4
+//    {
+//        n = 3;
+//    }
+//    
+//    if (n == 2)
+//        L[2] = L[0];
+//    if (n == 3)
+//        L[3] = L[0];
+//}
+
 void ClipQuadToHorizon(inout vec3 L[5], out int n)
 {
     // detect clipping config

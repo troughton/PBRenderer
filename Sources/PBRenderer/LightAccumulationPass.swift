@@ -35,6 +35,17 @@ final class LightAccumulationPass {
         return sampler
     }()
     
+    static let shadowSampler : Sampler = {
+        let sampler = Sampler()
+        sampler.minificationFilter = GL_LINEAR
+        sampler.magnificationFilter = GL_LINEAR
+        sampler.wrapS = GL_CLAMP_TO_EDGE
+        sampler.wrapT = GL_REPEAT
+        sampler.textureCompareMode = GL_COMPARE_REF_TO_TEXTURE
+        sampler.textureCompareFunc = GL_LEQUAL
+        return sampler
+    }()
+    
     static let ltcMaterialGGX = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_mat_ggx.dat"), numComponents: 4)
     
     static let ltcAmplitudeGGX = TextureLoader.ltcTextureFromFile(Resources.pathForResource(named: "ltc_amp_ggx.dat"), numComponents: 2)
@@ -124,6 +135,8 @@ final class LightAccumulationPass {
         case LTCAmplitudeGGX = "ltcAmplitudeGGX"
         case LTCMaterialDisney = "ltcMaterialDisney"
         case LightPoints = "lightPoints"
+        case WorldToLightClipMatrix = "worldToLightClipMatrix"
+        case ShadowMapDepthTexture = "shadowMapDepthTexture"
         
         case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
         
@@ -132,13 +145,14 @@ final class LightAccumulationPass {
         }
     }
     
-    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture) -> (Texture, rayTracingBuffer: Texture?) {
+    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture, shadowMapDepthTexture: Texture, worldToLightClipMatrix: mat4) -> (Texture, rayTracingBuffer: Texture?) {
         
         self.setupLightGrid(camera: camera, lights: scene.lights)
         
         let lightTexture = scene.lightTexture
         
         self.pipelineState.renderPass { (framebuffer, shader) in
+            shader.setMatrix(worldToLightClipMatrix, forProperty: LightAccumulationShaderProperty.WorldToLightClipMatrix)
             
             gBufferColours[1].bindToIndex(1)
             defer { gBufferColours[1].unbindFromIndex(1) }
@@ -182,6 +196,14 @@ final class LightAccumulationPass {
             Light.pointsTexture.bindToIndex(10)
             defer { Light.pointsTexture.unbindFromIndex(10) }
             shader.setUniform(GLint(10), forProperty: LightAccumulationShaderProperty.LightPoints)
+            
+            shadowMapDepthTexture.bindToIndex(11)
+            LightAccumulationPass.shadowSampler.bindToIndex(11)
+            defer {
+                shadowMapDepthTexture.unbindFromIndex(11)
+                LightAccumulationPass.shadowSampler.unbindFromIndex(11)
+            }
+            shader.setUniform(GLint(11), forProperty: LightAccumulationShaderProperty.ShadowMapDepthTexture)
             
             shader.setUniform(camera.exposure, forProperty: LightAccumulationShaderProperty.Exposure)
             

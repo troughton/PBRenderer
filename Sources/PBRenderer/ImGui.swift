@@ -44,7 +44,7 @@ public typealias UIDrawFunction = (state: inout GUIDisplayState) -> Void
 
 public final class GUI {
     public var drawFunctions : [UIDrawFunction] = []
-
+    
     let window : PBWindow
     
     private var _displayState = GUIDisplayState()
@@ -89,7 +89,7 @@ public func renderTestUI(state: inout GUIDisplayState) {
 
 public func renderCameraUI(state: inout GUIDisplayState, camera: Camera) {
     _ = igBegin(label: "Camera - \(camera.name!)", didOpen: &state.cameraEditorOpen, flags: GUIWindowFlags.Default)
-
+    
     igText("Exposure: \(camera.exposure)")
     _ = igSliderFloat(label: "Aperture", value: &camera.aperture, vMin: 0.7, vMax: 200.0);
     _ = igSliderFloat(label: "Shutter Time", value: &camera.shutterTime, vMin: 0, vMax: 10);
@@ -102,7 +102,7 @@ public func renderPropertyEditor(state: inout GUIDisplayState, scene: Scene) {
         igEnd()
         return
     }
-
+    
     if let editorSceneNodeId = state.editorSceneNodeId {
         if let sceneNode = scene.idsToNodes[editorSceneNodeId] {
             igText(sceneNode.id)
@@ -154,18 +154,18 @@ private func renderTransformControls(transform: Transform) {
         _ = igDragFloat(label: "x_s", value: &transform.scale.x, vSpeed: 0.1, vMin: 0.01, vMax: 100.0)
         _ = igDragFloat(label: "y_s", value: &transform.scale.y, vSpeed: 0.1, vMin: 0.01, vMax: 100.0)
         _ = igDragFloat(label: "z_s", value: &transform.scale.z, vSpeed: 0.1, vMin: 0.01, vMax: 100.0)
-
+        
     }
 }
 
 private let lightTypes : [(String, LightType)] = [("Point", LightType.Point),
-                                                 ("Spot", LightType.Spot(innerCutoff: 0.1, outerCutoff: 1.0)),
-                                                 ("Directional", LightType.Directional),
-                                                 ("Sphere Area", LightType.SphereArea(radius: 1.0)),
-                                                 ("Disk Area", LightType.DiskArea(radius: 1.0)),
-                                                 ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0)),
-                                                 ("Triangle Area", LightType.TriangleArea(base:1.0, height: 1.0)),
-                                                 ("Sun Area", LightType.SunArea(radius: radians(degrees: 0.263)))]
+                                                  ("Spot", LightType.Spot(innerCutoff: 0.1, outerCutoff: 1.0)),
+                                                  ("Directional", LightType.Directional),
+                                                  ("Sphere Area", LightType.SphereArea(radius: 1.0)),
+                                                  ("Disk Area", LightType.DiskArea(radius: 1.0)),
+                                                  ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0)),
+                                                  ("Triangle Area", LightType.TriangleArea(base:1.0, height: 1.0)),
+                                                  ("Sun Area", LightType.SunArea(radius: radians(degrees: 0.263)))]
 
 
 
@@ -182,7 +182,7 @@ private func renderLightControls(light: Light) {
     if(igCollapsingHeader(label: "Light")) {
         var currentLightType = lightTypes.index { (tuple) -> Bool in
             return tuple.1.isSameTypeAs(light.type)
-        }!
+            }!
         
         igCombo(label: "Type", currentItem: &currentLightType, items: lightTypes.lazy.map { $0.0 })
         
@@ -194,7 +194,7 @@ private func renderLightControls(light: Light) {
         
         let currentLightUnit = lightUnitText.index { (tuple) -> Bool in
             return tuple.1.isSameTypeAs(light.intensity)
-        }!
+            }!
         
         var intensity = light.intensity.value
         _ = igDragFloat(label: "Intensity (\(lightUnitText[currentLightUnit].0))", value: &intensity, vSpeed: 5, vMin: 0.0, vMax: 100000.0)
@@ -223,7 +223,7 @@ private func renderLightControls(light: Light) {
             _ = igDragFloat(label: "Height", value: &height, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             light.type = .TriangleArea(base: base, height: height)
             break
-
+            
         default:
             break
         }
@@ -240,14 +240,14 @@ public func renderCameraControls(camera: Camera) {
 }
 
 public func renderFPSCounter(state: inout GUIDisplayState) {
-        igSetNextWindowPos(ImVec2(x: 10, y: 10), Int32(ImGuiSetCond_FirstUseEver.rawValue))
+    igSetNextWindowPos(ImVec2(x: 10, y: 10), Int32(ImGuiSetCond_FirstUseEver.rawValue))
     
-        var opened = true
-        igBegin(label: "Stats", didOpen: &opened, flags: [GUIWindowFlags.NoTitleBar, GUIWindowFlags.NoResize, GUIWindowFlags.NoMove, GUIWindowFlags.NoSavedSettings])
-        igText("Stats")
-        igSeparator()
-        igText(String(format: "%.3f ms/frame (%.1f FPS)", 1000.0 / igGetIO().pointee.Framerate, igGetIO().pointee.Framerate))
-        igEnd()
+    var opened = true
+    igBegin(label: "Stats", didOpen: &opened, flags: [GUIWindowFlags.NoTitleBar, GUIWindowFlags.NoResize, GUIWindowFlags.NoMove, GUIWindowFlags.NoSavedSettings])
+    igText("Stats")
+    igSeparator()
+    igText(String(format: "%.3f ms/frame (%.1f FPS)", 1000.0 / igGetIO().pointee.Framerate, igGetIO().pointee.Framerate))
+    igEnd()
 }
 
 
@@ -257,7 +257,7 @@ public func renderSceneHierachy(state: inout GUIDisplayState, scene: Scene) {
         igEnd()
         return
     }
-
+    
     igPushStyleVarVec(Int32(ImGuiStyleVar_FramePadding.rawValue), ImVec2(x: 2,y: 2))
     igColumns(2, "Test Columns", false)
     igSeparator()
@@ -277,7 +277,7 @@ public func renderSceneHierachy(state: inout GUIDisplayState, scene: Scene) {
         if state.editorSceneNodeId == sceneNodeID {
             igPushStyleColor(Int32(ImGuiCol_Button.rawValue), ImVec4 (x: 0.8, y: 0.52, z: 0.82, w: 1))
             igPushStyleColor(Int32(ImGuiCol_ButtonHovered.rawValue), ImVec4 (x: 0.9, y: 0.52, z: 0.92, w: 1))
-
+            
             if (igButton(label: "Edit")) {
                 state.editorSceneNodeId = sceneNodeID
             }
@@ -287,7 +287,7 @@ public func renderSceneHierachy(state: inout GUIDisplayState, scene: Scene) {
                 state.editorSceneNodeId = sceneNodeID
             }
         }
-      
+        
         igNextColumn()
         
         if (node_open) {
@@ -376,7 +376,7 @@ private final class ImGui : WindowInputDelegate {
         io?.pointee.RenderDrawListsFn = { data in
             ImGui.renderDrawLists(drawData: &data!.pointee)
         };
-
+        
     }
     
     func keyAction(key: InputKey, action: InputAction, modifiers: InputModifiers) {
@@ -390,7 +390,7 @@ private final class ImGui : WindowInputDelegate {
         if (action == .Release) {
             KeysDown[Int(key.rawValue)] = 0;
         }
-    
+        
         io?.pointee.KeyCtrl = modifiers.contains(InputModifiers.Control) ? 1 : 0
         io?.pointee.KeyShift = modifiers.contains(InputModifiers.Shift) ? 1 : 0
         io?.pointee.KeyAlt = modifiers.contains(InputModifiers.Alt) ? 1 : 0
@@ -417,7 +417,7 @@ private final class ImGui : WindowInputDelegate {
     
     func mouseMove(position: (x: Double, y: Double), delta: (x: Double, y: Double)) {
         let io = igGetIO()
-
+        
         if window.hasFocus {
             io?.pointee.MousePos = ImVec2(x: Float(position.x), y: Float(position.y));
         } else {
@@ -438,7 +438,7 @@ private final class ImGui : WindowInputDelegate {
         if (ImGui._fontTexture == 0) {
             ImGui.createDeviceObjects()
         }
-       
+        
         let io = igGetIO()
         
         // Setup time step
@@ -609,7 +609,7 @@ private final class ImGui : WindowInputDelegate {
                 idx_buffer_offset += Int(pcmd.pointee.ElemCount);
             }
         }
-
+        
     }
     
     static func shutdown() {
@@ -632,7 +632,7 @@ private final class ImGui : WindowInputDelegate {
         }
     }
     
-
+    
 }
 
 //func igTextColoredV(color: ImVec4, format: String, args: [CVarArg] = []) {
@@ -658,7 +658,7 @@ func igSliderFloat(label: String, value: inout Float, vMin: Float, vMax: Float, 
 }
 
 func igFloat(label: String, value: inout Float, decimalPrecision: Int32 = 3) -> Bool {
-   return igInputFloat2(label, &value, decimalPrecision, 0)
+    return igInputFloat2(label, &value, decimalPrecision, 0)
 }
 
 func igButton(label: String, size: ImVec2 = ImVec2(x: 0, y: 0)) -> Bool {

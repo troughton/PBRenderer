@@ -174,7 +174,7 @@ public enum LightIntensity {
         }
     }
     
-    func isSameTypeAs(_ other: LightIntensity) -> Bool {
+    public func isSameTypeAs(_ other: LightIntensity) -> Bool {
         switch self {
         case .Illuminance(_):
             if case .Illuminance = other { return true } else { return false }
@@ -377,6 +377,7 @@ public final class Light {
     
     var backingGPULight : GPUBufferElement<GPULight>
     var lightPointsBufferIndex : Int
+    var shadowMapArrayIndex : Int?
     
     init(type: LightType, colour: LightColourMode, intensity: LightIntensity, falloffRadius: Float, backingGPULight: GPUBufferElement<GPULight>) {
         self.type = type
@@ -394,6 +395,11 @@ public final class Light {
         if Light.lightPointCount > Light.lightPointsGPUBuffer.capacity {
             Light.lightPointsGPUBuffer.reserveCapacity(capacity: Light.lightPointsGPUBuffer.capacity * 2)
             print("Doubling light points capacity. (This may or may not work)")
+        }
+        
+        // only the sun (and only the first sun in the scene) has a shadow map at the moment
+        if type.isSameTypeAs(.SunArea(radius: 1.0)) {
+            shadowMapArrayIndex = 1
         }
         
         self.backingGPULight.withElement { gpuLight in

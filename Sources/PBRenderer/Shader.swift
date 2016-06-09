@@ -226,6 +226,18 @@ extension Shader {
             glUniformMatrix4fv(uniformRef, 1, false, UnsafePointer(matrixPtr))
         }
     }
+
+    func setMatrices(_ matrices : [mat4], forProperty property: ShaderProperty) {
+        guard let uniformRef = self.uniformLocation(forProperty: property) else {
+            return
+        }
+        
+        matrices.withUnsafeBufferPointer { (matrices) -> Void in
+            let floatPtr = UnsafePointer<Float>(matrices.baseAddress)
+            glUniformMatrix4fv(uniformRef, GLsizei(matrices.count), false, floatPtr)
+        }
+    }
+
     
     func setMatrix(_ matrix : mat3, forProperty property: ShaderProperty) {
         guard let uniformRef = self.uniformLocation(forProperty: property) else {

@@ -10,16 +10,16 @@ let mainWindow : PBWindow
 
 
 final class CameraControl : WindowInputDelegate {
-    let camera : Camera
+    let sceneNode : SceneNode
     let movementSpeed = Float(0.9)
     
     let baseRotation : quat
     var yaw = Float(0)
     var pitch = Float(0)
     
-    init(camera: Camera) {
-        self.camera = camera
-        self.baseRotation = self.camera.sceneNode.transform.rotation
+    init(node: SceneNode) {
+        self.sceneNode = node
+        self.baseRotation = self.sceneNode.transform.rotation
     }
     var heldKeys = Set<InputKey>()
     
@@ -65,11 +65,11 @@ final class CameraControl : WindowInputDelegate {
             }
         }
         
-        self.camera.sceneNode.transform.translation += (self.camera.sceneNode.transform.nodeToWorldMatrix * movement).xyz
+        self.sceneNode.transform.translation += (self.sceneNode.transform.nodeToWorldMatrix * movement).xyz
         let pitchQuat = quat(angle: self.pitch, axis: vec3(1, 0, 0))
         let yawQuat = quat(angle: self.yaw, axis: vec3(0, 1, 0))
         
-        self.camera.sceneNode.transform.rotation = self.baseRotation * yawQuat * pitchQuat
+        self.sceneNode.transform.rotation = self.baseRotation * yawQuat * pitchQuat
     }}
 
 let baseHeight = Int32(800)
@@ -100,12 +100,14 @@ func main() {
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
-    let cameraControl = CameraControl(camera: camera)
+    let light = scene.lights.first!
+    
+    let cameraControl = CameraControl(node: camera.sceneNode)
     mainWindow.inputDelegates.append(cameraControl)
 
     let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))
     let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 2.0)
-    scene.environmentMap = environmentMapProbe
+    scene.environmentMap = nil
 
     scene.lightProbesSorted.forEach { $0.render(scene: scene) }
     
@@ -157,6 +159,7 @@ func main() {
         gui.render()
     }
 
+    scene.lights.first?.type = .SunArea(radius: radians(degrees: 0.263))
     
     // Game loop
     while !mainWindow.shouldClose {
