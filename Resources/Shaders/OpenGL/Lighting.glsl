@@ -116,7 +116,9 @@ vec3 evaluateSunArea(vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, Mater
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
     vec3 diffuse = BRDFDiffuse(V, D, N, NdotV, NdotD, material);
     
-    return (diffuse * material.albedo + specular) * illuminance * ShadowCalculation(worldSpacePosition);
+    vec3 lightColour = light.colourAndIntensity.xyz;
+    
+    return (diffuse * material.albedo + specular) * illuminance * lightColour * ShadowCalculation(worldSpacePosition);
 }
 
 
