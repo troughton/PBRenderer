@@ -5,9 +5,11 @@
 //  Created by Thomas Roughton on 31/05/16.
 //
 //
+//  Adapted from https://software.intel.com/en-us/articles/forward-clustered-shading
 
 import Foundation
 import SGLOpenGL
+
 
 struct LightGridEntry {
     let sizeAndLink : UInt32; // uint8 size, uint24 link

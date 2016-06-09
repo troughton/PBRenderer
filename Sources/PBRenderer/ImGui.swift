@@ -348,7 +348,6 @@ private func renderMaterialUI(material: GPUBufferElement<Material>, name: String
                 _ = igSliderFloat(label: "Reflectance", value: &material.reflectance, vMin: 0, vMax: 1.0);
                 
             }
-            
         }
     }
 }

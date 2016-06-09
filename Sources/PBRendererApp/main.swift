@@ -11,7 +11,7 @@ let mainWindow : PBWindow
 
 final class CameraControl : WindowInputDelegate {
     let sceneNode : SceneNode
-    let movementSpeed = Float(0.9)
+    let movementSpeed = Float(4.0)
     
     let baseRotation : quat
     var yaw = Float(0)
@@ -100,13 +100,11 @@ func main() {
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
-    let light = scene.lights.first!
-    
     let cameraControl = CameraControl(node: camera.sceneNode)
     mainWindow.inputDelegates.append(cameraControl)
 
     let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))
-    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 19600)
+    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 2.0)
     scene.environmentMap = environmentMapProbe
 
     scene.lightProbesSorted.forEach { $0.render(scene: scene) }

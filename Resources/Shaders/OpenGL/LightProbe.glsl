@@ -131,7 +131,7 @@ vec4 evaluateLightProbe(vec4 worldSpacePosition, vec3 N, vec3 V, float NdotV, ve
         roughness = material.roughness;
         linearRoughness = material.linearRoughness;
     }
-
+    
     vec3 diffuseResult = evaluateIBLDiffuse(N, V, NdotV, material.roughness, lightProbeSamplerIndex).rgb * material.albedo;
     vec4 specularResult = evaluateIBLSpecular(N, R, NdotV, material.linearRoughness, material.roughness, material.f0, material.f90, lightProbeSamplerIndex, lightProbe.ldMipMaxLevel);
     return vec4(diffuseResult + specularResult.rgb, specularResult.a);

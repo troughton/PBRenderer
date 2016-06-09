@@ -57,23 +57,27 @@ final class ShadowMapPass {
         
         let lights = scene.lights
         
-        lights.enumerated().forEach { (index, light) in            
+        for (index, light) in lights.enumerated() where light.type.isSameTypeAs(.SunArea(radius: 0)) {
             pipelineState.renderPass { (framebuffer, shader) in
                     light.shadowMapArrayIndex = index
 
                     let worldToLight = light.sceneNode.transform.worldToNodeMatrix
-                    
-                    let frustum = Frustum(worldToCameraMatrix: worldToLight, projectionMatrix: ShadowMapPass.lightToClip)
+                
                     let worldToLightClip = ShadowMapPass.lightToClip * worldToLight
                     worldToLightClipMatrix = worldToLightClip
                 
-                    recurseTree(node: scene.octree, frustum: frustum, worldToLightClip: worldToLightClip, light: light, shader: shader)
+                
+                    for node in scene.flattenedScene where !node.meshes.0.isEmpty {
+                        self.renderNode(node, worldToLightClip: worldToLightClip, shader: shader)
+                    }
+                
                 }
         }
         
+        
         let shadowMapDepthTexture = pipelineState.framebuffer.depthAttachment.texture
         
-        return (shadowMapDepthTexture!, worldToLightClipMatrix!)
+        return (shadowMapDepthTexture!, worldToLightClipMatrix ?? mat4(1))
     }
     
     func renderNode(_ node: SceneNode, worldToLightClip : mat4, shader: Shader) {
@@ -83,23 +87,6 @@ final class ShadowMapPass {
         
         node.meshes.0.forEach { mesh in
             mesh.render()
-        }
-    }
-    
-    private func recurseTree(node: OctreeNode<SceneNode>, frustum: Frustum, worldToLightClip: mat4, light: Light, shader: Shader) {
-        if !frustum.containsBox(node.boundingVolume) {
-            return
-        }
-        
-        
-        for node in node.values where !node.meshes.0.isEmpty {
-            self.renderNode(node, worldToLightClip: worldToLightClip, shader: shader)
-        }
-        
-        for i in 0..<Extent.LastElement.rawValue {
-            if let child = node[Extent(rawValue: i)!] {
-                recurseTree(node: child, frustum: frustum, worldToLightClip: worldToLightClip, light: light, shader: shader)
-            }
         }
     }
 }

@@ -178,19 +178,27 @@ final class GBufferPass {
         }
     }
     
-    private func recurseTree(node: OctreeNode<SceneNode>, frustum: Frustum, camera: Camera, shader: Shader, sortedLightProbes : [LightProbe], environmentMap: LightProbe?) {
+    func zSort(nodes: inout [SceneNode], worldToCameraMatrix: mat4) {
+        nodes.sort { (mesh1, mesh2) -> Bool in
+            let z1 = mesh1.meshes.1.maxZForBoundingBoxInSpace(nodeToSpaceTransform: worldToCameraMatrix * mesh1.transform.nodeToWorldMatrix)
+            let z2 = mesh2.meshes.1.maxZForBoundingBoxInSpace(nodeToSpaceTransform: worldToCameraMatrix * mesh2.transform.nodeToWorldMatrix)
+            return z1 > z2
+        }
+    }
+    
+    private func recurseTree(nodes: inout [SceneNode], node: OctreeNode<SceneNode>, frustum: Frustum) {
         
         if !frustum.containsBox(node.boundingVolume) {
             return
         }
         
         for node in node.values where !node.meshes.0.isEmpty {
-            self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+            nodes.append(node)
         }
         
         for i in 0..<Extent.LastElement.rawValue {
             if let child = node[Extent(rawValue: i)!] {
-                recurseTree(node: child, frustum: frustum, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+                recurseTree(nodes: &nodes, node: child, frustum: frustum)
             }
         }
     }
@@ -251,7 +259,12 @@ final class GBufferPass {
             
             let frustum = Frustum(worldToCameraMatrix: camera.transform.worldToNodeMatrix, projectionMatrix: camera.projectionMatrix)
             
-            self.recurseTree(node: scene.octree, frustum: frustum, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: scene.environmentMap)
+            var nodes = [SceneNode]()
+            self.recurseTree(nodes: &nodes, node: scene.octree, frustum: frustum)
+            
+            for node in nodes {
+                self.renderNode(node, camera: camera, shader: shader, sortedLightProbes: sortedLightProbes, environmentMap: scene.environmentMap)
+            }
         }
         
         return (colourTextures: self.gBufferPassState.framebuffer.colourAttachments.flatMap { $0?.texture! }, depthTexture: self.gBufferPassState.framebuffer.depthAttachment.texture!)
