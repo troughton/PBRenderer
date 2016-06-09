@@ -181,6 +181,7 @@ public protocol WindowInputDelegate {
     func mouseMove(position: (x: Double, y: Double), delta: (x: Double, y: Double))
     func mouseDrag(delta: (x: Double, y: Double))
     func scroll(offsets: (x: Double, y: Double))
+    func char(character: UnicodeScalar)
 }
 
 public extension WindowInputDelegate {
@@ -199,6 +200,9 @@ public extension WindowInputDelegate {
     }
     
     func scroll(offsets: (x: Double, y: Double)) {
+    }
+    
+    func char(character: UnicodeScalar) {
     }
 }
 
@@ -328,6 +332,14 @@ public final class PBWindow {
             let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
 
             window.inputDelegates.forEach { $0.scroll(offsets: (xOffset, yOffset)) }
+        }
+        
+        glfwSetCharCallback(self.glfwWindow) { (glfwWindow, codePoint) in
+            let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
+
+            let character = UnicodeScalar(codePoint)
+            
+            window.inputDelegates.forEach { $0.char(character: character) }
         }
         
         glfwSetFramebufferSizeCallback(self.glfwWindow) { (glfwWindow, width, height) in

@@ -279,7 +279,7 @@ public enum LightType {
         }
     }
     
-    func isSameTypeAs(_ other: LightType) -> Bool {
+    public func isSameTypeAs(_ other: LightType) -> Bool {
         switch self {
         case .Point:
             if case .Point = other { return true } else { return false }
