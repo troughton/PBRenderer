@@ -73,6 +73,11 @@ struct TextureDescriptor {
         let mipmapLevels = mipmapped ? UInt(log2(Double(max(width, height)))) : 1
         self.init(textureType: GL_TEXTURE_CUBE_MAP, pixelFormat: pixelFormat, width: width, height: height, depth: 1, mipmapLevelCount: mipmapLevels, arrayLength: 1, multisampleCount: 1)
     }
+    
+    init(texture2DArrayWithPixelFormat pixelFormat: SGLOpenGL.GLenum, width: Int, height: Int, layers: Int, mipmapped: Bool) {
+        let mipmapLevels = mipmapped ? UInt(log2(Double(max(width, height)))) : 1
+        self.init(textureType: GL_TEXTURE_2D_ARRAY, pixelFormat: pixelFormat, width: width, height: height, depth: layers, mipmapLevelCount: mipmapLevels, arrayLength: 1, multisampleCount: 1)
+    }
 }
 
 public class Texture {

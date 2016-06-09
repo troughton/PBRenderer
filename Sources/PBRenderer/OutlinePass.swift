@@ -16,8 +16,8 @@ final class OutlinePass {
     
     static let lightGridBuilder = LightGridBuilder()
     
-    static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "OutlinePass.vert"))
-    static let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "OutlinePass.frag"))
+    static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughPosition.vert"))
+    static let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughPosition.frag"))
     
     static let outlineShader = Shader(withVertexShader: vertexShader, fragmentShader: fragmentShader)
     

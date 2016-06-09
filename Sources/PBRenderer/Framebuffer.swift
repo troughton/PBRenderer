@@ -100,11 +100,23 @@ public class Framebuffer {
     let width : Int32
     let height : Int32
     
-    var colourAttachments: [RenderPassColourAttachment?]
+    var colourAttachments: [RenderPassColourAttachment?] {
+        didSet {
+            regenerate()
+        }
+    }
     
-    var depthAttachment: RenderPassDepthAttachment
+    var depthAttachment: RenderPassDepthAttachment {
+        didSet {
+            regenerate()
+        }
+    }
     
-    var stencilAttachment : RenderPassStencilAttachment?
+    var stencilAttachment : RenderPassStencilAttachment? {
+        didSet {
+            regenerate()
+        }
+    }
     
     init(width: Int32, height: Int32, colourAttachments: [RenderPassColourAttachment?], depthAttachment: RenderPassDepthAttachment, stencilAttachment: RenderPassStencilAttachment?) {
         
@@ -115,7 +127,8 @@ public class Framebuffer {
         self.depthAttachment = depthAttachment
         self.stencilAttachment = stencilAttachment
         
-        if colourAttachments.first??.texture == nil {
+     
+        if depthAttachment.texture == nil {
             _glFramebuffer = nil
             return //No need to create a new framebuffer for the default framebuffer.
         }
@@ -124,7 +137,11 @@ public class Framebuffer {
         glGenFramebuffers(1, &framebuffer)
         _glFramebuffer = framebuffer
         
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer)
+        regenerate()
+    }
+    
+    private func regenerate()  {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _glFramebuffer)
         
         for (i, colourAttachment) in colourAttachments.enumerated() where colourAttachment?.texture != nil {
             let colourAttachment = colourAttachment!
