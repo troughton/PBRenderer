@@ -26,6 +26,8 @@ LightData lightAtIndex(int lightIndex) {
 out vec4 outputColour;
 in vec2 uv;
 
+uniform bool visualiseLightCount;
+
 vec4 calculateCameraSpacePositionFromWindowZ(float windowZ,
                                              vec3 cameraDirection,
                                              vec2 projectionTerms) {
@@ -70,6 +72,10 @@ vec3 calculateLightingClustered(vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePos
         
         LightData light = lightAtIndex(lightIndex);
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, material, light);
+    }
+    
+    if (visualiseLightCount) {
+        lightAccumulation = vec3(light_count / 255.f) / exposure;
     }
     
     //    [flatten] if (mUI.visualizeLightCount)

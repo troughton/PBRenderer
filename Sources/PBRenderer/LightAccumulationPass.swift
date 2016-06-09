@@ -138,6 +138,8 @@ final class LightAccumulationPass {
         case WorldToLightClipMatrix = "worldToLightClipMatrix"
         case ShadowMapDepthTexture = "shadowMapDepthTexture"
         
+        case VisualiseLightCount = "visualiseLightCount"
+        
         case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
         
         var name : String {

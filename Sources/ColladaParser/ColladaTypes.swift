@@ -625,20 +625,32 @@ public final class TechniqueType : ColladaType {
 					*/
 	public let profile: String
 
-    public let attributes : [String : String]
+    public let attributes : [TechniqueInfo]
+    
+    public struct TechniqueInfo {
+        public let sid : String?
+        public let name : String
+        public let type : String?
+        public let value : String?
+    }
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.profile = String(xmlElement.attribute(forName: "profile")!.stringValue!)
         
-        var attributes = [String : String]()
+        var attributes = [TechniqueInfo]()
         for element in xmlElement.childElements {
-	        let key = element.name!
-	        let value = element.stringValue
-	        attributes[key] = value
+            let sid = element.attribute(forName: "sid")?.stringValue
+            let name = element.name!
+            let type = element.attribute(forName: "type")?.stringValue
+            let value = element.stringValue
+            attributes.append(TechniqueInfo(sid: sid, name: name, type: type, value: value))
         }
         self.attributes = attributes
-        
 	}
+
+    public subscript(sid: String) -> TechniqueInfo? {
+        return self.attributes.first(where: { $0.sid == sid })
+    }
 
 }
 /**

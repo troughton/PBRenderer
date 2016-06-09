@@ -1,8 +1,6 @@
 #version 410
 in vec4 lightSpacePosition;
 
-#include "LightAccumulation.glsl"
-
 uniform vec2 cameraNearFar;
 uniform vec2 projectionTerms;
 uniform usampler2D gBuffer0Texture;
@@ -19,6 +17,9 @@ in vec3 cameraDirection;
 #ifdef SSR
 layout(location=1) out vec4 reflectionTraceResult;
 #endif
+
+
+#include "LightAccumulation.glsl"
 
 #include "ReflectionTracer.glsl"
 

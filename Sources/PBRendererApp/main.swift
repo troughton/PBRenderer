@@ -104,7 +104,7 @@ func main() {
     mainWindow.inputDelegates.append(cameraControl)
 
     let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))
-    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 2.0)
+    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 19600)
     scene.environmentMap = environmentMapProbe
 
     scene.lightProbesSorted.forEach { $0.render(scene: scene) }

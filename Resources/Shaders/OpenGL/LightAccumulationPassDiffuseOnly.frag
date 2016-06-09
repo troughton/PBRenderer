@@ -1,7 +1,6 @@
 #version 410
 
 #define NoSpecular
-#include "LightAccumulation.glsl"
 
 in vec3 cameraDirection;
 
@@ -14,6 +13,8 @@ uniform sampler2D gBufferDepthTexture;
 
 uniform mat4 cameraToWorldMatrix;
 uniform float exposure;
+
+#include "LightAccumulation.glsl"
 
 vec4 lightAccumulationPass(vec2 projectionTerms, vec2 cameraNearFar,
                            uint gBuffer0, vec4 gBuffer1, vec4 gBuffer2, float gBufferDepth,

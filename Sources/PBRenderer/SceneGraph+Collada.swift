@@ -25,6 +25,12 @@ extension Scene {
         return meshes
     }
     
+    static func estimateFalloff(lightIntensity : Float) -> Float {
+        let exposure = Float(0.0003255208333) //sunny 16
+        let colourThreshold = Float(500.0)
+        return sqrt(colourThreshold * exposure * lightIntensity)
+    }
+    
     static func parseLightsFromCollada(_ root: Collada) -> (elementsInBuffer: [String : Light], buffer: GPUBuffer<GPULight>) {
         var elementsInBuffer = [String : Light]()
         
@@ -52,8 +58,8 @@ extension Scene {
                 case let .Spot(colour, falloffDegrees, _):
                     
                     var outerCutoff = falloffDegrees * 0.5
-                    if let penumbra = openColladaMayaTechnique?.attributes["penumbra_angle"] {
-                        outerCutoff += max(0, Float(penumbra)!) * 0.5
+                    if let penumbra = openColladaMayaTechnique?["penumbra_angle"] {
+                        outerCutoff += max(0, Float(penumbra.value!)!) * 0.5
                     }
                     
                     type = .Spot(innerCutoff: radians(degrees: falloffDegrees * 0.5),
@@ -66,14 +72,17 @@ extension Scene {
                 var intensity = length(colourAndIntensity)
                 let colour = colourAndIntensity / intensity
                 
-                if let mayaIntensity = openColladaMayaTechnique?.attributes["intensity"] {
-                    intensity *= Float(mayaIntensity)!
+                if let mayaIntensity = openColladaMayaTechnique?["intensity"] {
+                    intensity *= Float(mayaIntensity.value!)!
                 }
                 
-                let warningFalloffIsHardCoded = true
-                
                 let intensityWithUnits = LightIntensity(unit: type.validUnits.first!, value: intensity)
-                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensityWithUnits, falloffRadius: 200.0, backingGPULight: lightBuffer[viewForIndex: i])
+                
+                
+                let intensityInStoredUnits = intensityWithUnits.toStoredIntensity(forLightType: type)
+                let falloffRadius : Float = self.estimateFalloff(lightIntensity: intensityInStoredUnits)
+                
+                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensityWithUnits, falloffRadius: falloffRadius, backingGPULight: lightBuffer[viewForIndex: i])
                 elementsInBuffer[light.id!] = pbLight
                     i += 1
                 }
@@ -280,12 +289,19 @@ extension SceneNode {
             }
         }
         
-        let lightObjects : [Light] = node.instanceLight.map { lights[$0.url.substring(from: $0.url.index(after: $0.url.startIndex))]! }
         
         let lightProbes : [LightProbe]
-        if let attributes = node.extra.first?.technique.first?.attributes {
-            if attributes["originalMayaNodeId"]?.contains("Probe") ?? false {
-                let location = [Float](attributes["param"]!)!
+        let lightObjects : [Light] = node.instanceLight.map { lights[$0.url.substring(from: $0.url.index(after: $0.url.startIndex))]! }
+        
+        if let technique = node.extra.first?.technique.first {
+            if technique["originalMayaNodeId"]?.value?.contains("Probe") ?? false {
+                let location : [Float]
+                if let locationInfo = technique["LightProbeLocation"] {
+                    location = [Float](locationInfo.value!)!
+                } else {
+                    location = []
+                }
+                
                 if location.isEmpty {
                     lightProbes = []
                 } else {
@@ -296,6 +312,36 @@ extension SceneNode {
             } else {
                 lightProbes = []
             }
+            
+            if let falloff = technique["falloff"] {
+                lightObjects.forEach { $0.falloffRadius = Float(falloff.value!)! }
+            }
+            
+            if let lightType = technique["type"]?.value {
+                switch lightType {
+                case "sphere":
+                    let radius = Float(technique["radius"]!.value!)!
+                    lightObjects.forEach { $0.type = .SphereArea(radius: radius) }
+                case "disk":
+                    let radius = Float(technique["radius"]!.value!)!
+                    lightObjects.forEach { $0.type = .DiskArea(radius: radius) }
+                case "rectangle":
+                    let width = Float(technique["width"]!.value!)!
+                    let height = Float(technique["height"]!.value!)!
+                    lightObjects.forEach { $0.type = .RectangleArea(width: width, height: height) }
+                case "triangle":
+                    let base = Float(technique["base"]!.value!)!
+                    let height = Float(technique["height"]!.value!)!
+                    lightObjects.forEach { $0.type = .TriangleArea(base: base, height: height) }
+                case "sun":
+                    let radius = Float(technique["radius"]!.value!)!
+                    lightObjects.forEach { $0.type = .SunArea(radius: radius) }
+                default:
+                    break
+                }
+            }
+            
+            
         } else {
             lightProbes = []
         }
