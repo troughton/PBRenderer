@@ -116,7 +116,7 @@ public func renderPropertyEditor(state: inout GUIDisplayState, scene: Scene) {
                 renderCameraControls(camera: camera)
             })
             
-            sceneNode.materials.values.forEach { renderMaterialControls(material: $0) }
+            renderMaterialControls(materials: sceneNode.materials)
         } else {
             igText("No scene node selected")
         }
@@ -176,26 +176,11 @@ private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
                              ("lm", LightIntensity.LuminousPower(1.0)),
                              ("cd", LightIntensity.LuminousIntensity(1.0))]
 
-private func renderMaterialControls(material: GPUBufferElement<Material>) {
-    
-    if(igCollapsingHeader(label: "Material")) {
-        
-        material.withElement { material in
-            
-            igColorEdit3("Base Colour", &material.baseColour.x)
-            igColorEdit3("Emissive", &material.emissive.x)
-            
-            
-            _ = igSliderFloat(label: "Smoothness", value: &material.smoothness, vMin: 0.0, vMax: 0.0999);
-            _ = igSliderFloat(label: "Metal Mask", value: &material.metalMask, vMin: 0, vMax: 1);
-            if material.metalMask < 1.0 {
-                _ = igSliderFloat(label: "Reflectance", value: &material.metalMask, vMin: 0, vMax: 1);
-                
-            }
-            
-        }
-        
+private func renderMaterialControls(materials: [String : GPUBufferElement<Material>]) {
+    for (name, material) in materials {
+        renderMaterialUI(material: material, name: name)
     }
+   
 }
 
 private func renderLightControls(light: Light) {
@@ -340,8 +325,29 @@ private func renderTransformUI(transform: Transform) {
     
 }
 
-private func renderMaterialUI(material: Material) {
-    
+private func renderMaterialUI(material: GPUBufferElement<Material>, name: String) {
+    if(igCollapsingHeader(label: name)) {
+        
+        material.withElement { material in
+            let albedo = material.albedo
+            igValueColor("Albedo", ImVec4(x: albedo.x, y: albedo.y, z: albedo.z, w: 1))
+            
+            let f0 = material.f0
+            igValueColor("F0", ImVec4(x: f0.x, y: f0.y, z: f0.z, w: 1))
+            
+            igColorEdit3("Base Colour", &material.baseColour.x)
+            igColorEdit3("Emissive", &material.emissive.x)
+            
+            
+            _ = igSliderFloat(label: "Smoothness", value: &material.smoothness, vMin: 0.0, vMax: 0.999);
+            _ = igSliderFloat(label: "Metal Mask", value: &material.metalMask, vMin: 0, vMax: 1);
+            if material.metalMask < 1.0 {
+                _ = igSliderFloat(label: "Reflectance", value: &material.reflectance, vMin: 0, vMax: 1.0);
+                
+            }
+            
+        }
+    }
 }
 
 

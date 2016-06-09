@@ -167,9 +167,9 @@ public final class Camera {
     public let zFar: Float
     public let aspectRatio : Float
     
-    public var aperture : Float = 0.7
-    public var shutterTime : Float = 0.126
-    public var ISO : Float = 2000
+    public var aperture : Float = 16
+    public var shutterTime : Float = 0.1
+    public var ISO : Float = 100
     
     init(id: String?, name: String?, projectionMatrix: mat4, zNear: Float, zFar: Float, aspectRatio: Float) {
         self.id = id
