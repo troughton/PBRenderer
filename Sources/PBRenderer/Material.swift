@@ -34,8 +34,12 @@ public struct Material {
     public var reflectance : Float = 0.5
     public var materialTextureMask : MaterialTextureMask = []
     
-    public var f0 : Float {
-        return 0.16 * reflectance * reflectance
+    public var f0 : vec3 {
+        return lerp(from: vec3(0.16 * reflectance * reflectance), to: self.baseColour.rgb, t: self.metalMask)
+    }
+    
+    public var albedo : vec3 {
+        return lerp(from: self.baseColour.rgb, to: vec3(0), t: self.metalMask)
     }
     
     public var perceptuallyLinearRoughness : Float {

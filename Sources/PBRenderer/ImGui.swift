@@ -92,8 +92,8 @@ public func renderCameraUI(state: inout GUIDisplayState, camera: Camera) {
 
     igText("Exposure: \(camera.exposure)")
     _ = igSliderFloat(label: "Aperture", value: &camera.aperture, vMin: 0.7, vMax: 200.0);
-    _ = igSliderFloat(label: "Shutter Time", value: &camera.shutterTime, vMin: 0, vMax: 10);
-    _ = igSliderFloat(label: "ISO", value: &camera.ISO, vMin: 0, vMax: 2000);
+    _ = igSliderFloat(label: "Shutter Time", value: &camera.shutterTime, vMin: 0.01, vMax: 10);
+    _ = igSliderFloat(label: "ISO", value: &camera.ISO, vMin: 100, vMax: 2000);
     igEnd()
 }
 
@@ -115,6 +115,8 @@ public func renderPropertyEditor(state: inout GUIDisplayState, scene: Scene) {
             sceneNode.cameras.forEach({ (camera) in
                 renderCameraControls(camera: camera)
             })
+            
+            sceneNode.materials.values.forEach { renderMaterialControls(material: $0) }
         } else {
             igText("No scene node selected")
         }
@@ -174,8 +176,26 @@ private let lightUnitText = [("lx", LightIntensity.Illuminance(1.0)),
                              ("lm", LightIntensity.LuminousPower(1.0)),
                              ("cd", LightIntensity.LuminousIntensity(1.0))]
 
-private func renderMaterialControls(material: Material) {
+private func renderMaterialControls(material: GPUBufferElement<Material>) {
     
+    if(igCollapsingHeader(label: "Material")) {
+        
+        material.withElement { material in
+            
+            igColorEdit3("Base Colour", &material.baseColour.x)
+            igColorEdit3("Emissive", &material.emissive.x)
+            
+            
+            _ = igSliderFloat(label: "Smoothness", value: &material.smoothness, vMin: 0.0, vMax: 0.0999);
+            _ = igSliderFloat(label: "Metal Mask", value: &material.metalMask, vMin: 0, vMax: 1);
+            if material.metalMask < 1.0 {
+                _ = igSliderFloat(label: "Reflectance", value: &material.metalMask, vMin: 0, vMax: 1);
+                
+            }
+            
+        }
+        
+    }
 }
 
 private func renderLightControls(light: Light) {
