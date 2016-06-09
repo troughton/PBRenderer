@@ -187,8 +187,12 @@ private func renderLightControls(light: Light) {
     if(igCollapsingHeader(label: "Light")) {
         var currentLightType = lightTypes.index { (tuple) -> Bool in
             return tuple.1.isSameTypeAs(light.type)
-            }!
+        }!
         
+        var rgbColour = light.colour.rgbColour
+        igColorEdit3("Colour", &rgbColour.x)
+        light.colour = LightColourMode.Colour(rgbColour)
+                
         igCombo(label: "Type", currentItem: &currentLightType, items: lightTypes.lazy.map { $0.0 })
         
         // only change if we switch to another light type
@@ -337,7 +341,6 @@ private func renderMaterialUI(material: GPUBufferElement<Material>, name: String
             
             igColorEdit3("Base Colour", &material.baseColour.x)
             igColorEdit3("Emissive", &material.emissive.x)
-            
             
             _ = igSliderFloat(label: "Smoothness", value: &material.smoothness, vMin: 0.0, vMax: 0.999);
             _ = igSliderFloat(label: "Metal Mask", value: &material.metalMask, vMin: 0, vMax: 1);

@@ -159,8 +159,11 @@ func main() {
         gui.render()
     }
 
-    scene.lights.first?.type = .SunArea(radius: radians(degrees: 0.263))
-    scene.lights.first?.intensity = .Illuminance(94000)
+    let sun = scene.lights.filter { (light) -> Bool in
+        light.type.isSameTypeAs(.Directional)
+    }.first!
+    sun.type = .SunArea(radius: radians(degrees: 0.263))
+    sun.intensity = .Illuminance(94000)
     
     // Game loop
     while !mainWindow.shouldClose {
