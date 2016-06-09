@@ -456,6 +456,10 @@ private final class ImGui : WindowInputDelegate {
         io?.pointee.MouseWheel += Float(offsets.y);
     }
     
+    func char(character: UnicodeScalar) {
+        ImGuiIO_AddInputCharacter(UInt16(character.value))
+    }
+    
     private func render() {
         igRender()
     }
