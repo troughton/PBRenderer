@@ -371,6 +371,17 @@ public final class Light {
         }
     }
     
+    public var falloffRadiusOrInfinity : Float {
+        switch self.type {
+        case .Directional:
+            fallthrough
+        case .SunArea(radius: _):
+            return 1048576 //a very large number (2^20 metres) since actual infinity causes issues.
+        default:
+            return self.falloffRadius
+        }
+    }
+    
     public var isOn : Bool {
         return self.intensity.value > 0
     }

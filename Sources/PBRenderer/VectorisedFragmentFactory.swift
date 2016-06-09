@@ -5,6 +5,7 @@
 //  Created by Thomas Roughton on 31/05/16.
 //
 //
+//  Adapted from https://software.intel.com/en-us/articles/forward-clustered-shading
 
 #if os(OSX)
 
@@ -25,7 +26,7 @@ func GenerateLightBounds(light: Light, lightPositionView: vec3, box: inout Light
     
     let mCameraNearFar = vec4(camera.zNear, camera.zFar, 0.0, 0.0);
     
-    var clipRegion = ComputeClipRegion(lightPosView: lightPositionView.xyz, lightRadius: light.falloffRadius, cameraProj: camera.projectionMatrix, cameraNearFar: mCameraNearFar)
+    var clipRegion = ComputeClipRegion(lightPosView: lightPositionView.xyz, lightRadius: light.falloffRadiusOrInfinity, cameraProj: camera.projectionMatrix, cameraNearFar: mCameraNearFar)
     clipRegion = (clipRegion + 1.0) / 2; // map coordinates to [0..1]
     
     var intClipRegion = (0, 0, 0, 0);
@@ -40,7 +41,7 @@ func GenerateLightBounds(light: Light, lightPositionView: vec3, box: inout Light
     if (intClipRegion.3 >= dim.height) { intClipRegion.3 = dim.height - 1; }
     
     let center_z = (lightPositionView.z - mCameraNearFar.x) / (mCameraNearFar.y - mCameraNearFar.x);
-    let dist_z = light.falloffRadius / (mCameraNearFar.y - mCameraNearFar.x);
+    let dist_z = light.falloffRadiusOrInfinity / (mCameraNearFar.y - mCameraNearFar.x);
     
     var intZBounds = (0, 0);
     intZBounds.0 = Int((center_z - dist_z) * Float(dim.depth))
@@ -210,7 +211,7 @@ func FineRasterizeLights(lights: [Light], lightPositions: [vec3], fragments: ino
                 let lightIndex = fragments[idx].lightIndex
                 let light = lights[lightIndex]
                 let lightPosition = lightPositions[lightIndex]
-                fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadius,
+                fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadiusOrInfinity,
                                                           cameraProj11: cameraProj11, cameraProj22: cameraProj22, cameraZNear: camera.zNear, cameraZFar: camera.zFar,
                                                           lightGrid: lightGridBuilder)
             }

@@ -315,6 +315,7 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
                         vec3 V, vec3 N, float NdotV,
                         MaterialRenderingData material,
                         LightData light) {
+    
     switch (light.lightTypeFlag) {
         case LightTypePoint:
         case LightTypeDirectional:

@@ -5,11 +5,10 @@
 //  Created by Thomas Roughton on 31/05/16.
 //
 //
+//  Adapted from https://software.intel.com/en-us/articles/forward-clustered-shading
 
 import Foundation
 import SGLMath
-
-let noteIntelOriginalCodeHasFlippedZNearAndFarPlanes = true
 
 final class FragmentFactory
 {
@@ -133,7 +132,7 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
     lightPositionView.z *= -1;
     lightPositionView.y *= -1;
     // compute view space quad
-    var clipRegion = ComputeClipRegion(lightPosView: lightPositionView.xyz, lightRadius: light.falloffRadius, cameraProj: mCameraProj, cameraNearFar: mCameraNearFar)
+    var clipRegion = ComputeClipRegion(lightPosView: lightPositionView.xyz, lightRadius: light.falloffRadiusOrInfinity, cameraProj: mCameraProj, cameraNearFar: mCameraNearFar)
     clipRegion = (clipRegion + vec4(1.0, 1.0, 1.0, 1.0)) * 0.5; // map coordinates to [0..1]
     
     var intClipRegion = (0, 0, 0, 0);
@@ -148,7 +147,7 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
     if (intClipRegion.3 >= dim.height) { intClipRegion.3 = dim.height - 1; }
     
     let center_z = (lightPositionView.z - mCameraNearFar.x) / (mCameraNearFar.y - mCameraNearFar.x);
-    let dist_z = light.falloffRadius / (mCameraNearFar.y - mCameraNearFar.x);
+    let dist_z = light.falloffRadiusOrInfinity / (mCameraNearFar.y - mCameraNearFar.x);
     
     var intZBounds = (0, 0);
     intZBounds.0 = Int((center_z - dist_z) * Float(dim.depth))
@@ -242,7 +241,7 @@ func RasterizeLights(builder: LightGridBuilder, viewerCamera: Camera, lights: [L
         }
         #else
         // warning: scalar version does coarser (AABB) culling
-        for light in lights where light.intensity != 0 {
+        for light in lights where light.isOn {
             let lightIndex = light.backingGPULight.bufferIndex
             GenerateLightFragments(fragmentFactory: fragmentFactory, builder: builder, camera: viewerCamera, light: light, lightIndex: lightIndex);
         }
