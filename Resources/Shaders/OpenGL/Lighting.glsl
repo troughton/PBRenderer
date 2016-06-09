@@ -18,9 +18,9 @@ uniform sampler2D ltcMaterialDisney;
 
 uniform samplerBuffer lightPoints;
 
-uniform sampler2DArray shadowMapDepthTexture;
+uniform sampler2DShadow shadowMapDepthTexture;
 
-in vec4 lightSpacePosition;
+uniform mat4 worldToLightClipMatrix;
 
 layout(std140) struct LightData {
     vec4 colourAndIntensity;
@@ -66,24 +66,35 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness) {
     return normalize(mix(N, R, lerpFactor));
 }
 
-float ShadowCalculation()
-{
-    vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
+float ShadowCalculation(vec3 worldSpacePosition) {
+    
+    #define EPSILON 0.01
+    #define ShadowMapSize 4096.f
+    
+    vec4 clipSpacePosition = worldToLightClipMatrix * vec4(worldSpacePosition, 1);
+    vec3 projCoords = clipSpacePosition.xyz / clipSpacePosition.w;
+//    projCoords.y *= -1;
     projCoords = projCoords * 0.5 + 0.5;
     
-    float closestDepth = texture(shadowMapDepthTexture, vec3(projCoords.xy, 0)).r;
+    float xOffset = 1.0/ShadowMapSize;
+    float yOffset = 1.0/ShadowMapSize;
     
-    float currentDepth = projCoords.z;
+    float factor = 0.0;
     
-    float bias = 0.0002;
-    float shadow = currentDepth - bias > closestDepth  ? 0.0 : 1.0;
+    for (int y = -1 ; y <= 1 ; y++) {
+        for (int x = -1 ; x <= 1 ; x++) {
+            vec2 offsets = vec2(x * xOffset, y * yOffset);
+            vec3 uvC = vec3(projCoords.xy + offsets, projCoords.z - EPSILON);
+            factor += texture(shadowMapDepthTexture, uvC);
+        }
+    }
     
-    return shadow;
+    return factor / 9.f;
 }
 
 vec3 evaluateSunArea(vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, MaterialRenderingData material, LightData light) {
     float sunIlluminanceInLux = light.colourAndIntensity.w;
-    vec3 sunDirection = -light.worldSpaceDirection.xyz;
+    vec3 sunDirection = light.worldSpaceDirection.xyz;
     float sunAngularRadius = light.extraData.x;
     
     vec3 D = sunDirection;
@@ -97,15 +108,15 @@ vec3 evaluateSunArea(vec3 worldSpacePosition, vec3 V, vec3 N, float NdotV, Mater
     vec3 S = R - DdotR * D;
     vec3 L = DdotR < d ? normalize(d * D + normalize(S) * r) : R;
     
-    float illuminance = sunIlluminanceInLux * saturate(dot(N, D));
+    float NdotD = saturate(dot(N, D));
+    float illuminance = sunIlluminanceInLux * NdotD;
     
-    float NdotD = dot(N, D);
     float NdotL = dot(N, L);
     
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
-    vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);
+    vec3 diffuse = BRDFDiffuse(V, D, N, NdotV, NdotD, material);
     
-    return (diffuse * material.albedo + specular) * illuminance * ShadowCalculation();
+    return (diffuse * material.albedo + specular) * illuminance * ShadowCalculation(worldSpacePosition);
 }
 
 
@@ -297,7 +308,7 @@ vec3 evaluatePunctualLight(vec3 worldSpacePosition,
     // i.e with point light and luminous power unit: lightColor = color * phi / (4 * PI)
     vec3 luminance = BRDF(V, L, N, NdotV, NdotL, material) * NdotL * lightColour * attenuation;
     
-    return vec3(ShadowCalculation());
+    return luminance;
 }
 
 vec3 evaluateLighting(vec3 worldSpacePosition,
@@ -321,7 +332,7 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
             return evaluateTriangleAreaLight(worldSpacePosition, N, V, material, light);
             break;
         case LightTypeSunArea:
-            return evaluateSunArea(worldSpacePosition, N, V, NdotV, material, light);
+            return evaluateSunArea(worldSpacePosition, V, N, NdotV, material, light);
             break;
         default:
             return vec3(0);

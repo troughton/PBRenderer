@@ -147,7 +147,7 @@ private func renderTransformControls(transform: Transform) {
         _ = igDragFloat(label: "y_r", value: &currentEulerRotation.y, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
         _ = igDragFloat(label: "z_r", value: &currentEulerRotation.z, vSpeed: 0.1, vMin: -180.0, vMax: 180.0)
         
-        let rotation = quat(eulerAngles: radians(degrees: eulerRotationDegrees))
+        let rotation = quat(eulerAngles: radians(degrees: currentEulerRotation))
         transform.rotation = rotation
         
         igText("Scale")

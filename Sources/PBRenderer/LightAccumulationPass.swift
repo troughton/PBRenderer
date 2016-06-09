@@ -41,6 +41,8 @@ final class LightAccumulationPass {
         sampler.magnificationFilter = GL_LINEAR
         sampler.wrapS = GL_CLAMP_TO_EDGE
         sampler.wrapT = GL_REPEAT
+        sampler.textureCompareMode = GL_COMPARE_REF_TO_TEXTURE
+        sampler.textureCompareFunc = GL_LEQUAL
         return sampler
     }()
     
@@ -133,7 +135,7 @@ final class LightAccumulationPass {
         case LTCAmplitudeGGX = "ltcAmplitudeGGX"
         case LTCMaterialDisney = "ltcMaterialDisney"
         case LightPoints = "lightPoints"
-        case WorldToLightClipMatrices = "worldToLightClipMatrices"
+        case WorldToLightClipMatrix = "worldToLightClipMatrix"
         case ShadowMapDepthTexture = "shadowMapDepthTexture"
         
         case ReflectionTraceMaxDistance = "reflectionTraceMaxDistance"
@@ -143,14 +145,14 @@ final class LightAccumulationPass {
         }
     }
     
-    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture, shadowMapDepthTexture: Texture, worldToLightClipMatrices: [mat4]) -> (Texture, rayTracingBuffer: Texture?) {
+    func performPass(scene: Scene, camera: Camera, gBufferColours: [Texture], gBufferDepth: Texture, shadowMapDepthTexture: Texture, worldToLightClipMatrix: mat4) -> (Texture, rayTracingBuffer: Texture?) {
         
         self.setupLightGrid(camera: camera, lights: scene.lights)
         
         let lightTexture = scene.lightTexture
         
         self.pipelineState.renderPass { (framebuffer, shader) in
-            shader.setMatrices(worldToLightClipMatrices, forProperty: LightAccumulationShaderProperty.WorldToLightClipMatrices)
+            shader.setMatrix(worldToLightClipMatrix, forProperty: LightAccumulationShaderProperty.WorldToLightClipMatrix)
             
             gBufferColours[1].bindToIndex(1)
             defer { gBufferColours[1].unbindFromIndex(1) }

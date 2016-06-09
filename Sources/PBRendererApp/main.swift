@@ -159,7 +159,7 @@ func main() {
         gui.render()
     }
 
-    scene.lights.first?.type = .Directional
+    scene.lights.first?.type = .SunArea(radius: radians(degrees: 0.263))
     
     // Game loop
     while !mainWindow.shouldClose {

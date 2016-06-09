@@ -23,6 +23,6 @@ vec3 Uncharted2Tonemap(vec3 x) {
 void main() {
     vec4 lightAccumulation = texelFetch(lightAccumulationBuffer, ivec2(gl_FragCoord.xy), 0);
     
-    finalColour = vec4(1 - lightAccumulation.r/0.01);
-//    finalColour = vec4(Uncharted2Tonemap(lightAccumulation.xyz), lightAccumulation.w);
+//    finalColour = vec4(lightAccumulation.r);
+    finalColour = vec4(Uncharted2Tonemap(lightAccumulation.xyz), lightAccumulation.w);
 }

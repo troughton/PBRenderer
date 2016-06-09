@@ -11,7 +11,7 @@ import SGLOpenGL
 import SGLMath
 
 final class ShadowMapPass {
-    static let defaultShadowMapSize = Size(2048, 2048)
+    static let defaultShadowMapSize = Size(4096, 4096)
     
     static let vertexShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughPosition.vert"))
     static let fragmentShader = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughPosition.frag"))
@@ -50,17 +50,14 @@ final class ShadowMapPass {
         return framebuffer
     }
     
-    public static let lightToClip = SGLMath.ortho(Float(-20), 20, -20, 20, 0.01, 1000);
+    static let lightToClip = SGLMath.ortho(Float(-80), 80, -80, 80, 0.1, 100.0);
     
-    func performPass(scene: Scene) -> (Texture, [mat4]) {
-        var worldToLightClipMatrices : [mat4] = []
+    func performPass(scene: Scene) -> (Texture, mat4) {
+        var worldToLightClipMatrix : mat4? = nil
         
         let lights = scene.lights
         
-        
-        lights.enumerated().forEach { (index, light) in
-            pipelineState.framebuffer.depthAttachment.textureSlice = UInt(index)
-            
+        lights.enumerated().forEach { (index, light) in            
             pipelineState.renderPass { (framebuffer, shader) in
                     light.shadowMapArrayIndex = index
 
@@ -68,16 +65,15 @@ final class ShadowMapPass {
                     
                     let frustum = Frustum(worldToCameraMatrix: worldToLight, projectionMatrix: ShadowMapPass.lightToClip)
                     let worldToLightClip = ShadowMapPass.lightToClip * worldToLight
-                    worldToLightClipMatrices.append(worldToLightClip)
-                    
-                 
+                    worldToLightClipMatrix = worldToLightClip
+                
                     recurseTree(node: scene.octree, frustum: frustum, worldToLightClip: worldToLightClip, light: light, shader: shader)
                 }
         }
         
         let shadowMapDepthTexture = pipelineState.framebuffer.depthAttachment.texture
         
-        return (shadowMapDepthTexture!, worldToLightClipMatrices)
+        return (shadowMapDepthTexture!, worldToLightClipMatrix!)
     }
     
     func renderNode(_ node: SceneNode, worldToLightClip : mat4, shader: Shader) {
@@ -87,7 +83,6 @@ final class ShadowMapPass {
         
         node.meshes.0.forEach { mesh in
             mesh.render()
-            print("OMG!!! \(node.name)")
         }
     }
     
