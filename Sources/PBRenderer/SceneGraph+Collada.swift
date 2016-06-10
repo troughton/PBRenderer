@@ -328,11 +328,14 @@ extension SceneNode {
                 case "rectangle":
                     let width = Float(technique["width"]!.value!)!
                     let height = Float(technique["height"]!.value!)!
-                    lightObjects.forEach { $0.type = .RectangleArea(width: width, height: height) }
+                    let isTwoSided = technique["twoSided"] != nil ? true : false
+                    lightObjects.forEach { $0.type = .RectangleArea(width: width, height: height, twoSided: isTwoSided) }
                 case "triangle":
                     let base = Float(technique["base"]!.value!)!
                     let height = Float(technique["height"]!.value!)!
-                    lightObjects.forEach { $0.type = .TriangleArea(base: base, height: height) }
+                    
+                    let isTwoSided = technique["twoSided"] != nil ? true : false
+                    lightObjects.forEach { $0.type = .TriangleArea(base: base, height: height, twoSided: isTwoSided) }
                 case "sun":
                     let radius = Float(technique["radius"]!.value!)!
                     lightObjects.forEach { $0.type = .SunArea(radius: radius) }

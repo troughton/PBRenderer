@@ -122,10 +122,10 @@ public enum LightIntensity {
             case .DiskArea(_):
                 fallthrough
             case .Spot(innerCutoff: _, outerCutoff: _):
-                return lumens * Float(M_PI) //not correct, but prevents the intensity from changing as the angle changes.
-            case .TriangleArea(_, _):
+                return lumens * Float(M_PI) //not physically correct, but prevents the intensity from changing as the angle changes.
+            case .TriangleArea(_, _, _):
                 fallthrough
-            case .RectangleArea(_, _):
+            case .RectangleArea(_, _, _):
                 return lumens // TODO this is not correct at all.
             default:
                 fatalError()
@@ -195,8 +195,8 @@ public enum LightType {
     case Directional
     case SphereArea(radius: Float)
     case DiskArea(radius: Float)
-    case RectangleArea(width: Float, height: Float)
-    case TriangleArea(base: Float, height: Float)
+    case RectangleArea(width: Float, height: Float, twoSided: Bool)
+    case TriangleArea(base: Float, height: Float, twoSided: Bool)
     case SunArea(radius: Float)
     
     private var lightTypeFlag : LightTypeFlag {
@@ -211,9 +211,9 @@ public enum LightType {
             return .SphereArea
         case .DiskArea(_):
             return .DiskArea
-        case .RectangleArea(_, _):
+        case .RectangleArea(_, _, _):
             return .RectangleArea
-        case .TriangleArea(_, _):
+        case .TriangleArea(_, _, _):
             return .TriangleArea
         case .SunArea(_):
             return .SunArea
@@ -226,9 +226,9 @@ public enum LightType {
             fallthrough
         case .Spot(_, _):
             return [.LuminousPower(1.0)]
-        case .TriangleArea(_, _):
+        case .TriangleArea(_, _, _):
             fallthrough
-        case .RectangleArea(_, _):
+        case .RectangleArea(_, _, _):
             fallthrough
         case .DiskArea(_):
             fallthrough
@@ -256,9 +256,12 @@ public enum LightType {
             gpuLight.extraData = vec4(radius, 0, 0, 0)
         case let .DiskArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
-        case .RectangleArea(_, _):
+        case let .RectangleArea(_, _, isTwoSided):
             let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
-            gpuLight.extraData = vec4(bufferIndex, 0, 0, 0)
+            gpuLight.extraData = vec4(bufferIndex, isTwoSided ? 1 : 0, 0, 0)
+        case let .TriangleArea(_, _, isTwoSided):
+            let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
+            gpuLight.extraData = vec4(bufferIndex, isTwoSided ? 1 : 0, 0, 0)
         case let .SunArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
         default:
@@ -272,7 +275,7 @@ public enum LightType {
             return 4 * Float(M_PI) * radius * radius
         case let .DiskArea(radius: radius):
             return Float(M_PI) * radius * radius
-        case let .RectangleArea(width: width, height: height):
+        case let .RectangleArea(width: width, height: height, _):
             return width * height
         default:
             fatalError()
@@ -299,14 +302,14 @@ public enum LightType {
             } else {
                 return false
             }
-        case .RectangleArea(_, _):
-            if case .RectangleArea(_, _) = other {
+        case .RectangleArea(_, _, _):
+            if case .RectangleArea(_, _, _) = other {
                 return true
             } else {
                 return false
             }
-        case .TriangleArea(_, _):
-            if case .TriangleArea(_, _) = other {
+        case .TriangleArea(_, _, _):
+            if case .TriangleArea(_, _, _) = other {
                 return true
             } else {
                 return false
@@ -435,7 +438,7 @@ public final class Light {
     
     private func lightPointsDidChange() {
         switch self.type {
-        case let .RectangleArea(width, height):
+        case let .RectangleArea(width, height, _):
             let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
             let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
             
@@ -456,7 +459,7 @@ public final class Light {
             let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 4 //4 vertices for a rectangle
             Light.lightPointsGPUBuffer[range] = [topRight, topLeft, bottomLeft, bottomRight]
             Light.lightPointsGPUBuffer.didModifyRange(range)
-        case let .TriangleArea(base, height):
+        case let .TriangleArea(base, height, _):
             let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
             let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
             
