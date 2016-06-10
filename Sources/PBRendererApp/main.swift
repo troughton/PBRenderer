@@ -125,11 +125,7 @@ func main() {
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderCameraUI(state: &state, camera: camera)
     })
-    
-    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
-        renderTestUI(state: &state)
-    })
-    
+
     gui.drawFunctions.append( { (state : inout GUIDisplayState) in
         renderPropertyEditor(state: &state, scene: scene)
     })

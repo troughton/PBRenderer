@@ -22,7 +22,7 @@ uniform sampler2DShadow shadowMapDepthTexture;
 
 uniform mat4 worldToLightClipMatrix;
 
-layout(std140) struct LightData {
+struct LightData {
     vec4 colourAndIntensity;
     vec4 worldSpacePosition;
     vec4 worldSpaceDirection;
@@ -326,23 +326,17 @@ vec3 evaluateLighting(vec3 worldSpacePosition,
         case LightTypeDirectional:
         case LightTypeSpot:
             return evaluatePunctualLight(worldSpacePosition, V, N, NdotV, material, light);
-            break;
         case LightTypeSphereArea:
         case LightTypeDiskArea:
             return evaluateAreaLight(worldSpacePosition, V, N, NdotV, material, light);
-            break;
         case LightTypeRectangleArea:
             return evaluateRectangleAreaLight(worldSpacePosition, N, V, material, light);
-            break;
         case LightTypeTriangleArea:
             return evaluateTriangleAreaLight(worldSpacePosition, N, V, material, light);
-            break;
         case LightTypeSunArea:
             return evaluateSunArea(worldSpacePosition, V, N, NdotV, material, light);
-            break;
         default:
             return vec3(0);
-            break;
     }
     
 }

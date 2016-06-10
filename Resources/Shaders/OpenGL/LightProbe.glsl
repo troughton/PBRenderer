@@ -6,7 +6,7 @@ uniform sampler2D dfg; //constant term for light probe parametised on (NdotV, ro
 #define MaxTotalLightProbeCount 64
 #define MaxLightProbeCount 4
 
-layout(std140) struct LightProbe {
+struct LightProbe {
     mat4 boundingVolumeWorldToLocal;
     vec4 cubeMapPosition;
     int isEnvironmentMap;
