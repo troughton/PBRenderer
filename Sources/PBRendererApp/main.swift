@@ -17,9 +17,12 @@ final class CameraControl : WindowInputDelegate {
     var yaw = Float(0)
     var pitch = Float(0)
     
-    init(node: SceneNode) {
+    let scene : Scene
+    
+    init(node: SceneNode, scene: Scene) {
         self.sceneNode = node
         self.baseRotation = self.sceneNode.transform.rotation
+        self.scene = scene
     }
     var heldKeys = Set<InputKey>()
     
@@ -33,6 +36,10 @@ final class CameraControl : WindowInputDelegate {
             heldKeys.remove(key)
             if key == .Space {
                 mouseEnabled = !mouseEnabled
+            }
+            
+            if key == .L {
+                scene.lightProbesSorted.forEach { $0.render(scene: scene) }
             }
         default: break
         }
@@ -100,7 +107,7 @@ func main() {
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
-    let cameraControl = CameraControl(node: camera.sceneNode)
+    let cameraControl = CameraControl(node: camera.sceneNode, scene: scene)
     mainWindow.inputDelegates.append(cameraControl)
 
     let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))

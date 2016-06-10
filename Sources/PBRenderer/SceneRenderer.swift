@@ -152,13 +152,11 @@ final class GBufferPass {
         shader.setMatrix(node.transform.nodeToWorldMatrix, forProperty: BasicShaderProperty.ModelToWorldMatrix)
         shader.setMatrix(normalTransform, forProperty: BasicShaderProperty.NormalModelToWorldMatrix)
         
-        node.meshes.0.forEach { mesh in
-            if let materialName = mesh.materialName, let material = node.materials[materialName] {
-                
-                shader.setUniform(GLint(material.bufferIndex), forProperty: GBufferShaderProperty.MaterialIndex)
-            }
-            
-            let lightProbes = self.lightProbesAffectingPoint(node.transform.worldSpacePosition.xyz, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
+        
+        let worldSpaceBoundingBox = node.meshes.1.axisAlignedBoundingBoxInSpace(nodeToSpaceTransform: node.transform.nodeToWorldMatrix)
+        let meshCentre = worldSpaceBoundingBox.centre
+        
+        let lightProbes = self.lightProbesAffectingPoint(meshCentre, sortedLightProbes: sortedLightProbes, environmentMap: environmentMap)
             let lightProbeIndices = lightProbes.map { GLint($0.indexInBuffer) }
             
             //Find the indices for the light probes (available texture indices start from 8)
@@ -173,6 +171,14 @@ final class GBufferPass {
                 let specularIndex = diffuseIndex + 1
                 ldTexture.specularTexture.bindToIndex(specularIndex)
             }
+        
+        node.meshes.0.forEach { mesh in
+            if let materialName = mesh.materialName, let material = node.materials[materialName] {
+                
+                shader.setUniform(GLint(material.bufferIndex), forProperty: GBufferShaderProperty.MaterialIndex)
+            }
+            
+
             
             mesh.render()
         }

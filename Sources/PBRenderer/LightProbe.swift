@@ -199,8 +199,8 @@ public final class LightProbe {
     }
     
     public func boxContainsPoint(_ point: vec3) -> Bool {
-        let localSpacePoint = vec4(point, 1) * self.transform.worldToNodeMatrix
-        return localSpacePoint.x >= -1 && localSpacePoint.y >= -1 && localSpacePoint.z >= -1 && localSpacePoint.x <= 1 && localSpacePoint.y <= 1 && localSpacePoint.z <= 1
+        let localSpacePoint = self.transform.worldToNodeMatrix * vec4(point, 1)
+        return localSpacePoint.x >= -0.5 && localSpacePoint.y >= -0.5 && localSpacePoint.z >= -0.5 && localSpacePoint.x <= 0.5 && localSpacePoint.y <= 0.5 && localSpacePoint.z <= 0.5
     }
     
     public func render(scene: Scene, zNear: Float = 0.1) {
