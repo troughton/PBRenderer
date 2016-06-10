@@ -104,7 +104,7 @@ func main() {
     mainWindow.inputDelegates.append(cameraControl)
 
     let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))
-    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 19600)
+    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 12000)
     scene.environmentMap = environmentMapProbe
 
     scene.lightProbesSorted.forEach { $0.render(scene: scene) }
@@ -161,7 +161,7 @@ func main() {
         light.type.isSameTypeAs(.Directional)
     }.first!
     sun.type = .SunArea(radius: radians(degrees: 0.263))
-    sun.intensity = .Illuminance(94000)
+    sun.intensity = .Illuminance(120000)
     
     // Game loop
     while !mainWindow.shouldClose {

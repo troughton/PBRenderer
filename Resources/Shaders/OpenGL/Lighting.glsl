@@ -183,11 +183,11 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
     
     vec3 lightColour = light.colourAndIntensity.xyz * light.colourAndIntensity.w;
     
-   // float lobeEnergy = 1;
-    float alpha = sqr(material.roughness);
-    
-    float sphereAngle = saturate( lightRadius * inverseDistanceToLight);
-   // lobeEnergy *= sqr( alpha / saturate( alpha + 0.5 * sphereAngle ) );
+//    float lobeEnergy = 1;
+//    float alpha = sqr(material.roughness);
+//    
+//    float sphereAngle = saturate( lightRadius * inverseDistanceToLight);
+//    lobeEnergy *= sqr( alpha / saturate( alpha + 0.5 * sphereAngle ) );
 
     V = normalize(V);
     N = normalize(N);
@@ -221,12 +221,15 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
 
 // using LTCs
 vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, vec4 points[4], MaterialRenderingData material, LightData light) {
+    
+    bool isTwoSided = light.extraData.y != 0;
+    
     float cosTheta = dot(N, V);
     
     vec2 ltcUV = LTC_Coords(cosTheta, material.roughness);
     
     mat3 matrixInverseDisney = LTC_Matrix(ltcMaterialDisney, ltcUV);
-    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseDisney, points, true);
+    vec3 diffuse = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseDisney, points, isTwoSided);
     diffuse *= material.albedo;
     
     
@@ -237,7 +240,7 @@ vec3 evaluatePolygonAreaLight(vec3 worldSpacePosition, vec3 N, vec3 V, vec4 poin
     
 #else
     mat3 matrixInverseGGX = LTC_Matrix(ltcMaterialGGX, ltcUV);
-    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, true);
+    vec3 specular = LTC_Evaluate(N, V, worldSpacePosition, matrixInverseGGX, points, isTwoSided);
     vec2 schlick = texture(ltcAmplitudeGGX, ltcUV).xy;
     specular *= material.f0 * schlick.x + (material.f90) * schlick.y;
 

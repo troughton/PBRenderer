@@ -165,8 +165,8 @@ private let lightTypes : [(String, LightType)] = [("Point", LightType.Point),
                                                   ("Directional", LightType.Directional),
                                                   ("Sphere Area", LightType.SphereArea(radius: 1.0)),
                                                   ("Disk Area", LightType.DiskArea(radius: 1.0)),
-                                                  ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0)),
-                                                  ("Triangle Area", LightType.TriangleArea(base:1.0, height: 1.0)),
+                                                  ("Rectangle Area", LightType.RectangleArea(width: 1.0, height: 1.0, twoSided: false)),
+                                                  ("Triangle Area", LightType.TriangleArea(base:1.0, height: 1.0, twoSided: false)),
                                                   ("Sun Area", LightType.SunArea(radius: radians(degrees: 0.263)))]
 
 
@@ -222,15 +222,17 @@ private func renderLightControls(light: Light) {
             _ = igDragFloat(label: "Radius", value: &radius, vSpeed: 0.001, vMin: 0.005, vMax: 5)
             light.type = .SunArea(radius: radius)
             break
-        case .RectangleArea(var width, var height):
+        case .RectangleArea(var width, var height, var isTwoSided):
             _ = igDragFloat(label: "Width", value: &width, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             _ = igDragFloat(label: "Height", value: &height, vSpeed: 0.01, vMin: 0.1, vMax: 100)
-            light.type = .RectangleArea(width: width, height: height)
+            _ = igCheckbox("Two-sided", &isTwoSided)
+            light.type = .RectangleArea(width: width, height: height, twoSided: isTwoSided)
             break
-        case .TriangleArea(var base, var height):
+        case .TriangleArea(var base, var height, var isTwoSided):
             _ = igDragFloat(label: "Base", value: &base, vSpeed: 0.01, vMin: 0.1, vMax: 100)
             _ = igDragFloat(label: "Height", value: &height, vSpeed: 0.01, vMin: 0.1, vMax: 100)
-            light.type = .TriangleArea(base: base, height: height)
+            _ = igCheckbox("Two-sided", &isTwoSided)
+            light.type = .TriangleArea(base: base, height: height, twoSided: isTwoSided)
             break
             
         default:
