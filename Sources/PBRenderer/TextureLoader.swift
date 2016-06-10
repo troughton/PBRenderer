@@ -21,7 +21,7 @@ public final class TextureLoader {
         var width = Int32(0)
         var height = Int32(0)
         var componentsPerPixel = Int32(0)
-        let data = stbi_loadf(path, &width, &height, &componentsPerPixel, 0)
+        guard let data = stbi_loadf(path, &width, &height, &componentsPerPixel, 0) else { fatalError("Couldn't load texture at path \(path)") }
         defer { stbi_image_free(data) }
         
         let pixelFormat : GLenum
@@ -54,7 +54,7 @@ public final class TextureLoader {
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
             
-            memcpy(backFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            memcpy(backFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
         }
         
         
@@ -68,7 +68,7 @@ public final class TextureLoader {
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
             for i in 0..<cubeWidth {
-                memcpy(frontFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+                memcpy(frontFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
             }
         }
         
@@ -81,7 +81,7 @@ public final class TextureLoader {
             
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
-            memcpy(topFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            memcpy(topFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
         }
         
         let leftFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
@@ -94,7 +94,7 @@ public final class TextureLoader {
             let destinationIndex = cubeWidth * i
             
             for i in 0..<cubeWidth {
-                memcpy(leftFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+                memcpy(leftFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
             }
         }
         
@@ -107,7 +107,7 @@ public final class TextureLoader {
             let sourceIndex = row * Int(width) + 2 * cubeWidth
             let destinationIndex = cubeWidth * i
             for i in 0..<cubeWidth {
-                memcpy(rightFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+                memcpy(rightFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
             }
         }
         
@@ -120,7 +120,7 @@ public final class TextureLoader {
             
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
-            memcpy(bottomFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            memcpy(bottomFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
         }
         
         
