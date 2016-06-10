@@ -190,8 +190,9 @@ private func renderLightControls(light: Light) {
         }!
         
         var rgbColour = light.colour.rgbColour
-        igColorEdit3("Colour", &rgbColour.x)
-        light.colour = LightColourMode.Colour(rgbColour)
+        var rgbColourArray = (rgbColour.x, rgbColour.y, rgbColour.z)
+        igColorEdit3("Colour", &rgbColourArray.0)
+        light.colour = LightColourMode.Colour(vec3(rgbColourArray.0, rgbColourArray.1, rgbColourArray.2))
                 
         igCombo(label: "Type", currentItem: &currentLightType, items: lightTypes.lazy.map { $0.0 })
         
@@ -206,7 +207,7 @@ private func renderLightControls(light: Light) {
             }!
         
         var intensity = light.intensity.value
-        _ = igDragFloat(label: "Intensity (\(lightUnitText[currentLightUnit].0))", value: &intensity, vSpeed: 5, vMin: 0.0, vMax: 100000.0)
+        _ = igDragFloat(label: "Intensity (\(lightUnitText[currentLightUnit].0))", value: &intensity, vSpeed: 100, vMin: 0.0, vMax: 100000000.0)
         light.intensity = LightIntensity(unit: light.type.validUnits.first!, value: intensity)
         
         switch(light.type) {

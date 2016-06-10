@@ -50,7 +50,7 @@ final class ShadowMapPass {
         return framebuffer
     }
     
-       static let lightToClip = SGLMath.ortho(Float(-80), 80, -80, 80, 0.1, 100.0);
+       static let lightToClip = SGLMath.ortho(Float(-160), 160, -160, 160, 1.0, 1000.0);
     
     func performPass(scene: Scene) -> (Texture, mat4) {
         var worldToLightClipMatrix : mat4? = nil

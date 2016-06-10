@@ -8,6 +8,7 @@ import CPBRendererLibs
 
 let mainWindow : PBWindow
 
+var renderGUI = true
 
 final class CameraControl : WindowInputDelegate {
     let sceneNode : SceneNode
@@ -40,6 +41,10 @@ final class CameraControl : WindowInputDelegate {
             
             if key == .L {
                 scene.lightProbesSorted.forEach { $0.render(scene: scene) }
+            }
+            
+            if key == .G {
+                renderGUI = !renderGUI
             }
         default: break
         }
@@ -111,7 +116,7 @@ func main() {
     mainWindow.inputDelegates.append(cameraControl)
 
     let environmentMapTexture = TextureLoader.textureFromVerticalCrossHDRCubeMapAtPath(Resources.pathForResource(named: "00261_OpenfootageNET_Beach04_LOW_cross.hdr"))
-    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 12000)
+    let environmentMapProbe = LightProbe(environmentMapWithResolution: 256, texture: environmentMapTexture, exposureMultiplier: 19600)
     scene.environmentMap = environmentMapProbe
 
     scene.lightProbesSorted.forEach { $0.render(scene: scene) }
@@ -161,14 +166,21 @@ func main() {
         
         
         sceneRenderer.renderScene(scene, camera: camera)
-        gui.render()
+        
+        if renderGUI { gui.render() }
     }
 
     let sun = scene.lights.filter { (light) -> Bool in
         light.type.isSameTypeAs(.Directional)
     }.first!
     sun.type = .SunArea(radius: radians(degrees: 0.263))
-    sun.intensity = .Illuminance(120000)
+    sun.intensity = .Illuminance(98000)
+    
+    for light in scene.lights
+    {
+        var intensity = light.intensity.value
+        light.intensity = LightIntensity(unit: light.type.validUnits.first!, value: intensity)
+    }
     
     // Game loop
     while !mainWindow.shouldClose {

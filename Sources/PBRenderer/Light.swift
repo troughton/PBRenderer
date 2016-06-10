@@ -437,6 +437,9 @@ public final class Light {
     
     
     private func lightPointsDidChange() {
+        if self.sceneNode == nil {
+            return
+        }
         switch self.type {
         case let .RectangleArea(width, height, _):
             let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);

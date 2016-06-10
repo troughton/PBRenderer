@@ -44,7 +44,7 @@ public final class TextureLoader {
         
         let cubeNumElements = Int(cubeWidth * cubeWidth * Int(componentsPerPixel))
         
-        let backFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
+        let backFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
         defer { free(backFace) }
         
         for i in 0..<cubeWidth {
@@ -54,11 +54,11 @@ public final class TextureLoader {
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
             
-            memcpy(backFace?.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            memcpy(backFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
         }
         
         
-        let frontFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
+        let frontFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
         defer { free(frontFace) }
         
         for i in 0..<cubeWidth {
@@ -68,11 +68,11 @@ public final class TextureLoader {
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
             for i in 0..<cubeWidth {
-                memcpy(frontFace?.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+                memcpy(frontFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
             }
         }
         
-        let topFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
+        let topFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
         defer { free(topFace) }
         
         for i in 0..<cubeWidth {
@@ -81,10 +81,10 @@ public final class TextureLoader {
             
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
-            memcpy(topFace?.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            memcpy(topFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
         }
         
-        let leftFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
+        let leftFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
         defer { free(leftFace) }
         
         for i in 0..<cubeWidth {
@@ -94,11 +94,11 @@ public final class TextureLoader {
             let destinationIndex = cubeWidth * i
             
             for i in 0..<cubeWidth {
-                memcpy(leftFace?.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+                memcpy(leftFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
             }
         }
         
-        let rightFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
+        let rightFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
         defer { free(rightFace) }
         
         for i in 0..<cubeWidth {
@@ -107,11 +107,11 @@ public final class TextureLoader {
             let sourceIndex = row * Int(width) + 2 * cubeWidth
             let destinationIndex = cubeWidth * i
             for i in 0..<cubeWidth {
-                memcpy(rightFace?.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
+                memcpy(rightFace.advanced(by: (destinationIndex + cubeWidth - i - 1) * Int(componentsPerPixel)), data?.advanced(by: (sourceIndex + i) * Int(componentsPerPixel)), sizeof(Float) * Int(componentsPerPixel))
             }
         }
         
-        let bottomFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))
+        let bottomFace = UnsafeMutablePointer<Float>(calloc(sizeof(Float), cubeNumElements))!
         defer { free(bottomFace) }
         
         for i in 0..<cubeWidth {
@@ -120,19 +120,19 @@ public final class TextureLoader {
             
             let sourceIndex = row * Int(width) + centreOffset
             let destinationIndex = cubeWidth * i
-            memcpy(bottomFace?.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
+            memcpy(bottomFace.advanced(by: destinationIndex * Int(componentsPerPixel)), data?.advanced(by: sourceIndex * Int(componentsPerPixel)), sizeof(Float) * cubeWidth * Int(componentsPerPixel))
         }
         
         
         let textureDescriptor = TextureDescriptor(textureCubeWithPixelFormat: pixelFormat, width: cubeWidth, height: cubeWidth, mipmapped: true)
         let texture = Texture(textureWithDescriptor: textureDescriptor)
         
-        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: rightFace!)
-        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_Y, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: topFace!)
-        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_Z, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: backFace!)
-        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: leftFace!)
-        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: bottomFace!)
-        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: frontFace!)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: rightFace)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_Y, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: topFace)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_POSITIVE_Z, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: backFace)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_X, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: leftFace)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: bottomFace)
+        texture.fillSubImage(target: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, mipmapLevel: 0, width: cubeWidth, height: cubeWidth, type: GL_FLOAT, data: frontFace)
         
         texture.generateMipmaps()
         

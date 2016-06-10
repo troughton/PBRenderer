@@ -183,8 +183,10 @@ func GenerateLightFragments(fragmentFactory: FragmentFactory, builder: LightGrid
     }
 }
 
+#if os(OSX)
 private var fragments = [Fragment]()
-
+#endif
+    
 //Requires that all lights be in a single buffer
 func RasterizeLights(builder: LightGridBuilder, viewerCamera: Camera, lights: [Light]) {
     

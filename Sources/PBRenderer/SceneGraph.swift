@@ -125,6 +125,8 @@ public final class SceneNode {
         self.cameras.forEach { $0.sceneNode = self }
         self.lights.forEach { $0.sceneNode = self }
         self.lightProbes.forEach { $0.sceneNode = self }
+        
+        self.transformDidChange()
     }
     
     init(id: String?, name: String?, transform: Transform, meshes: ([GLMesh], BoundingBox) = ([], BoundingBox.baseBox), children: [SceneNode] = [], cameras: [Camera] = [], lights: [Light] = [], materials: [String: GPUBufferElement<Material>] = [:], lightProbes : [LightProbe] = []) {

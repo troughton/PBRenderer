@@ -291,7 +291,8 @@ extension SceneNode {
         
         
         let lightProbes : [LightProbe]
-        let lightObjects : [Light] = node.instanceLight.map { lights[$0.url.substring(from: $0.url.index(after: $0.url.startIndex))]! }
+        let lightObjects : [Light] = node.instanceLight.flatMap { lights[$0.url.substring(from: $0.url.index(after: $0.url.startIndex))]
+        }
         
         if let technique = node.extra.first?.technique.first {
             if technique["originalMayaNodeId"]?.value?.contains("Probe") ?? false {
@@ -306,7 +307,9 @@ extension SceneNode {
                     lightProbes = []
                 } else {
                     let lightProbeLocation = vec3(location[0], location[1], location[2])
-                    let lightProbe = LightProbe(localLightProbeWithResolution: 256, position: lightProbeLocation)
+                    let lightProbeNearPlane = Float(technique["nearPlane"]!.value!)!
+                    let lightProbeFarPlane = Float(technique["farPlane"]!.value!)!
+                    let lightProbe = LightProbe(localLightProbeWithResolution: 256, position: lightProbeLocation, nearPlane: lightProbeNearPlane, farPlane: lightProbeFarPlane)
                     lightProbes = [lightProbe]
                 }
             } else {

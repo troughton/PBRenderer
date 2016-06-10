@@ -99,6 +99,7 @@ public final class LDTexture {
             var attachment = RenderPassColourAttachment(clearColour: vec4(0))
             attachment.texture = self.diffuseTexture
             attachment.textureSlice = i
+            attachment.loadAction = .Clear
             attachment.storeAction = .Store
             return attachment
         }
@@ -109,6 +110,7 @@ public final class LDTexture {
         
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.texture = diffuseDepthTexture
+            depthAttachment.loadAction = .Clear
         
         return Framebuffer(width: Int32(resolution), height: Int32(resolution), colourAttachments: colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
     }
@@ -128,12 +130,14 @@ public final class LDTexture {
                 attachment.texture = self.specularTexture
                 attachment.textureSlice = i
                 attachment.mipmapLevel = Int(mipmapLevel)
+                attachment.loadAction = .Clear
                 attachment.storeAction = .Store
                 return attachment
             }
             var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
             depthAttachment.texture = specularDepthTexture
             depthAttachment.mipmapLevel = Int(mipmapLevel)
+            depthAttachment.loadAction = .Clear
             
             return Framebuffer(width: Int32(mipLevelSize), height: Int32(mipLevelSize), colourAttachments: colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
         }

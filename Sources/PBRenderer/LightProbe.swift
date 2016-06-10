@@ -65,6 +65,8 @@ public final class LightProbe {
     let localCubeMap : Texture
     public let ldTexture : LDTexture
     public let resolution : Int
+    public let nearPlane : Float
+    public let farPlane : Float
     
     private let colourAttachments : [RenderPassColourAttachment]
     private let sceneRenderers : [SceneRenderer]
@@ -75,7 +77,7 @@ public final class LightProbe {
         return self.backingElement.bufferIndex
     }
     
-    public init(localLightProbeWithResolution resolution: Int, position: vec3) {
+    public init(localLightProbeWithResolution resolution: Int, position: vec3, nearPlane: Float, farPlane: Float) {
         
         let cubeMapDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: resolution, height: resolution, mipmapped: true)
         let localCubeMap = Texture(textureWithDescriptor: cubeMapDescriptor)
@@ -103,6 +105,9 @@ public final class LightProbe {
         
         self.cubeMapWorldSpacePosition = position ?? vec3(0)
         
+        self.nearPlane = nearPlane
+        self.farPlane = farPlane
+        
         self.backingElement.withElement { (backingElement) -> Void in
             backingElement.cubeMapPosition = vec4(self.cubeMapWorldSpacePosition, 1)
             backingElement.isEnvironmentMap = 0
@@ -114,6 +119,8 @@ public final class LightProbe {
     public init(environmentMapWithResolution resolution: Int, texture: Texture, exposureMultiplier: Float) {
         
         self.sceneNode = nil
+        self.nearPlane = 0.0
+        self.farPlane = Float.infinity
         
         self.localCubeMap = texture
         
@@ -203,15 +210,9 @@ public final class LightProbe {
         return localSpacePoint.x >= -0.5 && localSpacePoint.y >= -0.5 && localSpacePoint.z >= -0.5 && localSpacePoint.x <= 0.5 && localSpacePoint.y <= 0.5 && localSpacePoint.z <= 0.5
     }
     
-    public func render(scene: Scene, zNear: Float = 0.1) {
+    public func render(scene: Scene) {
         
-        let zFar = self.worldSpaceVertices.lazy
-            .map { distanceSquared($0, self.cubeMapWorldSpacePosition) }
-            .sorted { $0 < $1 }
-            .last
-            .map { 1.5 * sqrt($0) } ?? 100.0
-        
-        let exposureUsed = self.renderSceneToCubeMap(scene, atPosition: cubeMapWorldSpacePosition, zNear: zNear, zFar: zFar)
+        let exposureUsed = self.renderSceneToCubeMap(scene, atPosition: cubeMapWorldSpacePosition, zNear: self.nearPlane, zFar: self.farPlane)
         
         LDTexture.fillLDTexturesFromCubeMaps(textures: [self.ldTexture], cubeMaps: [self.localCubeMap], valueMultipliers: [1.0 / exposureUsed])
     }
