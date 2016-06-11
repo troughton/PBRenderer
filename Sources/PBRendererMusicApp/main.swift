@@ -75,7 +75,6 @@ final class AudioVisualManager : SongDelegate {
         
         self.scene.lights.forEach {
             $0.intensity.value = 0
-            $0.falloffRadius = 10e5;
         }
         
         for i in 1...6 {
@@ -173,7 +172,7 @@ func main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
     glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE)
     
-    let mainWindow = PBWindow(name: "PBRenderer Music", width: 1280, height: 800)
+    let mainWindow = PBWindow(name: "PBRenderer Music", width: 1920, height: 1080)
     mainWindow.shouldHideCursor = true
     
     let avManager = AudioVisualManager()
@@ -208,6 +207,7 @@ func main() {
         }
         
         sceneRenderer.renderScene(avManager.scene, camera: avManager.camera)
+        
 //        gui.render()
     }
     
