@@ -215,25 +215,28 @@ public final class Camera {
 public final class Transform {
     public var sceneNode : SceneNode! = nil
     
-    public var parent : Transform? = nil
+    public var parent : Transform? = nil {
+        didSet {
+            parent?.children.append(self)
+            self.setNeedsRecalculateTransform()
+        }
+    }
+    private var children = [Transform]()
     
     public var translation : vec3 {
         didSet {
             self.setNeedsRecalculateTransform()
-            self.sceneNode?.transformDidChange()
         }
     }
     public var rotation : quat {
         didSet {
             self.setNeedsRecalculateTransform()
-            self.sceneNode?.transformDidChange()
         }
     }
     
     public var scale : vec3 {
         didSet {
             self.setNeedsRecalculateTransform()
-            self.sceneNode?.transformDidChange()
         }
     }
     
@@ -250,6 +253,7 @@ public final class Transform {
         self.scale = scale
         
         self.parent = parent
+        self.parent?.children.append(self)
     }
     
     private func setNeedsRecalculateTransform() {
@@ -257,16 +261,20 @@ public final class Transform {
         _worldToNodeMatrix = nil
         _worldSpacePosition = nil
         _worldSpaceDirection = nil
+        
+        
+        self.sceneNode.transformDidChange()
+        
+        self.children.forEach { $0.setNeedsRecalculateTransform() }
     }
     
     private func calculateNodeToWorldMatrix() -> mat4 {
-        var transform = self.parent?.nodeToWorldMatrix ?? mat4(1)
         
-        transform = SGLMath.translate(transform, self.translation)
+        var transform = SGLMath.translate(mat4(1), self.translation)
         transform = transform * self.rotation
         transform = SGLMath.scale(transform, self.scale)
         
-        return transform;
+        return (self.parent?.nodeToWorldMatrix ?? mat4(1)) * transform;
     }
     
     private func calculateWorldToNodeMatrix() -> mat4 {

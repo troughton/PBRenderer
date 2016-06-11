@@ -73,7 +73,10 @@ final class AudioVisualManager : SongDelegate {
             camera.aperture = 1.0
         }
         
-        self.scene.lights.forEach { $0.intensity.value = 0 }
+        self.scene.lights.forEach {
+            $0.intensity.value = 0
+            $0.falloffRadius = 10e5;
+        }
         
         for i in 1...6 {
             let backgroundAreaLightPlane = scene.idsToNodes["BackgroundAreaLightPlane\(i)"]!
@@ -88,39 +91,34 @@ final class AudioVisualManager : SongDelegate {
             
         }
         
-        for i in 1...6 {
-            let backgroundAreaLightNode = scene.idsToNodes["BackgroundAreaLight\(i)"]!
-            let lightNode = backgroundAreaLightNode.lights.first!
-            
-            lightNode.type = .RectangleArea(width: 0.95, height: 4.34)
-        }
-        
-        for i in 1...4 {
-            let pyramidAreaLightNode = scene.idsToNodes["PyramidSpot\(i)"]!
-            let lightNode = pyramidAreaLightNode.lights.first!
-            
-            lightNode.type = .TriangleArea(base: 2.0, height: 2.9)
-        }
-        
         let endCamera = scene.idsToNodes["camera2"]!.cameras.first!
         self.camera.shutterTime = 1.0
         self.camera.aperture = 1.0
         
         let movingCamera = scene.idsToNodes["MainCamera"]!.cameras.first!
         
-        let cameraAnimation = AnimationSystem.Animation(startBeat: 4 * 13, duration: 4 * 4, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
-            if percentage < 1 {
-                self.camera = movingCamera
-            } else {
-                self.camera = endCamera
-            }
-            
-            let translation = lerp(from: startCamera.transform.translation, to: endCamera.transform.translation, t: Float(percentage))
-            
-            self.camera.transform.translation = translation
-            self.camera.transform.rotation = slerp(from: startCamera.transform.rotation, to: endCamera.transform.rotation, t: Float(percentage))
+//        let cameraAnimation = AnimationSystem.Animation(startBeat: 4 * 13, duration: 4 * 4, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
+//            if percentage < 1 {
+//                self.camera = movingCamera
+//            } else {
+//                self.camera = endCamera
+//            }
+//            
+//            let translation = lerp(from: startCamera.transform.translation, to: endCamera.transform.translation, t: Float(percentage))
+//            
+//            self.camera.transform.translation = translation
+//            self.camera.transform.rotation = slerp(from: startCamera.transform.rotation, to: endCamera.transform.rotation, t: Float(percentage))
+//        })
+//        AnimationSystem.addAnimation(cameraAnimation)
+        
+        let pyramidGroup = scene.idsToNodes["PyramidGroup"]!
+        let pyramidRotationAnimation = AnimationSystem.Animation(startBeat: 4 * 13, duration: 4 * 8, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
+            pyramidGroup.transform.rotation = quat(angle: Float(percentage * M_PI), axis: vec3(0, 1, 0))
+            print(pyramidGroup.transform.rotation.eulerAngles)
+            print("Rotated right vector is \(self.scene.idsToNodes["PyramidGroup_Pyramid1"]!.transform.nodeToWorldMatrix * vec4(1, 0, 0, 0))")
         })
-        AnimationSystem.addAnimation(cameraAnimation)
+        
+        AnimationSystem.addAnimation(pyramidRotationAnimation)
         
     }
     
@@ -145,6 +143,8 @@ final class AudioVisualManager : SongDelegate {
                 processMainMelodyEvent(event, scene: self.scene, beatNumber: beatNumber)
             case .LowBass:
                 processLowBassEvent(event, scene: self.scene, beatNumber: beatNumber)
+            case .SecondMelody:
+                processSecondaryMelodyEvent(event, scene: self.scene, beatNumber: beatNumber)
             default:
                 break;
             }
@@ -155,7 +155,6 @@ final class AudioVisualManager : SongDelegate {
     func update() {
         let beatNumber = song.beatNumber
         AnimationSystem.tick(currentBeat: beatNumber)
-        
     }
 }
 
@@ -175,24 +174,41 @@ func main() {
     glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE)
     
     let mainWindow = PBWindow(name: "PBRenderer Music", width: 1280, height: 800)
+    mainWindow.shouldHideCursor = true
+    
     let avManager = AudioVisualManager()
     song.delegate = avManager
     
     let sceneRenderer = SceneRenderer(window: mainWindow)
     
-    song.update()
-    avManager.update()
+//    song.update()
+//    avManager.update()
+    
+    let gui = GUI(window: mainWindow)
+    
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderPropertyEditor(state: &state, scene: avManager.scene)
+    })
+    
+    gui.drawFunctions.append( { (state : inout GUIDisplayState) in
+        renderSceneHierachy(state: &state, scene: avManager.scene)
+    })
     
     mainWindow.registerForUpdate { (window, deltaTime) in
         
-        if !song.isPlaying {
-            song.play()
+        if glfwGetTime() > 5.0 {
+            
+            if !song.isPlaying {
+                song.play()
+            }
+            
+            song.update()
+            avManager.update()
         }
         
-        song.update()
-        avManager.update()
-        
         sceneRenderer.renderScene(avManager.scene, camera: avManager.camera)
+//        gui.render()
     }
     
     

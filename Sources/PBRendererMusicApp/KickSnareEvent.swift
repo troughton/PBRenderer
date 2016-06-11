@@ -40,7 +40,7 @@ private var cameraBaseTranslations : [vec3]! = nil
         if case let .noteMessage(noteMessage) = event {
             
             
-            let pyramid = scene.idsToNodes["Pyramid1"]!
+            let pyramid = scene.idsToNodes["PyramidGroup_Pyramid1"]!
             
             if pyramidBaseScale == nil {
                 pyramidBaseScale = pyramid.transform.scale

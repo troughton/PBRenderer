@@ -51,7 +51,7 @@ void main() {
     vec4 out1 = vec4(0);
     vec4 out2 = vec4(0);
     
-    vec3 radiosity = material.emissive.rgb + evaluateIBL(worldSpacePosition, N, V, NdotV, R, renderingMaterial);
+    vec3 radiosity = material.emissive.rgb;// + evaluateIBL(worldSpacePosition, N, V, NdotV, R, renderingMaterial);
     vec4 out3 = vec4(epilogueLighting(radiosity, exposure), 1);
     
     encodeDataToGBuffers(material, N, out0, out1, out2);

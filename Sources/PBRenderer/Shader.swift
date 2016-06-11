@@ -70,7 +70,9 @@ public class Shader {
             location = unsafeBitCast(blockIndex, to: GLint.self)
         }
         if location == -1 {
-            print("Warning: uniform for property \(property) was not found.")
+            if _isDebugAssertConfiguration() {
+                print("Warning: uniform for property \(property) was not found.")
+            }
             return nil
         } else {
             self.uniformMappings[property.name] = location

@@ -31,7 +31,7 @@ var originalSmoothness : Float! = nil
                     if percentage >= 1.0 {
                         material.smoothness = originalSmoothness
                     } else {
-                        material.smoothness = randomFloat() * 0.04 + 0.8
+                        material.smoothness = randomFloat() * 0.1 + 0.8
                     }
 
                 })
