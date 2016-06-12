@@ -20,6 +20,7 @@ var originalSmoothness : Float! = nil
         
         if case let .noteMessage(noteMessage) = event {
             
+            let pyramidTopLight = scene.idsToNodes["PyramidTopLight"]!.lights.first!
             let groundPlane = scene.idsToNodes["GroundPlane"]
             let material = groundPlane!.materials.values.first!
             if originalSmoothness == nil {
@@ -30,8 +31,10 @@ var originalSmoothness : Float! = nil
                 material.withElement({ material in
                     if percentage >= 1.0 {
                         material.smoothness = originalSmoothness
+                        pyramidTopLight.falloffRadius = 100.0
                     } else {
                         material.smoothness = randomFloat() * 0.1 + 0.8
+                        pyramidTopLight.falloffRadius = 2.37
                     }
 
                 })

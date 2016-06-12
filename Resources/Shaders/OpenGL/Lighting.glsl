@@ -209,7 +209,7 @@ vec3 evaluateAreaLight(vec3 worldSpacePosition,
         illuminance = calculateDiskIlluminance(worldSpacePosition, NdotL, sqrDist, L, light);
     }
 
-    illuminance *= smoothDistanceAtt(sqrDist, light.inverseSquareAttenuationRadius);
+    illuminance *= smoothDistanceAtt(dot(closestPointOnSphere, closestPointOnSphere), light.inverseSquareAttenuationRadius);
     
     vec3 specular = BRDFSpecular(V, L, N, NdotV, NdotL, material);
     vec3 diffuse = BRDFDiffuse(V, L, N, NdotV, NdotL, material);

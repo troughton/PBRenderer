@@ -74,10 +74,6 @@ vec3 calculateLightingClustered(vec2 cameraNearFar, vec2 uv, vec3 cameraSpacePos
         lightAccumulation += evaluateLighting(worldSpacePosition, V, N, NdotV, material, light);
     }
     
-    if (visualiseLightCount) {
-        lightAccumulation = vec3(light_count / 255.f) / exposure;
-    }
-    
     //    [flatten] if (mUI.visualizeLightCount)
     //    {
     //        lit = (float(light_count) * rcp(255.0f)).xxx;

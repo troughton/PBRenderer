@@ -192,60 +192,60 @@ func RasterizeLights(builder: LightGridBuilder, viewerCamera: Camera, lights: [L
     
     let fragmentFactory = FragmentFactory()
     
-    #if os(OSX)
-        //We expect the simd path to be faster – Swift on Linux doesn't support the simd module yet, which SGLMath makes use of.
-
-        var bounds = [LightBounds](repeating: LightBounds(), count: lights.count)
-
-        let lightPositions = lights.map { (light) -> vec3 in
-            var lightPositionView = viewerCamera.sceneNode.transform.worldToNodeMatrix * light.sceneNode.transform.worldSpacePosition
-            lightPositionView.z *= -1;
-            lightPositionView.y *= -1;
-            return lightPositionView.xyz
-        }
-        
-        let dim = builder.dim
-        
-        CoarseRasterizeLights(lights: lights, lightPositions: lightPositions, bounds: &bounds, camera: viewerCamera, dim: dim)
-        
-        
-        fragments.removeAll(keepingCapacity: true)
-        
-        for (i, region) in bounds.enumerated() {
-            
-            var y = region.p1.1 / 4
-            while y <= region.p2.1 / 4 {
-                var x = region.p1.0 / 4
-                while x <= region.p2.0 / 4 {
-                    var z = region.p1.2 / 4
-                    
-                    while z <= region.p2.2 / 4 {
-                        
-                        let fragment = Fragment(cellIndex: dim.cellIndex(x: x, y: y, z: z), lightIndex: i)
-                        fragments.append(fragment)
-                        
-                        z += 1
-                    }
-                    
-                    
-                    x += 1
-                }
-                
-                
-                y += 1
-            }
-        }
-        
-        FineRasterizeLights(lights: lights, lightPositions: lightPositions, fragments: &fragments, camera: viewerCamera, lightGridBuilder: builder);
-        
-        for fragment in fragments {
-            builder.pushFragment(cellIndex: fragment.cellIndex, lightIndex: Int32(lights[fragment.lightIndex].backingGPULight.bufferIndex), coverage: fragment.coverage)
-        }
-        #else
+//    #if os(OSX)
+//        //We expect the simd path to be faster – Swift on Linux doesn't support the simd module yet, which SGLMath makes use of.
+//
+//        var bounds = [LightBounds](repeating: LightBounds(), count: lights.count)
+//
+//        let lightPositions = lights.map { (light) -> vec3 in
+//            var lightPositionView = viewerCamera.sceneNode.transform.worldToNodeMatrix * light.sceneNode.transform.worldSpacePosition
+//            lightPositionView.z *= -1;
+//            lightPositionView.y *= -1;
+//            return lightPositionView.xyz
+//        }
+//        
+//        let dim = builder.dim
+//        
+//        CoarseRasterizeLights(lights: lights, lightPositions: lightPositions, bounds: &bounds, camera: viewerCamera, dim: dim)
+//        
+//        
+//        fragments.removeAll(keepingCapacity: true)
+//        
+//        for (i, region) in bounds.enumerated() {
+//            
+//            var y = region.p1.1 / 4
+//            while y <= region.p2.1 / 4 {
+//                var x = region.p1.0 / 4
+//                while x <= region.p2.0 / 4 {
+//                    var z = region.p1.2 / 4
+//                    
+//                    while z <= region.p2.2 / 4 {
+//                        
+//                        let fragment = Fragment(cellIndex: dim.cellIndex(x: x, y: y, z: z), lightIndex: i)
+//                        fragments.append(fragment)
+//                        
+//                        z += 1
+//                    }
+//                    
+//                    
+//                    x += 1
+//                }
+//                
+//                
+//                y += 1
+//            }
+//        }
+//        
+//        FineRasterizeLights(lights: lights, lightPositions: lightPositions, fragments: &fragments, camera: viewerCamera, lightGridBuilder: builder);
+//        
+//        for fragment in fragments {
+//            builder.pushFragment(cellIndex: fragment.cellIndex, lightIndex: Int32(lights[fragment.lightIndex].backingGPULight.bufferIndex), coverage: fragment.coverage)
+//        }
+//        #else
         // warning: scalar version does coarser (AABB) culling
         for light in lights where light.isOn {
             let lightIndex = light.backingGPULight.bufferIndex
             GenerateLightFragments(fragmentFactory: fragmentFactory, builder: builder, camera: viewerCamera, light: light, lightIndex: lightIndex);
         }
-    #endif
+//    #endif
 }

@@ -172,7 +172,7 @@ func main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
     glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE)
     
-    let mainWindow = PBWindow(name: "PBRenderer Music", width: 1920, height: 1080)
+    let mainWindow = PBWindow(name: "PBRenderer Music", width: 1936 * 2, height: 1089 * 2)
     mainWindow.shouldHideCursor = true
     
     let avManager = AudioVisualManager()
