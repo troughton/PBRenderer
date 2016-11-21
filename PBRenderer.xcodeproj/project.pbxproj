@@ -1,0 +1,1407 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E90A88941CFA723D00F11FD4 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90A88911CFA723900F11FD4 /* Animation.swift */; };
+		E9176D7F1CFBAE16009993D5 /* HighMotifEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9176D7E1CFBAE16009993D5 /* HighMotifEvent.swift */; };
+		E9176D821CFBC2B5009993D5 /* DrivingChordsEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9176D811CFBC2B5009993D5 /* DrivingChordsEvent.swift */; };
+		E9176D841CFCFC0E009993D5 /* KickSnareEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9176D831CFCFC0E009993D5 /* KickSnareEvent.swift */; };
+		E9176D8B1CFD3254009993D5 /* LightGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9176D891CFD26A0009993D5 /* LightGrid.swift */; };
+		E917E17E1CFD9F9400247C99 /* VectorisedFragmentFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E917E17B1CFD9B8100247C99 /* VectorisedFragmentFactory.swift */; };
+		E917E7491CFE76F7009B94F7 /* LightAccumulationPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = E917E7481CFE76F7009B94F7 /* LightAccumulationPass.swift */; };
+		E94199281CFD3A5D00A0890C /* FragmentFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9176D8D1CFD36EA009993D5 /* FragmentFactory.swift */; };
+		E94DCD851CF538760055BBDB /* SceneRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94DCD841CF538760055BBDB /* SceneRenderer.swift */; };
+		E954D9A71D093C2200F1EB00 /* ShadowMapPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = E954D9A41D093C1800F1EB00 /* ShadowMapPass.swift */; };
+		E954D9AA1D0AC0C100F1EB00 /* SecondaryMelodyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E954D9A91D0AC0C100F1EB00 /* SecondaryMelodyEvent.swift */; };
+		E9606E9D1CF5A8C50003AA87 /* LDTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9606E9C1CF5A8C50003AA87 /* LDTexture.swift */; };
+		E9606EBF1CF6599D0003AA87 /* TextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9606EBE1CF6599D0003AA87 /* TextureLoader.swift */; };
+		E9606EC11CF67DC60003AA87 /* Sampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9606EC01CF67DC60003AA87 /* Sampler.swift */; };
+		E9606EC31CF6C7B70003AA87 /* SwiftGL.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/SwiftGL.swift" /* SwiftGL.swift */; };
+		E96091BD1D077AE100261BF2 /* OutlinePass.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96091BC1D077AE100261BF2 /* OutlinePass.swift */; };
+		E96091C21D079E3F00261BF2 /* Octree.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96091C11D079E3E00261BF2 /* Octree.swift */; };
+		E96091C41D07AC8200261BF2 /* Frustum.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96091C31D07AC8200261BF2 /* Frustum.swift */; };
+		E96A88381CFF97FB0063DD59 /* MainMelodyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A88361CFF97FA0063DD59 /* MainMelodyEvent.swift */; };
+		E96A883A1CFF9C2D0063DD59 /* LowBassEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A88391CFF9C2D0063DD59 /* LowBassEvent.swift */; };
+		E96A88661CFFDB360063DD59 /* LightProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A88641CFFDB1E0063DD59 /* LightProbe.swift */; };
+		E96F4FBA1CF14CC40032E601 /* libSGLMath.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLMath" /* libSGLMath.dylib */; };
+		E96F4FBB1CF14CC40032E601 /* libSGLOpenGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */; };
+		E96F4FBC1CF14CC40032E601 /* libPBRenderer.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_PBRenderer" /* libPBRenderer.dylib */; };
+		E96F4FBD1CF14CC40032E601 /* libColladaParser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_ColladaParser" /* libColladaParser.dylib */; };
+		E96F4FC21CF14D110032E601 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96F4FAD1CF14C860032E601 /* main.swift */; };
+		E96F4FC71CF14D5B0032E601 /* MIDIEventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96F4FC61CF14D5B0032E601 /* MIDIEventType.swift */; };
+		E96F4FC91CF14DDB0032E601 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E96F4FC81CF14DDB0032E601 /* AudioToolbox.framework */; };
+		E96F4FCB1CF14EDE0032E601 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96F4FCA1CF14EDE0032E601 /* Song.swift */; };
+		E993C10D1D0803330017E384 /* ImGui.swift in Sources */ = {isa = PBXBuildFile; fileRef = E993C10C1D0803330017E384 /* ImGui.swift */; };
+		E997652D1D02F83B000B9387 /* BoundingVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = E997652C1D02F83B000B9387 /* BoundingVolume.swift */; };
+		E9A5BEC61D01763700FB368E /* ScreenSpaceReflections.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A5BEC51D01763700FB368E /* ScreenSpaceReflections.swift */; };
+		E9DEB0F11DAF9AE6001CD48E /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9DEB0F01DAF9AE6001CD48E /* Operators.swift */; };
+		E9DEB0F41DAF9AEC001CD48E /* glsl.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9DEB0F31DAF9AEC001CD48E /* glsl.swift */; };
+		E9FA27CF1DB093DF00B825D6 /* cimgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27A41DB093DF00B825D6 /* cimgui.cpp */; };
+		E9FA27D01DB093DF00B825D6 /* drawList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27A61DB093DF00B825D6 /* drawList.cpp */; };
+		E9FA27D11DB093DF00B825D6 /* fontAtlas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27A71DB093DF00B825D6 /* fontAtlas.cpp */; };
+		E9FA27D21DB093DF00B825D6 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27AA1DB093DF00B825D6 /* imgui.cpp */; };
+		E9FA27D31DB093DF00B825D6 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27AC1DB093DF00B825D6 /* imgui_demo.cpp */; };
+		E9FA27D41DB093DF00B825D6 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27AD1DB093DF00B825D6 /* imgui_draw.cpp */; };
+		E9FA27D51DB093DF00B825D6 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27B01DB093DF00B825D6 /* README.md */; };
+		E9FA27D61DB093DF00B825D6 /* Implementation.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27B51DB093DF00B825D6 /* Implementation.c */; };
+		E9FA27D71DB093DF00B825D6 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27B61DB093DF00B825D6 /* Makefile */; };
+		E9FA27D81DB093DF00B825D6 /* etc1_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27BC1DB093DF00B825D6 /* etc1_utils.c */; };
+		E9FA27D91DB093DF00B825D6 /* image_DXT.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27BE1DB093DF00B825D6 /* image_DXT.c */; };
+		E9FA27DA1DB093DF00B825D6 /* image_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = E9FA27C01DB093DF00B825D6 /* image_helper.c */; };
+		_LinkFileRef_ColladaParser_via_PBRenderer /* libColladaParser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_ColladaParser" /* libColladaParser.dylib */; };
+		_LinkFileRef_ColladaParser_via_PBRendererApp /* libColladaParser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_ColladaParser" /* libColladaParser.dylib */; };
+		_LinkFileRef_PBRenderer_via_PBRendererApp /* libPBRenderer.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_PBRenderer" /* libPBRenderer.dylib */; };
+		_LinkFileRef_SGLMath_via_ColladaParser /* libSGLMath.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLMath" /* libSGLMath.dylib */; };
+		_LinkFileRef_SGLMath_via_PBRenderer /* libSGLMath.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLMath" /* libSGLMath.dylib */; };
+		_LinkFileRef_SGLMath_via_PBRendererApp /* libSGLMath.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLMath" /* libSGLMath.dylib */; };
+		_LinkFileRef_SGLOpenGL_via_ColladaParser /* libSGLOpenGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */; };
+		_LinkFileRef_SGLOpenGL_via_PBRenderer /* libSGLOpenGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */; };
+		_LinkFileRef_SGLOpenGL_via_PBRendererApp /* libSGLOpenGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Complex.swift" /* Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Complex.swift" /* Complex.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Internal.swift" /* Internal.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Internal.swift" /* Internal.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix2x2.swift" /* Matrix2x2.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x2.swift" /* Matrix2x2.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix2x3.swift" /* Matrix2x3.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x3.swift" /* Matrix2x3.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix2x4.swift" /* Matrix2x4.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x4.swift" /* Matrix2x4.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix3x2.swift" /* Matrix3x2.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x2.swift" /* Matrix3x2.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix3x3.swift" /* Matrix3x3.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x3.swift" /* Matrix3x3.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix3x4.swift" /* Matrix3x4.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x4.swift" /* Matrix3x4.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix4x2.swift" /* Matrix4x2.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x2.swift" /* Matrix4x2.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix4x3.swift" /* Matrix4x3.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x3.swift" /* Matrix4x3.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix4x4.swift" /* Matrix4x4.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x4.swift" /* Matrix4x4.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Protocols.swift" /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Protocols.swift" /* Protocols.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Quaternion.swift" /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Quaternion.swift" /* Quaternion.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Swizzle.swift" /* Swizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Swizzle.swift" /* Swizzle.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector2.swift" /* Vector2.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector2.swift" /* Vector2.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector2b.swift" /* Vector2b.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector2b.swift" /* Vector2b.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector3.swift" /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector3.swift" /* Vector3.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector3b.swift" /* Vector3b.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector3b.swift" /* Vector3b.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector4.swift" /* Vector4.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector4.swift" /* Vector4.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector4b.swift" /* Vector4b.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector4b.swift" /* Vector4b.swift */; };
+		"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/glm.swift" /* glm.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLMath-1.0.8/Sources/glm.swift" /* glm.swift */; };
+		"__src_cc_ref_Packages/SGLOpenGL-2.1.0/Sources/Commands.swift" /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Commands.swift" /* Commands.swift */; };
+		"__src_cc_ref_Packages/SGLOpenGL-2.1.0/Sources/Constants.swift" /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Constants.swift" /* Constants.swift */; };
+		"__src_cc_ref_Packages/SGLOpenGL-2.1.0/Sources/Loaders.swift" /* Loaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Loaders.swift" /* Loaders.swift */; };
+		__src_cc_ref_Sources/ColladaParser/Collada.swift /* Collada.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/ColladaParser/Collada.swift /* Collada.swift */; };
+		__src_cc_ref_Sources/ColladaParser/ColladaTypes.swift /* ColladaTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/ColladaParser/ColladaTypes.swift /* ColladaTypes.swift */; };
+		__src_cc_ref_Sources/ColladaParser/XMLParser.swift /* XMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/ColladaParser/XMLParser.swift /* XMLParser.swift */; };
+		__src_cc_ref_Sources/PBRenderer/DFGTexture.swift /* DFGTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/DFGTexture.swift /* DFGTexture.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Framebuffer.swift /* Framebuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Framebuffer.swift /* Framebuffer.swift */; };
+		__src_cc_ref_Sources/PBRenderer/GPUBuffer.swift /* GPUBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/GPUBuffer.swift /* GPUBuffer.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Light.swift /* Light.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Light.swift /* Light.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Material.swift /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Material.swift /* Material.swift */; };
+		__src_cc_ref_Sources/PBRenderer/MathExtensions.swift /* MathExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/MathExtensions.swift /* MathExtensions.swift */; };
+		"__src_cc_ref_Sources/PBRenderer/Mesh+ColladaMesh.swift" /* Mesh+ColladaMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Sources/PBRenderer/Mesh+ColladaMesh.swift" /* Mesh+ColladaMesh.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Mesh.swift /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Mesh.swift /* Mesh.swift */; };
+		__src_cc_ref_Sources/PBRenderer/OpenCLContext.swift /* OpenCLContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/OpenCLContext.swift /* OpenCLContext.swift */; };
+		__src_cc_ref_Sources/PBRenderer/OpenCLProgram.swift /* OpenCLProgram.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/OpenCLProgram.swift /* OpenCLProgram.swift */; };
+		__src_cc_ref_Sources/PBRenderer/RenderStates.swift /* RenderStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/RenderStates.swift /* RenderStates.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Resources.swift /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Resources.swift /* Resources.swift */; };
+		"__src_cc_ref_Sources/PBRenderer/SceneGraph+Collada.swift" /* SceneGraph+Collada.swift in Sources */ = {isa = PBXBuildFile; fileRef = "__PBXFileRef_Sources/PBRenderer/SceneGraph+Collada.swift" /* SceneGraph+Collada.swift */; };
+		__src_cc_ref_Sources/PBRenderer/SceneGraph.swift /* SceneGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/SceneGraph.swift /* SceneGraph.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Shader.swift /* Shader.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Shader.swift /* Shader.swift */; };
+		__src_cc_ref_Sources/PBRenderer/ShaderProperties.swift /* ShaderProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/ShaderProperties.swift /* ShaderProperties.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Texture.swift /* Texture.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Texture.swift /* Texture.swift */; };
+		__src_cc_ref_Sources/PBRenderer/Window.swift /* Window.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRenderer/Window.swift /* Window.swift */; };
+		__src_cc_ref_Sources/PBRendererApp/main.swift /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/PBRendererApp/main.swift /* main.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E96F4F611CF141040032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_SGLMath";
+			remoteInfo = SGLMath;
+		};
+		E96F4F621CF141040032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_SGLOpenGL";
+			remoteInfo = SGLOpenGL;
+		};
+		E96F4F631CF141040032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_ColladaParser";
+			remoteInfo = ColladaParser;
+		};
+		E96F4F641CF141060032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_PBRenderer";
+			remoteInfo = PBRenderer;
+		};
+		E96F4FB01CF14CC40032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_SGLMath";
+			remoteInfo = SGLMath;
+		};
+		E96F4FB21CF14CC40032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_SGLOpenGL";
+			remoteInfo = SGLOpenGL;
+		};
+		E96F4FB41CF14CC40032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_PBRenderer";
+			remoteInfo = PBRenderer;
+		};
+		E96F4FB61CF14CC40032E601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = __RootObject_ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "______Target_ColladaParser";
+			remoteInfo = ColladaParser;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		E90A88911CFA723900F11FD4 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
+		E9176D7E1CFBAE16009993D5 /* HighMotifEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HighMotifEvent.swift; sourceTree = "<group>"; };
+		E9176D811CFBC2B5009993D5 /* DrivingChordsEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrivingChordsEvent.swift; sourceTree = "<group>"; };
+		E9176D831CFCFC0E009993D5 /* KickSnareEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KickSnareEvent.swift; sourceTree = "<group>"; };
+		E9176D891CFD26A0009993D5 /* LightGrid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LightGrid.swift; sourceTree = "<group>"; };
+		E9176D8D1CFD36EA009993D5 /* FragmentFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FragmentFactory.swift; sourceTree = "<group>"; };
+		E917E17B1CFD9B8100247C99 /* VectorisedFragmentFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorisedFragmentFactory.swift; sourceTree = "<group>"; };
+		E917E7481CFE76F7009B94F7 /* LightAccumulationPass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LightAccumulationPass.swift; sourceTree = "<group>"; };
+		E94DCD841CF538760055BBDB /* SceneRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneRenderer.swift; sourceTree = "<group>"; };
+		E954D9A41D093C1800F1EB00 /* ShadowMapPass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShadowMapPass.swift; sourceTree = "<group>"; };
+		E954D9A91D0AC0C100F1EB00 /* SecondaryMelodyEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecondaryMelodyEvent.swift; sourceTree = "<group>"; };
+		E95BE0091D04DA26001A75C6 /* ltc_amp_ggx.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = ltc_amp_ggx.dat; sourceTree = "<group>"; };
+		E95BE00A1D04DA26001A75C6 /* ltc_mat_ggx.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = ltc_mat_ggx.dat; sourceTree = "<group>"; };
+		E95BE00B1D04DA2E001A75C6 /* ltc_amp_disney.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = ltc_amp_disney.dat; sourceTree = "<group>"; };
+		E95BE00C1D04DA2E001A75C6 /* ltc_mat_disney.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = ltc_mat_disney.dat; sourceTree = "<group>"; };
+		E9606E9C1CF5A8C50003AA87 /* LDTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LDTexture.swift; sourceTree = "<group>"; };
+		E9606EA11CF5A9DD0003AA87 /* BRDF.cl */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.opencl; path = BRDF.cl; sourceTree = "<group>"; };
+		E9606EA21CF5A9DD0003AA87 /* CLMath.cl */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.opencl; path = CLMath.cl; sourceTree = "<group>"; };
+		E9606EA31CF5A9DD0003AA87 /* LightAccumulationPass.cl */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.opencl; path = LightAccumulationPass.cl; sourceTree = "<group>"; };
+		E9606EA41CF5A9DD0003AA87 /* LightAccumulationPassColourDepth.cl */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.opencl; path = LightAccumulationPassColourDepth.cl; sourceTree = "<group>"; };
+		E9606EA51CF5A9DD0003AA87 /* LightAccumulationPassDepth.cl */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.opencl; path = LightAccumulationPassDepth.cl; sourceTree = "<group>"; };
+		E9606EA61CF5A9DD0003AA87 /* Utilities.cl */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.opencl; path = Utilities.cl; sourceTree = "<group>"; };
+		E9606EA81CF5A9DD0003AA87 /* BRDF.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = BRDF.glsl; sourceTree = "<group>"; };
+		E9606EA91CF5A9DD0003AA87 /* Camera.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Camera.glsl; sourceTree = "<group>"; };
+		E9606EAB1CF5A9DD0003AA87 /* DFGTexture.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DFGTexture.frag; sourceTree = "<group>"; };
+		E9606EAC1CF5A9DD0003AA87 /* Encoding.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Encoding.glsl; sourceTree = "<group>"; };
+		E9606EAD1CF5A9DD0003AA87 /* FinalPass.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FinalPass.frag; sourceTree = "<group>"; };
+		E9606EAE1CF5A9DD0003AA87 /* ForwardPass.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ForwardPass.frag; sourceTree = "<group>"; };
+		E9606EAF1CF5A9DD0003AA87 /* ForwardPass.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ForwardPass.vert; sourceTree = "<group>"; };
+		E9606EB01CF5A9DD0003AA87 /* GeometryPass.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GeometryPass.frag; sourceTree = "<group>"; };
+		E9606EB11CF5A9DD0003AA87 /* GeometryPass.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GeometryPass.vert; sourceTree = "<group>"; };
+		E9606EB41CF5A9DD0003AA87 /* Lighting.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lighting.glsl; sourceTree = "<group>"; };
+		E9606EB51CF5A9DD0003AA87 /* LightAccumulationPass.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LightAccumulationPass.frag; sourceTree = "<group>"; };
+		E9606EB71CF5A9DD0003AA87 /* MaterialData.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = MaterialData.glsl; sourceTree = "<group>"; };
+		E9606EB81CF5A9DD0003AA87 /* PassthroughQuad.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PassthroughQuad.vert; sourceTree = "<group>"; };
+		E9606EB91CF5A9DD0003AA87 /* Sampling.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Sampling.glsl; sourceTree = "<group>"; };
+		E9606EBA1CF5A9DD0003AA87 /* Utilities.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Utilities.glsl; sourceTree = "<group>"; };
+		E9606EBB1CF5B2610003AA87 /* LDDiffuseTexture.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LDDiffuseTexture.frag; sourceTree = "<group>"; };
+		E9606EBC1CF5B4D30003AA87 /* LDSpecularTexture.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LDSpecularTexture.frag; sourceTree = "<group>"; };
+		E9606EBD1CF5B7790003AA87 /* LDSpecularTexturePassthrough.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LDSpecularTexturePassthrough.frag; sourceTree = "<group>"; };
+		E9606EBE1CF6599D0003AA87 /* TextureLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextureLoader.swift; sourceTree = "<group>"; };
+		E9606EC01CF67DC60003AA87 /* Sampler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sampler.swift; sourceTree = "<group>"; };
+		E96091B81D05873600261BF2 /* LTC.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = LTC.glsl; sourceTree = "<group>"; };
+		E96091BA1D066DBF00261BF2 /* 00261_OpenfootageNET_Beach04_LOW_cross.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = 00261_OpenfootageNET_Beach04_LOW_cross.hdr; sourceTree = "<group>"; };
+		E96091BC1D077AE100261BF2 /* OutlinePass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutlinePass.swift; sourceTree = "<group>"; };
+		E96091C11D079E3E00261BF2 /* Octree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Octree.swift; sourceTree = "<group>"; };
+		E96091C31D07AC8200261BF2 /* Frustum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Frustum.swift; sourceTree = "<group>"; };
+		E96A88361CFF97FA0063DD59 /* MainMelodyEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMelodyEvent.swift; sourceTree = "<group>"; };
+		E96A88391CFF9C2D0063DD59 /* LowBassEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LowBassEvent.swift; sourceTree = "<group>"; };
+		E96A88641CFFDB1E0063DD59 /* LightProbe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LightProbe.swift; sourceTree = "<group>"; };
+		E96A88671CFFF2240063DD59 /* LightAccumulationPassDiffuseOnly.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LightAccumulationPassDiffuseOnly.frag; sourceTree = "<group>"; };
+		E96A88681CFFF2300063DD59 /* LightAccumulation.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LightAccumulation.glsl; sourceTree = "<group>"; };
+		E96A88691D002CF80063DD59 /* ReflectionTracer.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReflectionTracer.glsl; sourceTree = "<group>"; };
+		E96F4FAD1CF14C860032E601 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = Sources/PBRendererMusicApp/main.swift; sourceTree = SOURCE_ROOT; };
+		E96F4FC11CF14CC40032E601 /* PBRendererMusic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PBRendererMusic; sourceTree = BUILT_PRODUCTS_DIR; };
+		E96F4FC61CF14D5B0032E601 /* MIDIEventType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIEventType.swift; sourceTree = "<group>"; };
+		E96F4FC81CF14DDB0032E601 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		E96F4FCA1CF14EDE0032E601 /* Song.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Song.swift; sourceTree = "<group>"; };
+		E96F4FD21CF161640032E601 /* ColladaTestScene.dae */ = {isa = PBXFileReference; lastKnownFileType = text.xml.dae; path = ColladaTestScene.dae; sourceTree = "<group>"; };
+		E96F4FE21CF161640032E601 /* stpeters_probe.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = stpeters_probe.hdr; sourceTree = "<group>"; };
+		E980E5921CF7CEB100261333 /* CubeMaps.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; path = CubeMaps.cl; sourceTree = "<group>"; };
+		E993C10C1D0803330017E384 /* ImGui.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImGui.swift; sourceTree = "<group>"; };
+		E997652C1D02F83B000B9387 /* BoundingVolume.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoundingVolume.swift; sourceTree = "<group>"; };
+		E9A5BEC41D011F4100FB368E /* ConeTracing.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ConeTracing.frag; sourceTree = "<group>"; };
+		E9A5BEC51D01763700FB368E /* ScreenSpaceReflections.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenSpaceReflections.swift; sourceTree = "<group>"; };
+		E9A5BEC71D019B2900FB368E /* CameraSpacePositionVertexShader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CameraSpacePositionVertexShader.vert; sourceTree = "<group>"; };
+		E9A5BEC81D022E1D00FB368E /* LinearBlurHorizontal.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LinearBlurHorizontal.frag; sourceTree = "<group>"; };
+		E9A5BEC91D022E1D00FB368E /* LinearBlurVertical.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LinearBlurVertical.frag; sourceTree = "<group>"; };
+		E9DEB0F01DAF9AE6001CD48E /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Operators.swift; sourceTree = "<group>"; };
+		E9DEB0F31DAF9AEC001CD48E /* glsl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = glsl.swift; sourceTree = "<group>"; };
+		E9F6AAC71CF7EC2300D43E75 /* LightProbe.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LightProbe.glsl; sourceTree = "<group>"; };
+		E9FA27A21DB093DE00B825D6 /* PBRenderer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PBRenderer-Bridging-Header.h"; sourceTree = "<group>"; };
+		E9FA27A41DB093DF00B825D6 /* cimgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cimgui.cpp; sourceTree = "<group>"; };
+		E9FA27A51DB093DF00B825D6 /* cimgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cimgui.h; sourceTree = "<group>"; };
+		E9FA27A61DB093DF00B825D6 /* drawList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = drawList.cpp; sourceTree = "<group>"; };
+		E9FA27A71DB093DF00B825D6 /* fontAtlas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fontAtlas.cpp; sourceTree = "<group>"; };
+		E9FA27A91DB093DF00B825D6 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imconfig.h; sourceTree = "<group>"; };
+		E9FA27AA1DB093DF00B825D6 /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui.cpp; sourceTree = "<group>"; };
+		E9FA27AB1DB093DF00B825D6 /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui.h; sourceTree = "<group>"; };
+		E9FA27AC1DB093DF00B825D6 /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_demo.cpp; sourceTree = "<group>"; };
+		E9FA27AD1DB093DF00B825D6 /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_draw.cpp; sourceTree = "<group>"; };
+		E9FA27AE1DB093DF00B825D6 /* imgui_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_internal.h; sourceTree = "<group>"; };
+		E9FA27AF1DB093DF00B825D6 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		E9FA27B01DB093DF00B825D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		E9FA27B11DB093DF00B825D6 /* stb_rect_pack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_rect_pack.h; sourceTree = "<group>"; };
+		E9FA27B21DB093DF00B825D6 /* stb_textedit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_textedit.h; sourceTree = "<group>"; };
+		E9FA27B31DB093DF00B825D6 /* stb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_truetype.h; sourceTree = "<group>"; };
+		E9FA27B41DB093DF00B825D6 /* ImGuiCInclude.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImGuiCInclude.h; sourceTree = "<group>"; };
+		E9FA27B51DB093DF00B825D6 /* Implementation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Implementation.c; sourceTree = "<group>"; };
+		E9FA27B61DB093DF00B825D6 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		E9FA27B71DB093DF00B825D6 /* PBRendererCLibs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBRendererCLibs.h; sourceTree = "<group>"; };
+		E9FA27BC1DB093DF00B825D6 /* etc1_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = etc1_utils.c; sourceTree = "<group>"; };
+		E9FA27BD1DB093DF00B825D6 /* etc1_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = etc1_utils.h; sourceTree = "<group>"; };
+		E9FA27BE1DB093DF00B825D6 /* image_DXT.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = image_DXT.c; sourceTree = "<group>"; };
+		E9FA27BF1DB093DF00B825D6 /* image_DXT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image_DXT.h; sourceTree = "<group>"; };
+		E9FA27C01DB093DF00B825D6 /* image_helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = image_helper.c; sourceTree = "<group>"; };
+		E9FA27C11DB093DF00B825D6 /* image_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image_helper.h; sourceTree = "<group>"; };
+		E9FA27C21DB093DF00B825D6 /* pkm_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pkm_helper.h; sourceTree = "<group>"; };
+		E9FA27C31DB093DF00B825D6 /* pvr_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pvr_helper.h; sourceTree = "<group>"; };
+		E9FA27C41DB093DF00B825D6 /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
+		E9FA27C51DB093DF00B825D6 /* stb_image_write.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image_write.h; sourceTree = "<group>"; };
+		E9FA27C61DB093DF00B825D6 /* stbi_DDS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_DDS.h; sourceTree = "<group>"; };
+		E9FA27C71DB093DF00B825D6 /* stbi_DDS_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_DDS_c.h; sourceTree = "<group>"; };
+		E9FA27C81DB093DF00B825D6 /* stbi_ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_ext.h; sourceTree = "<group>"; };
+		E9FA27C91DB093DF00B825D6 /* stbi_ext_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_ext_c.h; sourceTree = "<group>"; };
+		E9FA27CA1DB093DF00B825D6 /* stbi_pkm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_pkm.h; sourceTree = "<group>"; };
+		E9FA27CB1DB093DF00B825D6 /* stbi_pkm_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_pkm_c.h; sourceTree = "<group>"; };
+		E9FA27CC1DB093DF00B825D6 /* stbi_pvr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_pvr.h; sourceTree = "<group>"; };
+		E9FA27CD1DB093DF00B825D6 /* stbi_pvr_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stbi_pvr_c.h; sourceTree = "<group>"; };
+		__PBXFileRef_PBRenderer.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Project.xcconfig; path = PBRenderer.xcodeproj/Configs/Project.xcconfig; sourceTree = "<group>"; };
+		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Complex.swift" /* Complex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complex.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Internal.swift" /* Internal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internal.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x2.swift" /* Matrix2x2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix2x2.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x3.swift" /* Matrix2x3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix2x3.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x4.swift" /* Matrix2x4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix2x4.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x2.swift" /* Matrix3x2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix3x2.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x3.swift" /* Matrix3x3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix3x3.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x4.swift" /* Matrix3x4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix3x4.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x2.swift" /* Matrix4x2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix4x2.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x3.swift" /* Matrix4x3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix4x3.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x4.swift" /* Matrix4x4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix4x4.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Protocols.swift" /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Quaternion.swift" /* Quaternion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Swizzle.swift" /* Swizzle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Swizzle.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector2.swift" /* Vector2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector2.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector2b.swift" /* Vector2b.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector2b.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector3.swift" /* Vector3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector3.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector3b.swift" /* Vector3b.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector3b.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector4.swift" /* Vector4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector4.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector4b.swift" /* Vector4b.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector4b.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/glm.swift" /* glm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = glm.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Commands.swift" /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Constants.swift" /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Loaders.swift" /* Loaders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loaders.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/SwiftGL.swift" /* SwiftGL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftGL.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/ColladaParser/Collada.swift /* Collada.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collada.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/ColladaParser/ColladaTypes.swift /* ColladaTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColladaTypes.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/ColladaParser/XMLParser.swift /* XMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLParser.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/DFGTexture.swift /* DFGTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DFGTexture.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Framebuffer.swift /* Framebuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Framebuffer.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/GPUBuffer.swift /* GPUBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUBuffer.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Light.swift /* Light.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Light.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Material.swift /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/MathExtensions.swift /* MathExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathExtensions.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Sources/PBRenderer/Mesh+ColladaMesh.swift" /* Mesh+ColladaMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mesh+ColladaMesh.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Mesh.swift /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/OpenCLContext.swift /* OpenCLContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCLContext.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/OpenCLProgram.swift /* OpenCLProgram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCLProgram.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/RenderStates.swift /* RenderStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderStates.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Resources.swift /* Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resources.swift; sourceTree = "<group>"; };
+		"__PBXFileRef_Sources/PBRenderer/SceneGraph+Collada.swift" /* SceneGraph+Collada.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SceneGraph+Collada.swift"; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/SceneGraph.swift /* SceneGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneGraph.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Shader.swift /* Shader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shader.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/ShaderProperties.swift /* ShaderProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderProperties.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Texture.swift /* Texture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Texture.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRenderer/Window.swift /* Window.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Window.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/PBRendererApp/main.swift /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		"_____Product_ColladaParser" /* libColladaParser.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libColladaParser.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		"_____Product_PBRenderer" /* libPBRenderer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libPBRenderer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		"_____Product_PBRendererApp" /* PBRendererApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = PBRendererApp; sourceTree = BUILT_PRODUCTS_DIR; };
+		"_____Product_SGLMath" /* libSGLMath.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libSGLMath.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		"_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libSGLOpenGL.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E96F4FB91CF14CC40032E601 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				E96F4FC91CF14DDB0032E601 /* AudioToolbox.framework in Frameworks */,
+				E96F4FBA1CF14CC40032E601 /* libSGLMath.dylib in Frameworks */,
+				E96F4FBB1CF14CC40032E601 /* libSGLOpenGL.dylib in Frameworks */,
+				E96F4FBC1CF14CC40032E601 /* libPBRenderer.dylib in Frameworks */,
+				E96F4FBD1CF14CC40032E601 /* libColladaParser.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		"___LinkPhase_ColladaParser" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				_LinkFileRef_SGLMath_via_ColladaParser /* libSGLMath.dylib in Frameworks */,
+				_LinkFileRef_SGLOpenGL_via_ColladaParser /* libSGLOpenGL.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		"___LinkPhase_PBRenderer" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				_LinkFileRef_SGLMath_via_PBRenderer /* libSGLMath.dylib in Frameworks */,
+				_LinkFileRef_SGLOpenGL_via_PBRenderer /* libSGLOpenGL.dylib in Frameworks */,
+				_LinkFileRef_ColladaParser_via_PBRenderer /* libColladaParser.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		"___LinkPhase_PBRendererApp" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				_LinkFileRef_SGLMath_via_PBRendererApp /* libSGLMath.dylib in Frameworks */,
+				_LinkFileRef_SGLOpenGL_via_PBRendererApp /* libSGLOpenGL.dylib in Frameworks */,
+				_LinkFileRef_PBRenderer_via_PBRendererApp /* libPBRenderer.dylib in Frameworks */,
+				_LinkFileRef_ColladaParser_via_PBRendererApp /* libColladaParser.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		"___LinkPhase_SGLMath" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		"___LinkPhase_SGLOpenGL" /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		Dependencies_ /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				"_______Group_SGLOpenGL" /* SGLOpenGL */,
+				"_______Group_SGLMath" /* SGLMath */,
+			);
+			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		E9176D8C1CFD36D5009993D5 /* Light Culling */ = {
+			isa = PBXGroup;
+			children = (
+				E917E17B1CFD9B8100247C99 /* VectorisedFragmentFactory.swift */,
+				E9176D891CFD26A0009993D5 /* LightGrid.swift */,
+				E9176D8D1CFD36EA009993D5 /* FragmentFactory.swift */,
+			);
+			name = "Light Culling";
+			sourceTree = "<group>";
+		};
+		E95BE0081D04DA1E001A75C6 /* Textures */ = {
+			isa = PBXGroup;
+			children = (
+				E96091BA1D066DBF00261BF2 /* 00261_OpenfootageNET_Beach04_LOW_cross.hdr */,
+				E95BE0091D04DA26001A75C6 /* ltc_amp_ggx.dat */,
+				E95BE00A1D04DA26001A75C6 /* ltc_mat_ggx.dat */,
+				E95BE00B1D04DA2E001A75C6 /* ltc_amp_disney.dat */,
+				E95BE00C1D04DA2E001A75C6 /* ltc_mat_disney.dat */,
+			);
+			name = Textures;
+			sourceTree = "<group>";
+		};
+		E9606E9F1CF5A9DD0003AA87 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				E9606EA01CF5A9DD0003AA87 /* OpenCL */,
+				E9606EA71CF5A9DD0003AA87 /* OpenGL */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		E9606EA01CF5A9DD0003AA87 /* OpenCL */ = {
+			isa = PBXGroup;
+			children = (
+				E9606EA11CF5A9DD0003AA87 /* BRDF.cl */,
+				E9606EA21CF5A9DD0003AA87 /* CLMath.cl */,
+				E9606EA31CF5A9DD0003AA87 /* LightAccumulationPass.cl */,
+				E9606EA41CF5A9DD0003AA87 /* LightAccumulationPassColourDepth.cl */,
+				E9606EA51CF5A9DD0003AA87 /* LightAccumulationPassDepth.cl */,
+				E980E5921CF7CEB100261333 /* CubeMaps.cl */,
+				E9606EA61CF5A9DD0003AA87 /* Utilities.cl */,
+			);
+			path = OpenCL;
+			sourceTree = "<group>";
+		};
+		E9606EA71CF5A9DD0003AA87 /* OpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				E9606EA81CF5A9DD0003AA87 /* BRDF.glsl */,
+				E9606EA91CF5A9DD0003AA87 /* Camera.glsl */,
+				E9606EAB1CF5A9DD0003AA87 /* DFGTexture.frag */,
+				E9606EBB1CF5B2610003AA87 /* LDDiffuseTexture.frag */,
+				E9606EBC1CF5B4D30003AA87 /* LDSpecularTexture.frag */,
+				E9606EBD1CF5B7790003AA87 /* LDSpecularTexturePassthrough.frag */,
+				E9606EAC1CF5A9DD0003AA87 /* Encoding.glsl */,
+				E9606EAD1CF5A9DD0003AA87 /* FinalPass.frag */,
+				E9606EAE1CF5A9DD0003AA87 /* ForwardPass.frag */,
+				E96091B81D05873600261BF2 /* LTC.glsl */,
+				E9606EAF1CF5A9DD0003AA87 /* ForwardPass.vert */,
+				E9F6AAC71CF7EC2300D43E75 /* LightProbe.glsl */,
+				E9606EB01CF5A9DD0003AA87 /* GeometryPass.frag */,
+				E9606EB11CF5A9DD0003AA87 /* GeometryPass.vert */,
+				E9606EB41CF5A9DD0003AA87 /* Lighting.glsl */,
+				E9606EB51CF5A9DD0003AA87 /* LightAccumulationPass.frag */,
+				E9A5BEC71D019B2900FB368E /* CameraSpacePositionVertexShader.vert */,
+				E96A88681CFFF2300063DD59 /* LightAccumulation.glsl */,
+				E96A88671CFFF2240063DD59 /* LightAccumulationPassDiffuseOnly.frag */,
+				E9606EB71CF5A9DD0003AA87 /* MaterialData.glsl */,
+				E9606EB81CF5A9DD0003AA87 /* PassthroughQuad.vert */,
+				E9606EB91CF5A9DD0003AA87 /* Sampling.glsl */,
+				E9606EBA1CF5A9DD0003AA87 /* Utilities.glsl */,
+				E96A88691D002CF80063DD59 /* ReflectionTracer.glsl */,
+				E9A5BEC81D022E1D00FB368E /* LinearBlurHorizontal.frag */,
+				E9A5BEC91D022E1D00FB368E /* LinearBlurVertical.frag */,
+				E9A5BEC41D011F4100FB368E /* ConeTracing.frag */,
+			);
+			path = OpenGL;
+			sourceTree = "<group>";
+		};
+		E96F4FAB1CF14C720032E601 /* PBRendererMusicApp */ = {
+			isa = PBXGroup;
+			children = (
+				E96F4FC81CF14DDB0032E601 /* AudioToolbox.framework */,
+				E96F4FC61CF14D5B0032E601 /* MIDIEventType.swift */,
+				E96F4FAD1CF14C860032E601 /* main.swift */,
+				E96F4FCA1CF14EDE0032E601 /* Song.swift */,
+				E90A88911CFA723900F11FD4 /* Animation.swift */,
+				E9176D7E1CFBAE16009993D5 /* HighMotifEvent.swift */,
+				E9176D811CFBC2B5009993D5 /* DrivingChordsEvent.swift */,
+				E9176D831CFCFC0E009993D5 /* KickSnareEvent.swift */,
+				E96A88361CFF97FA0063DD59 /* MainMelodyEvent.swift */,
+				E954D9A91D0AC0C100F1EB00 /* SecondaryMelodyEvent.swift */,
+				E96A88391CFF9C2D0063DD59 /* LowBassEvent.swift */,
+			);
+			name = PBRendererMusicApp;
+			path = Sources/PBRendererMusicApp;
+			sourceTree = "<group>";
+		};
+		E96F4FCC1CF161640032E601 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E95BE0081D04DA1E001A75C6 /* Textures */,
+				E9606E9F1CF5A9DD0003AA87 /* Shaders */,
+				E96F4FD21CF161640032E601 /* ColladaTestScene.dae */,
+				E96F4FE21CF161640032E601 /* stpeters_probe.hdr */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		E9FA27981DB0936400B825D6 /* PBRendererCLibs */ = {
+			isa = PBXGroup;
+			children = (
+				E9FA27A31DB093DF00B825D6 /* cimgui */,
+				E9FA27A81DB093DF00B825D6 /* imgui */,
+				E9FA27B41DB093DF00B825D6 /* ImGuiCInclude.h */,
+				E9FA27B51DB093DF00B825D6 /* Implementation.c */,
+				E9FA27B61DB093DF00B825D6 /* Makefile */,
+				E9FA27B71DB093DF00B825D6 /* PBRendererCLibs.h */,
+				E9FA27BB1DB093DF00B825D6 /* SOIL2 */,
+				E9FA27A21DB093DE00B825D6 /* PBRenderer-Bridging-Header.h */,
+			);
+			name = PBRendererCLibs;
+			path = "Packages/CPBRendererLibs-1.0.0/PBRendererCLibs";
+			sourceTree = "<group>";
+		};
+		E9FA27A31DB093DF00B825D6 /* cimgui */ = {
+			isa = PBXGroup;
+			children = (
+				E9FA27A41DB093DF00B825D6 /* cimgui.cpp */,
+				E9FA27A51DB093DF00B825D6 /* cimgui.h */,
+				E9FA27A61DB093DF00B825D6 /* drawList.cpp */,
+				E9FA27A71DB093DF00B825D6 /* fontAtlas.cpp */,
+			);
+			path = cimgui;
+			sourceTree = "<group>";
+		};
+		E9FA27A81DB093DF00B825D6 /* imgui */ = {
+			isa = PBXGroup;
+			children = (
+				E9FA27A91DB093DF00B825D6 /* imconfig.h */,
+				E9FA27AA1DB093DF00B825D6 /* imgui.cpp */,
+				E9FA27AB1DB093DF00B825D6 /* imgui.h */,
+				E9FA27AC1DB093DF00B825D6 /* imgui_demo.cpp */,
+				E9FA27AD1DB093DF00B825D6 /* imgui_draw.cpp */,
+				E9FA27AE1DB093DF00B825D6 /* imgui_internal.h */,
+				E9FA27AF1DB093DF00B825D6 /* LICENSE */,
+				E9FA27B01DB093DF00B825D6 /* README.md */,
+				E9FA27B11DB093DF00B825D6 /* stb_rect_pack.h */,
+				E9FA27B21DB093DF00B825D6 /* stb_textedit.h */,
+				E9FA27B31DB093DF00B825D6 /* stb_truetype.h */,
+			);
+			path = imgui;
+			sourceTree = "<group>";
+		};
+		E9FA27BB1DB093DF00B825D6 /* SOIL2 */ = {
+			isa = PBXGroup;
+			children = (
+				E9FA27BC1DB093DF00B825D6 /* etc1_utils.c */,
+				E9FA27BD1DB093DF00B825D6 /* etc1_utils.h */,
+				E9FA27BE1DB093DF00B825D6 /* image_DXT.c */,
+				E9FA27BF1DB093DF00B825D6 /* image_DXT.h */,
+				E9FA27C01DB093DF00B825D6 /* image_helper.c */,
+				E9FA27C11DB093DF00B825D6 /* image_helper.h */,
+				E9FA27C21DB093DF00B825D6 /* pkm_helper.h */,
+				E9FA27C31DB093DF00B825D6 /* pvr_helper.h */,
+				E9FA27C41DB093DF00B825D6 /* stb_image.h */,
+				E9FA27C51DB093DF00B825D6 /* stb_image_write.h */,
+				E9FA27C61DB093DF00B825D6 /* stbi_DDS.h */,
+				E9FA27C71DB093DF00B825D6 /* stbi_DDS_c.h */,
+				E9FA27C81DB093DF00B825D6 /* stbi_ext.h */,
+				E9FA27C91DB093DF00B825D6 /* stbi_ext_c.h */,
+				E9FA27CA1DB093DF00B825D6 /* stbi_pkm.h */,
+				E9FA27CB1DB093DF00B825D6 /* stbi_pkm_c.h */,
+				E9FA27CC1DB093DF00B825D6 /* stbi_pvr.h */,
+				E9FA27CD1DB093DF00B825D6 /* stbi_pvr_c.h */,
+			);
+			path = SOIL2;
+			sourceTree = "<group>";
+		};
+		"___RootGroup_" = {
+			isa = PBXGroup;
+			children = (
+				__PBXFileRef_Package.swift /* Package.swift */,
+				E96F4FCC1CF161640032E601 /* Resources */,
+				"_____Configs_" /* Configs */,
+				"_____Sources_" /* Sources */,
+				Dependencies_ /* Dependencies */,
+				"____Products_" /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		"____Products_" /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				"_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */,
+				"_____Product_SGLMath" /* libSGLMath.dylib */,
+				"_____Product_ColladaParser" /* libColladaParser.dylib */,
+				"_____Product_PBRenderer" /* libPBRenderer.dylib */,
+				"_____Product_PBRendererApp" /* PBRendererApp */,
+				E96F4FC11CF14CC40032E601 /* PBRendererMusic */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		"_____Configs_" /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				__PBXFileRef_PBRenderer.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */,
+			);
+			name = Configs;
+			sourceTree = "<group>";
+		};
+		"_____Sources_" /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E9FA27981DB0936400B825D6 /* PBRendererCLibs */,
+				E96F4FAB1CF14C720032E601 /* PBRendererMusicApp */,
+				"_______Group_ColladaParser" /* ColladaParser */,
+				"_______Group_PBRenderer" /* PBRenderer */,
+				"_______Group_PBRendererApp" /* PBRendererApp */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		"_______Group_ColladaParser" /* ColladaParser */ = {
+			isa = PBXGroup;
+			children = (
+				__PBXFileRef_Sources/ColladaParser/Collada.swift /* Collada.swift */,
+				__PBXFileRef_Sources/ColladaParser/ColladaTypes.swift /* ColladaTypes.swift */,
+				__PBXFileRef_Sources/ColladaParser/XMLParser.swift /* XMLParser.swift */,
+			);
+			name = ColladaParser;
+			path = Sources/ColladaParser;
+			sourceTree = "<group>";
+		};
+		"_______Group_PBRenderer" /* PBRenderer */ = {
+			isa = PBXGroup;
+			children = (
+				E954D9A41D093C1800F1EB00 /* ShadowMapPass.swift */,
+				__PBXFileRef_Sources/PBRenderer/DFGTexture.swift /* DFGTexture.swift */,
+				E9606E9C1CF5A8C50003AA87 /* LDTexture.swift */,
+				__PBXFileRef_Sources/PBRenderer/Framebuffer.swift /* Framebuffer.swift */,
+				__PBXFileRef_Sources/PBRenderer/GPUBuffer.swift /* GPUBuffer.swift */,
+				__PBXFileRef_Sources/PBRenderer/Light.swift /* Light.swift */,
+				__PBXFileRef_Sources/PBRenderer/Material.swift /* Material.swift */,
+				__PBXFileRef_Sources/PBRenderer/MathExtensions.swift /* MathExtensions.swift */,
+				"__PBXFileRef_Sources/PBRenderer/Mesh+ColladaMesh.swift" /* Mesh+ColladaMesh.swift */,
+				__PBXFileRef_Sources/PBRenderer/Mesh.swift /* Mesh.swift */,
+				__PBXFileRef_Sources/PBRenderer/OpenCLContext.swift /* OpenCLContext.swift */,
+				__PBXFileRef_Sources/PBRenderer/OpenCLProgram.swift /* OpenCLProgram.swift */,
+				__PBXFileRef_Sources/PBRenderer/RenderStates.swift /* RenderStates.swift */,
+				__PBXFileRef_Sources/PBRenderer/Resources.swift /* Resources.swift */,
+				E96091BC1D077AE100261BF2 /* OutlinePass.swift */,
+				E96091C31D07AC8200261BF2 /* Frustum.swift */,
+				"__PBXFileRef_Sources/PBRenderer/SceneGraph+Collada.swift" /* SceneGraph+Collada.swift */,
+				__PBXFileRef_Sources/PBRenderer/SceneGraph.swift /* SceneGraph.swift */,
+				E94DCD841CF538760055BBDB /* SceneRenderer.swift */,
+				E96A88641CFFDB1E0063DD59 /* LightProbe.swift */,
+				E917E7481CFE76F7009B94F7 /* LightAccumulationPass.swift */,
+				E9A5BEC51D01763700FB368E /* ScreenSpaceReflections.swift */,
+				__PBXFileRef_Sources/PBRenderer/Shader.swift /* Shader.swift */,
+				__PBXFileRef_Sources/PBRenderer/ShaderProperties.swift /* ShaderProperties.swift */,
+				__PBXFileRef_Sources/PBRenderer/Texture.swift /* Texture.swift */,
+				__PBXFileRef_Sources/PBRenderer/Window.swift /* Window.swift */,
+				E9606EBE1CF6599D0003AA87 /* TextureLoader.swift */,
+				E9606EC01CF67DC60003AA87 /* Sampler.swift */,
+				E993C10C1D0803330017E384 /* ImGui.swift */,
+				E9176D8C1CFD36D5009993D5 /* Light Culling */,
+				E997652C1D02F83B000B9387 /* BoundingVolume.swift */,
+				E96091C11D079E3E00261BF2 /* Octree.swift */,
+			);
+			name = PBRenderer;
+			path = Sources/PBRenderer;
+			sourceTree = "<group>";
+		};
+		"_______Group_PBRendererApp" /* PBRendererApp */ = {
+			isa = PBXGroup;
+			children = (
+				__PBXFileRef_Sources/PBRendererApp/main.swift /* main.swift */,
+			);
+			name = PBRendererApp;
+			path = Sources/PBRendererApp;
+			sourceTree = "<group>";
+		};
+		"_______Group_SGLMath" /* SGLMath */ = {
+			isa = PBXGroup;
+			children = (
+				E9DEB0F31DAF9AEC001CD48E /* glsl.swift */,
+				E9DEB0F01DAF9AE6001CD48E /* Operators.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Complex.swift" /* Complex.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/glm.swift" /* glm.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Internal.swift" /* Internal.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x2.swift" /* Matrix2x2.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x3.swift" /* Matrix2x3.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix2x4.swift" /* Matrix2x4.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x2.swift" /* Matrix3x2.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x3.swift" /* Matrix3x3.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix3x4.swift" /* Matrix3x4.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x2.swift" /* Matrix4x2.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x3.swift" /* Matrix4x3.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Matrix4x4.swift" /* Matrix4x4.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Protocols.swift" /* Protocols.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Quaternion.swift" /* Quaternion.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Swizzle.swift" /* Swizzle.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector2.swift" /* Vector2.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector2b.swift" /* Vector2b.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector3.swift" /* Vector3.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector3b.swift" /* Vector3b.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector4.swift" /* Vector4.swift */,
+				"__PBXFileRef_Packages/SGLMath-1.0.8/Sources/Vector4b.swift" /* Vector4b.swift */,
+			);
+			name = SGLMath;
+			path = "Packages/SGLMath-1.0.8/Sources";
+			sourceTree = "<group>";
+		};
+		"_______Group_SGLOpenGL" /* SGLOpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Commands.swift" /* Commands.swift */,
+				"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Constants.swift" /* Constants.swift */,
+				"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/Loaders.swift" /* Loaders.swift */,
+				"__PBXFileRef_Packages/SGLOpenGL-2.1.0/Sources/SwiftGL.swift" /* SwiftGL.swift */,
+			);
+			name = SGLOpenGL;
+			path = "Packages/SGLOpenGL-2.1.0/Sources";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E96F4FAE1CF14CC40032E601 /* PBRendererMusic */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E96F4FBE1CF14CC40032E601 /* Build configuration list for PBXNativeTarget "PBRendererMusic" */;
+			buildPhases = (
+				E96F4FB71CF14CC40032E601 /* Sources */,
+				E96F4FB91CF14CC40032E601 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E96F4FAF1CF14CC40032E601 /* PBXTargetDependency */,
+				E96F4FB11CF14CC40032E601 /* PBXTargetDependency */,
+				E96F4FB31CF14CC40032E601 /* PBXTargetDependency */,
+				E96F4FB51CF14CC40032E601 /* PBXTargetDependency */,
+			);
+			name = PBRendererMusic;
+			productName = PBRendererApp;
+			productReference = E96F4FC11CF14CC40032E601 /* PBRendererMusic */;
+			productType = "com.apple.product-type.tool";
+		};
+		"______Target_ColladaParser" /* ColladaParser */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_ColladaParser" /* Build configuration list for PBXNativeTarget "ColladaParser" */;
+			buildPhases = (
+				CompilePhase_ColladaParser /* Sources */,
+				"___LinkPhase_ColladaParser" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				__Dependency_SGLMath /* PBXTargetDependency */,
+				__Dependency_SGLOpenGL /* PBXTargetDependency */,
+			);
+			name = ColladaParser;
+			productName = ColladaParser;
+			productReference = "_____Product_ColladaParser" /* libColladaParser.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		"______Target_PBRenderer" /* PBRenderer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_PBRenderer" /* Build configuration list for PBXNativeTarget "PBRenderer" */;
+			buildPhases = (
+				CompilePhase_PBRenderer /* Sources */,
+				"___LinkPhase_PBRenderer" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				__Dependency_SGLMath /* PBXTargetDependency */,
+				__Dependency_SGLOpenGL /* PBXTargetDependency */,
+				__Dependency_ColladaParser /* PBXTargetDependency */,
+			);
+			name = PBRenderer;
+			productName = PBRenderer;
+			productReference = "_____Product_PBRenderer" /* libPBRenderer.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		"______Target_PBRendererApp" /* PBRendererApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_PBRendererApp" /* Build configuration list for PBXNativeTarget "PBRendererApp" */;
+			buildPhases = (
+				CompilePhase_PBRendererApp /* Sources */,
+				"___LinkPhase_PBRendererApp" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				__Dependency_SGLMath /* PBXTargetDependency */,
+				__Dependency_SGLOpenGL /* PBXTargetDependency */,
+				__Dependency_PBRenderer /* PBXTargetDependency */,
+				__Dependency_ColladaParser /* PBXTargetDependency */,
+			);
+			name = PBRendererApp;
+			productName = PBRendererApp;
+			productReference = "_____Product_PBRendererApp" /* PBRendererApp */;
+			productType = "com.apple.product-type.tool";
+		};
+		"______Target_SGLMath" /* SGLMath */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_SGLMath" /* Build configuration list for PBXNativeTarget "SGLMath" */;
+			buildPhases = (
+				CompilePhase_SGLMath /* Sources */,
+				"___LinkPhase_SGLMath" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SGLMath;
+			productName = SGLMath;
+			productReference = "_____Product_SGLMath" /* libSGLMath.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		"______Target_SGLOpenGL" /* SGLOpenGL */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = "_______Confs_SGLOpenGL" /* Build configuration list for PBXNativeTarget "SGLOpenGL" */;
+			buildPhases = (
+				CompilePhase_SGLOpenGL /* Sources */,
+				"___LinkPhase_SGLOpenGL" /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SGLOpenGL;
+			productName = SGLOpenGL;
+			productReference = "_____Product_SGLOpenGL" /* libSGLOpenGL.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		__RootObject_ /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				TargetAttributes = {
+					"______Target_ColladaParser" = {
+						LastSwiftMigration = 0800;
+					};
+					"______Target_PBRenderer" = {
+						LastSwiftMigration = 0800;
+					};
+					"______Target_PBRendererApp" = {
+						LastSwiftMigration = 0800;
+					};
+					"______Target_SGLMath" = {
+						LastSwiftMigration = 0800;
+					};
+					"______Target_SGLOpenGL" = {
+						LastSwiftMigration = 0800;
+					};
+				};
+			};
+			buildConfigurationList = "___RootConfs_" /* Build configuration list for PBXProject "PBRenderer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = "___RootGroup_";
+			productRefGroup = "____Products_" /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				"______Target_SGLOpenGL" /* SGLOpenGL */,
+				"______Target_SGLMath" /* SGLMath */,
+				"______Target_ColladaParser" /* ColladaParser */,
+				"______Target_PBRenderer" /* PBRenderer */,
+				"______Target_PBRendererApp" /* PBRendererApp */,
+				E96F4FAE1CF14CC40032E601 /* PBRendererMusic */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CompilePhase_ColladaParser /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				__src_cc_ref_Sources/ColladaParser/Collada.swift /* Collada.swift in Sources */,
+				__src_cc_ref_Sources/ColladaParser/ColladaTypes.swift /* ColladaTypes.swift in Sources */,
+				__src_cc_ref_Sources/ColladaParser/XMLParser.swift /* XMLParser.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CompilePhase_PBRenderer /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				E9606EBF1CF6599D0003AA87 /* TextureLoader.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/DFGTexture.swift /* DFGTexture.swift in Sources */,
+				E96091C41D07AC8200261BF2 /* Frustum.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Framebuffer.swift /* Framebuffer.swift in Sources */,
+				E96091BD1D077AE100261BF2 /* OutlinePass.swift in Sources */,
+				E94199281CFD3A5D00A0890C /* FragmentFactory.swift in Sources */,
+				E9FA27D81DB093DF00B825D6 /* etc1_utils.c in Sources */,
+				E9A5BEC61D01763700FB368E /* ScreenSpaceReflections.swift in Sources */,
+				E9FA27D71DB093DF00B825D6 /* Makefile in Sources */,
+				E997652D1D02F83B000B9387 /* BoundingVolume.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/GPUBuffer.swift /* GPUBuffer.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Light.swift /* Light.swift in Sources */,
+				E917E17E1CFD9F9400247C99 /* VectorisedFragmentFactory.swift in Sources */,
+				E96091C21D079E3F00261BF2 /* Octree.swift in Sources */,
+				E9FA27D91DB093DF00B825D6 /* image_DXT.c in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Material.swift /* Material.swift in Sources */,
+				E9FA27D21DB093DF00B825D6 /* imgui.cpp in Sources */,
+				E917E7491CFE76F7009B94F7 /* LightAccumulationPass.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/MathExtensions.swift /* MathExtensions.swift in Sources */,
+				E9FA27D01DB093DF00B825D6 /* drawList.cpp in Sources */,
+				"__src_cc_ref_Sources/PBRenderer/Mesh+ColladaMesh.swift" /* Mesh+ColladaMesh.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Mesh.swift /* Mesh.swift in Sources */,
+				E9606E9D1CF5A8C50003AA87 /* LDTexture.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/OpenCLContext.swift /* OpenCLContext.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/OpenCLProgram.swift /* OpenCLProgram.swift in Sources */,
+				E94DCD851CF538760055BBDB /* SceneRenderer.swift in Sources */,
+				E9FA27D41DB093DF00B825D6 /* imgui_draw.cpp in Sources */,
+				__src_cc_ref_Sources/PBRenderer/RenderStates.swift /* RenderStates.swift in Sources */,
+				E9FA27D61DB093DF00B825D6 /* Implementation.c in Sources */,
+				E993C10D1D0803330017E384 /* ImGui.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Resources.swift /* Resources.swift in Sources */,
+				E96A88661CFFDB360063DD59 /* LightProbe.swift in Sources */,
+				E9176D8B1CFD3254009993D5 /* LightGrid.swift in Sources */,
+				"__src_cc_ref_Sources/PBRenderer/SceneGraph+Collada.swift" /* SceneGraph+Collada.swift in Sources */,
+				E9FA27D31DB093DF00B825D6 /* imgui_demo.cpp in Sources */,
+				__src_cc_ref_Sources/PBRenderer/SceneGraph.swift /* SceneGraph.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Shader.swift /* Shader.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/ShaderProperties.swift /* ShaderProperties.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Texture.swift /* Texture.swift in Sources */,
+				E9606EC11CF67DC60003AA87 /* Sampler.swift in Sources */,
+				__src_cc_ref_Sources/PBRenderer/Window.swift /* Window.swift in Sources */,
+				E9FA27CF1DB093DF00B825D6 /* cimgui.cpp in Sources */,
+				E9FA27D11DB093DF00B825D6 /* fontAtlas.cpp in Sources */,
+				E9FA27D51DB093DF00B825D6 /* README.md in Sources */,
+				E954D9A71D093C2200F1EB00 /* ShadowMapPass.swift in Sources */,
+				E9FA27DA1DB093DF00B825D6 /* image_helper.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CompilePhase_PBRendererApp /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				__src_cc_ref_Sources/PBRendererApp/main.swift /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CompilePhase_SGLMath /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Complex.swift" /* Complex.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/glm.swift" /* glm.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Internal.swift" /* Internal.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix2x2.swift" /* Matrix2x2.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix2x3.swift" /* Matrix2x3.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix2x4.swift" /* Matrix2x4.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix3x2.swift" /* Matrix3x2.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix3x3.swift" /* Matrix3x3.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix3x4.swift" /* Matrix3x4.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix4x2.swift" /* Matrix4x2.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix4x3.swift" /* Matrix4x3.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Matrix4x4.swift" /* Matrix4x4.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Protocols.swift" /* Protocols.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Quaternion.swift" /* Quaternion.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Swizzle.swift" /* Swizzle.swift in Sources */,
+				E9DEB0F41DAF9AEC001CD48E /* glsl.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector2.swift" /* Vector2.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector2b.swift" /* Vector2b.swift in Sources */,
+				E9DEB0F11DAF9AE6001CD48E /* Operators.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector3.swift" /* Vector3.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector3b.swift" /* Vector3b.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector4.swift" /* Vector4.swift in Sources */,
+				"__src_cc_ref_Packages/SGLMath-1.0.8/Sources/Vector4b.swift" /* Vector4b.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CompilePhase_SGLOpenGL /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				E9606EC31CF6C7B70003AA87 /* SwiftGL.swift in Sources */,
+				"__src_cc_ref_Packages/SGLOpenGL-2.1.0/Sources/Commands.swift" /* Commands.swift in Sources */,
+				"__src_cc_ref_Packages/SGLOpenGL-2.1.0/Sources/Constants.swift" /* Constants.swift in Sources */,
+				"__src_cc_ref_Packages/SGLOpenGL-2.1.0/Sources/Loaders.swift" /* Loaders.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E96F4FB71CF14CC40032E601 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				E96F4FCB1CF14EDE0032E601 /* Song.swift in Sources */,
+				E96A88381CFF97FB0063DD59 /* MainMelodyEvent.swift in Sources */,
+				E96F4FC21CF14D110032E601 /* main.swift in Sources */,
+				E954D9AA1D0AC0C100F1EB00 /* SecondaryMelodyEvent.swift in Sources */,
+				E96A883A1CFF9C2D0063DD59 /* LowBassEvent.swift in Sources */,
+				E9176D841CFCFC0E009993D5 /* KickSnareEvent.swift in Sources */,
+				E90A88941CFA723D00F11FD4 /* Animation.swift in Sources */,
+				E9176D821CFBC2B5009993D5 /* DrivingChordsEvent.swift in Sources */,
+				E96F4FC71CF14D5B0032E601 /* MIDIEventType.swift in Sources */,
+				E9176D7F1CFBAE16009993D5 /* HighMotifEvent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E96F4FAF1CF14CC40032E601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_SGLMath" /* SGLMath */;
+			targetProxy = E96F4FB01CF14CC40032E601 /* PBXContainerItemProxy */;
+		};
+		E96F4FB11CF14CC40032E601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_SGLOpenGL" /* SGLOpenGL */;
+			targetProxy = E96F4FB21CF14CC40032E601 /* PBXContainerItemProxy */;
+		};
+		E96F4FB31CF14CC40032E601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_PBRenderer" /* PBRenderer */;
+			targetProxy = E96F4FB41CF14CC40032E601 /* PBXContainerItemProxy */;
+		};
+		E96F4FB51CF14CC40032E601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_ColladaParser" /* ColladaParser */;
+			targetProxy = E96F4FB61CF14CC40032E601 /* PBXContainerItemProxy */;
+		};
+		__Dependency_ColladaParser /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_ColladaParser" /* ColladaParser */;
+			targetProxy = E96F4F631CF141040032E601 /* PBXContainerItemProxy */;
+		};
+		__Dependency_PBRenderer /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_PBRenderer" /* PBRenderer */;
+			targetProxy = E96F4F641CF141060032E601 /* PBXContainerItemProxy */;
+		};
+		__Dependency_SGLMath /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_SGLMath" /* SGLMath */;
+			targetProxy = E96F4F611CF141040032E601 /* PBXContainerItemProxy */;
+		};
+		__Dependency_SGLOpenGL /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "______Target_SGLOpenGL" /* SGLOpenGL */;
+			targetProxy = E96F4F621CF141040032E601 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		E96F4FBF1CF14CC40032E601 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Packages/CGLFW3-1.0.0",
+					"$(SRCROOT)/Packages/CPBRendererLibs-1.0.0",
+					"$(SRCROOT)/Packages/CLibXML2-1.0.2",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E96F4FC01CF14CC40032E601 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Packages/CGLFW3-1.0.0",
+					"$(SRCROOT)/Packages/CPBRendererLibs-1.0.0",
+					"$(SRCROOT)/Packages/CLibXML2-1.0.2",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DISABLE_SAFETY_CHECKS = YES;
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+		_ReleaseConf_ColladaParser /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/Packages/CLibXML2-1.0.2";
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		_ReleaseConf_PBRenderer /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_TESTABILITY = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Packages/CGLFW3-1.0.0",
+					"$(SRCROOT)/Packages/CPBRendererLibs-1.0.0",
+					"$(SRCROOT)/Packages/CLibXML2-1.0.2",
+					"\"/usr/include\"",
+					"\"/opt/local/include/libxml2\"",
+					usr/local/include,
+				);
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Packages/CPBRendererLibs-1.0.0/PBRendererCLibs/PBRenderer-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		_ReleaseConf_PBRendererApp /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Packages/CGLFW3-1.0.0",
+					"$(SRCROOT)/Packages/CPBRendererLibs-1.0.0",
+					"$(SRCROOT)/Packages/CLibXML2-1.0.2",
+					"\"/opt/local/include/libxml2\"",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		_ReleaseConf_SGLMath /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		_ReleaseConf_SGLOpenGL /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		"___DebugConf_ColladaParser" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/Packages/CLibXML2-1.0.2";
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		"___DebugConf_PBRenderer" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_TESTABILITY = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Packages/CGLFW3-1.0.0",
+					"$(SRCROOT)/Packages/CPBRendererLibs-1.0.0",
+					"$(SRCROOT)/Packages/CLibXML2-1.0.2",
+					"\"/usr/include\"",
+					"\"/opt/local/include/libxml2\"",
+					usr/local/include,
+				);
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Packages/CPBRendererLibs-1.0.0/PBRendererCLibs/PBRenderer-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		"___DebugConf_PBRendererApp" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Packages/CGLFW3-1.0.0",
+					"$(SRCROOT)/Packages/CPBRendererLibs-1.0.0",
+					"$(SRCROOT)/Packages/CLibXML2-1.0.2",
+					"\"/opt/local/include/libxml2\"",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		"___DebugConf_SGLMath" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		"___DebugConf_SGLOpenGL" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "lib$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		"_____Release_" /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = __PBXFileRef_PBRenderer.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */;
+			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				OTHER_SWIFT_FLAGS = "-I/opt/local/include/libxml2 -DXcode";
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		"_______Debug_" /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = __PBXFileRef_PBRenderer.xcodeproj/Configs/Project.xcconfig /* Project.xcconfig */;
+			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "-I/opt/local/include/libxml2 -DXcode";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E96F4FBE1CF14CC40032E601 /* Build configuration list for PBXNativeTarget "PBRendererMusic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E96F4FBF1CF14CC40032E601 /* Debug */,
+				E96F4FC01CF14CC40032E601 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"___RootConfs_" /* Build configuration list for PBXProject "PBRenderer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"_______Debug_" /* Debug */,
+				"_____Release_" /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_ColladaParser" /* Build configuration list for PBXNativeTarget "ColladaParser" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_ColladaParser" /* Debug */,
+				_ReleaseConf_ColladaParser /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_PBRenderer" /* Build configuration list for PBXNativeTarget "PBRenderer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_PBRenderer" /* Debug */,
+				_ReleaseConf_PBRenderer /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_PBRendererApp" /* Build configuration list for PBXNativeTarget "PBRendererApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_PBRendererApp" /* Debug */,
+				_ReleaseConf_PBRendererApp /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_SGLMath" /* Build configuration list for PBXNativeTarget "SGLMath" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_SGLMath" /* Debug */,
+				_ReleaseConf_SGLMath /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		"_______Confs_SGLOpenGL" /* Build configuration list for PBXNativeTarget "SGLOpenGL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"___DebugConf_SGLOpenGL" /* Debug */,
+				_ReleaseConf_SGLOpenGL /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = __RootObject_ /* Project object */;
+}

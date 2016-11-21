@@ -1,0 +1,51 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "496E88F0457D7C9159011C48A75512D1931B27F9",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "609906054A5713C42BD379809D427EC3E3DD7E10" : 0,
+    "DF7050CA8C360A45F4B0790469F3164173B04DE8" : 0,
+    "496E88F0457D7C9159011C48A75512D1931B27F9" : 0,
+    "943FAC1E851A72A254BE9A7257CC46C0BD731CC4" : 0,
+    "343B4A17FCD3D5C4463317786AF4B1C728327C01" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "811C9F81-68F6-4D90-9BB5-BA6E033F39FF",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "609906054A5713C42BD379809D427EC3E3DD7E10" : "PBRenderer\/Packages\/SGLOpenGL-2.1.0\/",
+    "DF7050CA8C360A45F4B0790469F3164173B04DE8" : "PBRenderer\/Packages\/SGLImage-1.0.1\/",
+    "496E88F0457D7C9159011C48A75512D1931B27F9" : "PBRenderer\/",
+    "943FAC1E851A72A254BE9A7257CC46C0BD731CC4" : "PBRenderer\/Packages\/CPBRendererLibs-1.0.0\/",
+    "343B4A17FCD3D5C4463317786AF4B1C728327C01" : "PBRenderer\/Packages\/SGLMath-1.0.8\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "PBRenderer",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "PBRenderer.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/troughton\/Math.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "343B4A17FCD3D5C4463317786AF4B1C728327C01"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/troughton\/PBRenderer.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "496E88F0457D7C9159011C48A75512D1931B27F9"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/troughton\/OpenGL.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "609906054A5713C42BD379809D427EC3E3DD7E10"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/troughton\/CPBRendererLibs.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "943FAC1E851A72A254BE9A7257CC46C0BD731CC4"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/SwiftGL\/Image.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "DF7050CA8C360A45F4B0790469F3164173B04DE8"
+    }
+  ]
+}

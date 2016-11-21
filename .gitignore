@@ -1,6 +1,4 @@
 .DS_Store
-*.xcodeproj
 .build/
-Packages/
 
 imgui.ini

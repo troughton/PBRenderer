@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/SceneGraph+Collada.swift"
+            timestampString = "487324970.922194"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "263"
+            endingLineNumber = "263"
+            landmarkName = "init(colladaNode:root:sourcesToMeshes:materials:lights:parentTransform:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PBRenderer.SceneNode.init (colladaNode : ColladaParser.NodeType, root : ColladaParser.Collada, sourcesToMeshes : Swift.Dictionary&lt;Swift.String, Swift.Array&lt;PBRenderer.GLMesh&gt;&gt;, materials : Swift.Dictionary&lt;Swift.String, PBRenderer.GPUBufferElement&lt;PBRenderer.Material&gt;&gt;, parentTransform : Swift.Optional&lt;PBRenderer.Transform&gt;) -&gt; PBRenderer.SceneNode"
+                  moduleName = "PBRenderer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Thomas/Library/Mobile%20Documents/com~apple~CloudDocs/University/COMP%20308%20-%20Computer%20Graphics/PBRenderer/Sources/PBRenderer/SceneGraph+Collada.swift"
+                  timestampString = "485261098.760338"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "181"
+                  endingLineNumber = "181"
+                  offsetFromSymbolStart = "10785">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PBRenderer.SceneNode.(init (colladaNode : ColladaParser.NodeType, root : ColladaParser.Collada, sourcesToMeshes : Swift.Dictionary&lt;Swift.String, Swift.Array&lt;PBRenderer.GLMesh&gt;&gt;, materials : Swift.Dictionary&lt;Swift.String, PBRenderer.GPUBufferElement&lt;PBRenderer.Material&gt;&gt;, parentTransform : Swift.Optional&lt;PBRenderer.Transform&gt;) -&gt; PBRenderer.SceneNode).(closure #3)"
+                  moduleName = "PBRenderer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Thomas/Library/Mobile%20Documents/com~apple~CloudDocs/University/COMP%20308%20-%20Computer%20Graphics/PBRenderer/Sources/PBRenderer/SceneGraph+Collada.swift"
+                  timestampString = "485261098.760457"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "181"
+                  endingLineNumber = "181"
+                  offsetFromSymbolStart = "19">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PBRenderer.SceneNode.(init (colladaNode : ColladaParser.NodeType, root : ColladaParser.Collada, sourcesToMeshes : Swift.Dictionary&lt;Swift.String, Swift.Array&lt;PBRenderer.GLMesh&gt;&gt;, materials : Swift.Dictionary&lt;Swift.String, PBRenderer.GPUBufferElement&lt;PBRenderer.Material&gt;&gt;, parentTransform : Swift.Optional&lt;PBRenderer.Transform&gt;) -&gt; PBRenderer.SceneNode).(closure #4)"
+                  moduleName = "PBRenderer"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Thomas/Library/Mobile%20Documents/com~apple~CloudDocs/University/COMP%20308%20-%20Computer%20Graphics/PBRenderer/Sources/PBRenderer/SceneGraph+Collada.swift"
+                  timestampString = "485261098.760538"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "183"
+                  endingLineNumber = "183"
+                  offsetFromSymbolStart = "18">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/Light.swift"
+            timestampString = "487210834.209425"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "348"
+            endingLineNumber = "348"
+            landmarkName = "Light"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/RenderWindow.swift"
+            timestampString = "485648294.610304"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
+            landmarkName = "calculateNearPlaneSize(zNear:cameraAspect:projectionMatrix:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/FragmentFactory.swift"
+            timestampString = "487159424.802752"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "129"
+            endingLineNumber = "129"
+            landmarkName = "GenerateLightFragments(fragmentFactory:builder:camera:light:lightIndex:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/FragmentFactory.swift"
+            timestampString = "487159424.802752"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "106"
+            endingLineNumber = "106"
+            landmarkName = "ComputeClipRegion(lightPosView:lightRadius:cameraProj:cameraNearFar:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/Texture.swift"
+            timestampString = "486962096.417795"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "367"
+            endingLineNumber = "367"
+            landmarkName = "bindToFramebuffer(_:attachment:mipmapLevel:textureSlice:depthPlane:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRendererApp/ImGui.swift"
+            timestampString = "486633773.450912"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "94"
+            endingLineNumber = "94"
+            landmarkName = "renderCameraUI(state:camera:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/ImGui.swift"
+            timestampString = "498122079.522161"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "191"
+            endingLineNumber = "191"
+            landmarkName = "renderLightControls(_:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/ImGui.swift"
+            timestampString = "498122079.522161"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "210"
+            endingLineNumber = "210"
+            landmarkName = "renderLightControls(_:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/Light.swift"
+            timestampString = "487212928.592649"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
+            landmarkName = "toLuminousIntensity(forLightType:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/SceneGraph.swift"
+            timestampString = "487292275.501886"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "274"
+            endingLineNumber = "274"
+            landmarkName = "calculateNodeToWorldMatrix()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/SceneGraph.swift"
+            timestampString = "487291959.260369"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "149"
+            endingLineNumber = "149"
+            landmarkName = "transformDidChange()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/SceneGraph.swift"
+            timestampString = "487292194.061406"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "233"
+            endingLineNumber = "233"
+            landmarkName = "Transform"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PBRenderer.Transform.rotation.didset : SGLMath.Quaternion&lt;Swift.Float&gt;"
+                  moduleName = "libPBRenderer.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Thomas/Desktop/PBRenderer/Sources/PBRenderer/SceneGraph.swift"
+                  timestampString = "487292277.495011"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "233"
+                  endingLineNumber = "233"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PBRenderer.Transform.rotation.setter : SGLMath.Quaternion&lt;Swift.Float&gt;"
+                  moduleName = "libPBRenderer.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Thomas/Desktop/PBRenderer/Sources/PBRenderer/SceneGraph.swift"
+                  timestampString = "487292277.495213"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "233"
+                  endingLineNumber = "233"
+                  offsetFromSymbolStart = "11">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PBRenderer.Transform.(rotation.materializeForSet : SGLMath.Quaternion&lt;Swift.Float&gt;).(closure #1)"
+                  moduleName = "libPBRenderer.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Thomas/Desktop/PBRenderer/Sources/PBRenderer/SceneGraph.swift"
+                  timestampString = "487292277.495347"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "233"
+                  endingLineNumber = "233"
+                  offsetFromSymbolStart = "14">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/Mesh+ColladaMesh.swift"
+            timestampString = "498123797.661111"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "162"
+            endingLineNumber = "162"
+            landmarkName = "meshesFromCollada(_:root:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/Mesh+ColladaMesh.swift"
+            timestampString = "498123797.661111"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
+            landmarkName = "meshesFromCollada(_:root:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/Mesh+ColladaMesh.swift"
+            timestampString = "498123797.661111"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "124"
+            endingLineNumber = "124"
+            landmarkName = "classifySourcesFromInput(_:root:dictionary:offset:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/PBRenderer/LightProbe.swift"
+            timestampString = "500950387.319809"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "179"
+            endingLineNumber = "179"
+            landmarkName = "renderSceneToCubeMap(_:atPosition:zNear:zFar:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
