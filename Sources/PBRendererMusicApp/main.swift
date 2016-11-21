@@ -10,7 +10,7 @@ import AudioToolbox
 
 let mainWindow : PBWindow
 
-let song = try! Song(audioFilePath: Process.arguments[2], midiFilePath: Process.arguments[3])
+let song = try! Song(audioFilePath: CommandLine.arguments[2], midiFilePath: CommandLine.arguments[3])
 
 func randomFloat() -> Float {
     return Float(arc4random())/Float(UInt32.max)
@@ -60,7 +60,7 @@ final class AudioVisualManager : SongDelegate {
     
     init() {
         
-        guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
+        guard let collada = Collada(contentsOfFile: CommandLine.arguments[1]) else { fatalError("Couldn't load Collada file") }
         
         self.scene = Scene(fromCollada: collada)
         
@@ -113,8 +113,6 @@ final class AudioVisualManager : SongDelegate {
         let pyramidGroup = scene.idsToNodes["PyramidGroup"]!
         let pyramidRotationAnimation = AnimationSystem.Animation(startBeat: 4 * 13, duration: 4 * 8, repeatsUntil: nil, onTick: { (elapsedBeats, percentage) in
             pyramidGroup.transform.rotation = quat(angle: Float(percentage * M_PI), axis: vec3(0, 1, 0))
-            print(pyramidGroup.transform.rotation.eulerAngles)
-            print("Rotated right vector is \(self.scene.idsToNodes["PyramidGroup_Pyramid1"]!.transform.nodeToWorldMatrix * vec4(1, 0, 0, 0))")
         })
         
         AnimationSystem.addAnimation(pyramidRotationAnimation)

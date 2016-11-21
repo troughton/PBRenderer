@@ -38,7 +38,7 @@ extension Scene {
             return count + lightLibrary.light.count
         }
         
-        let lightBuffer = GPUBuffer<GPULight>(capacity: lightCount, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+        let lightBuffer = GPUBuffer<GPULight>(capacity: lightCount, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .dynamic, accessType: .draw)
         
         var i = 0
         for lightLibrary in root.libraryLights {
@@ -49,23 +49,23 @@ extension Scene {
                 let openColladaMayaTechnique = light.extra.first?.technique.first
                 
                 switch light.techniqueCommon.lightType {
-                case let .Directional(colour):
+                case let .directional(colour):
                     colourAndIntensity = vec3(colour)
-                    type = .Directional
-                case let .Point(colour):
-                    type = .Point
+                    type = .directional
+                case let .point(colour):
+                    type = .point
                     colourAndIntensity = vec3(colour)
-                case let .Spot(colour, falloffDegrees, _):
+                case let .spot(colour, falloffDegrees, _):
                     
                     var outerCutoff = falloffDegrees * 0.5
                     if let penumbra = openColladaMayaTechnique?["penumbra_angle"] {
                         outerCutoff += max(0, Float(penumbra.value!)!) * 0.5
                     }
                     
-                    type = .Spot(innerCutoff: radians(degrees: falloffDegrees * 0.5),
+                    type = .spot(innerCutoff: radians(degrees: falloffDegrees * 0.5),
                                  outerCutoff: radians(degrees: outerCutoff))
                     colourAndIntensity = vec3(colour)
-                case .Ambient(_):
+                case .ambient(_):
                     continue
                 }
                 
@@ -82,7 +82,7 @@ extension Scene {
                 let intensityInStoredUnits = intensityWithUnits.toStoredIntensity(forLightType: type)
                 let falloffRadius : Float = self.estimateFalloff(lightIntensity: intensityInStoredUnits)
                 
-                let pbLight = Light(type: type, colour: .Colour(colour), intensity: intensityWithUnits, falloffRadius: falloffRadius, backingGPULight: lightBuffer[viewForIndex: i])
+                let pbLight = Light(type: type, colour: .colour(colour), intensity: intensityWithUnits, falloffRadius: falloffRadius, backingGPULight: lightBuffer[viewForIndex: i])
                 elementsInBuffer[light.id!] = pbLight
                     i += 1
                 }
@@ -101,7 +101,7 @@ extension Scene {
             return count + materialLibrary.material.count
         }
         
-        let materialBuffer = GPUBuffer<Material>(capacity: materialCount, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+        let materialBuffer = GPUBuffer<Material>(capacity: materialCount, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .dynamic, accessType: .draw)
         
         var i = 0
         for materialLibrary in root.libraryMaterials {
@@ -263,7 +263,7 @@ extension SceneNode {
         let cameras : [Camera] = node.instanceCamera.map { root[$0.url] as! CameraType }.map { camera in
             let projectionMatrix : mat4
             switch camera.optics.techniqueCommon.projection {
-            case let .Perspective(xFov, yFov, aspectRatio, zNear, zFar):
+            case let .perspective(xFov, yFov, aspectRatio, zNear, zFar):
                 
                 if let yFov = yFov, let aspectRatio = aspectRatio {
                     projectionMatrix = SGLMath.perspective(radians(degrees: yFov), aspectRatio, zNear, zFar)
@@ -275,12 +275,12 @@ extension SceneNode {
                     fatalError("Unsupported field of view combination.")
                 }
                 return Camera(id: camera.id, name: camera.name, projectionMatrix: projectionMatrix, zNear: zNear, zFar: zFar, aspectRatio: aspectRatio ?? (xFov! / yFov!))
-            case let .Orthographic(xMag, yMag, aspectRatio, zNear, zFar):
-                if let xMag = xMag, yMag = yMag {
+            case let .orthographic(xMag, yMag, aspectRatio, zNear, zFar):
+                if let xMag = xMag, let yMag = yMag {
                     projectionMatrix = SGLMath.ortho(0, xMag, 0, yMag, zNear, zFar)
-                } else if let xMag = xMag, aspectRatio = aspectRatio {
+                } else if let xMag = xMag, let aspectRatio = aspectRatio {
                     projectionMatrix = SGLMath.ortho(0, xMag, 0, xMag / aspectRatio, zNear, zFar)
-                } else if let yMag = yMag, aspectRatio = aspectRatio {
+                } else if let yMag = yMag, let aspectRatio = aspectRatio {
                     projectionMatrix = SGLMath.ortho(0, yMag * aspectRatio, 0, yMag, zNear, zFar)
                 } else {
                     fatalError("Invalid orthographic matrix terms.")
@@ -324,24 +324,24 @@ extension SceneNode {
                 switch lightType {
                 case "sphere":
                     let radius = Float(technique["radius"]!.value!)!
-                    lightObjects.forEach { $0.type = .SphereArea(radius: radius) }
+                    lightObjects.forEach { $0.type = .sphereArea(radius: radius) }
                 case "disk":
                     let radius = Float(technique["radius"]!.value!)!
-                    lightObjects.forEach { $0.type = .DiskArea(radius: radius) }
+                    lightObjects.forEach { $0.type = .diskArea(radius: radius) }
                 case "rectangle":
                     let width = Float(technique["width"]!.value!)!
                     let height = Float(technique["height"]!.value!)!
                     let isTwoSided = technique["twoSided"] != nil ? true : false
-                    lightObjects.forEach { $0.type = .RectangleArea(width: width, height: height, twoSided: isTwoSided) }
+                    lightObjects.forEach { $0.type = .rectangleArea(width: width, height: height, twoSided: isTwoSided) }
                 case "triangle":
                     let base = Float(technique["base"]!.value!)!
                     let height = Float(technique["height"]!.value!)!
                     
                     let isTwoSided = technique["twoSided"] != nil ? true : false
-                    lightObjects.forEach { $0.type = .TriangleArea(base: base, height: height, twoSided: isTwoSided) }
+                    lightObjects.forEach { $0.type = .triangleArea(base: base, height: height, twoSided: isTwoSided) }
                 case "sun":
                     let radius = Float(technique["radius"]!.value!)!
-                    lightObjects.forEach { $0.type = .SunArea(radius: radius) }
+                    lightObjects.forEach { $0.type = .sunArea(radius: radius) }
                 default:
                     break
                 }

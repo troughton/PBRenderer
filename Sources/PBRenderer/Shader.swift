@@ -23,12 +23,12 @@ struct StringShaderProperty : ShaderProperty {
     }
 }
 
-public class Shader {
+open class Shader {
     
-    private var uniformMappings = [String : GLint]()
+    fileprivate var uniformMappings = [String : GLint]()
     
-    public let glProgramRef : GLuint
-    private let _shaderStages : [GLuint]
+    open let glProgramRef : GLuint
+    fileprivate let _shaderStages : [GLuint]
     
     public init(withVertexShader vertexShader: String, fragmentShader: String) {
         let shaders = [Shader.createShader(type: GL_VERTEX_SHADER, text: vertexShader), Shader.createShader(type: GL_FRAGMENT_SHADER, text: fragmentShader)]
@@ -36,16 +36,16 @@ public class Shader {
         self.glProgramRef = Shader.createProgram(shaderList: shaders)
     }
     
-    private func useProgram() {
+    fileprivate func useProgram() {
 
         glUseProgram(self.glProgramRef)
     }
     
-    private func endUseProgram() {
+    fileprivate func endUseProgram() {
         glUseProgram(0)
     }
     
-    public func withProgram(_ function: @noescape (Shader) -> ()) -> () {
+    open func withProgram(_ function: (Shader) -> ()) -> () {
         self.useProgram()
         function(self)
         self.endUseProgram()
@@ -59,7 +59,7 @@ public class Shader {
         glDeleteProgram(self.glProgramRef);
     }
     
-    private func uniformLocation(forProperty property: ShaderProperty) -> GLint? {
+    fileprivate func uniformLocation(forProperty property: ShaderProperty) -> GLint? {
         if let location = self.uniformMappings[property.name] {
             return location
         }
@@ -91,7 +91,7 @@ public class Shader {
 
 extension Shader {
     static func shaderTextByExpandingIncludes(fromFile filePath: String) throws -> String {
-        var text = try String(contentsOfFile: filePath, encoding: NSUTF8StringEncoding)
+        var text = try String(contentsOfFile: filePath, encoding: String.Encoding.utf8)
         let directory = filePath.components(separatedBy: "/").dropLast().joined(separator: "/")
         
         let regex = try NSRegularExpression(pattern: "#include \"(.+)\"", options: [])
@@ -99,13 +99,13 @@ extension Shader {
         var includedFiles = Set<String>()
         
         while let match = regex.firstMatch(in: text, options: [], range: NSMakeRange(0, text.characters.count)) {
-            let includeFileNameRange = match.range(at: 1)
+            let includeFileNameRange = match.rangeAt(1)
             
             let startIndex = text.index(text.startIndex, offsetBy: includeFileNameRange.location)
             let endIndex = text.index(startIndex, offsetBy: includeFileNameRange.length)
             
             let includeFileName = text[startIndex..<endIndex]
-            let includeFile = try String(contentsOfFile: (directory.isEmpty ? "" : directory + "/") + includeFileName, encoding: NSUTF8StringEncoding)
+            let includeFile = try String(contentsOfFile: (directory.isEmpty ? "" : directory + "/") + includeFileName, encoding: String.Encoding.utf8)
             
             let matchStartIndex = text.index(text.startIndex, offsetBy: match.range.location)
             let matchEndIndex = text.index(matchStartIndex, offsetBy: match.range.length)
@@ -124,7 +124,7 @@ extension Shader {
     /**
     * Creates and links a shader program using the specified OpenGL shader objects.
     */
-    private static func createProgram(shaderList: [GLuint]) -> GLuint {
+    fileprivate static func createProgram(shaderList: [GLuint]) -> GLuint {
     
         let program = glCreateProgram();
     
@@ -141,13 +141,13 @@ extension Shader {
             var infoLogLength : GLint = 0
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
     
-            let error = UnsafeMutablePointer<GLchar>(calloc(sizeof(GLchar), Int(infoLogLength)))
+            let error = UnsafeMutablePointer<GLchar>.allocate(capacity: Int(infoLogLength))
             
             glGetProgramInfoLog(program, infoLogLength, nil, error);
             
-            let errorString = String(cString: UnsafePointer<CChar>(error!))
+            let errorString = String(cString: error)
             
-            free(error)
+            error.deallocate(capacity: Int(infoLogLength))
             
             fatalError("Linker failure: \(errorString)");
         }
@@ -163,9 +163,9 @@ extension Shader {
     * Creates and compiles a shader from the given text.
     * @param shaderType The type of the shader. Any of GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, or GL_FRAGMENT_SHADER.
     */
-    private static func createShader(type: GLenum, text: String) -> GLuint {
+    fileprivate static func createShader(type: GLenum, text: String) -> GLuint {
         let shader = glCreateShader(type);
-        let cString = text.cString(using: NSUTF8StringEncoding)!
+        let cString = text.cString(using: String.Encoding.utf8)!
         let baseAddress = cString.withUnsafeBufferPointer { (shaderText) -> UnsafePointer<GLchar>! in
             return shaderText.baseAddress
         }
@@ -182,13 +182,13 @@ extension Shader {
             var infoLogLength : GLint = 0
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
     
-            let error = UnsafeMutablePointer<GLchar>(calloc(sizeof(GLchar), Int(infoLogLength)))
+            let error = UnsafeMutablePointer<GLchar>.allocate(capacity: Int(infoLogLength))
             
             glGetShaderInfoLog(shader, infoLogLength, nil, error);
             
-            let errorString = String(cString: UnsafePointer<CChar>(error!))
+            let errorString = String(cString: error)
             
-            free(error)
+            error.deallocate(capacity: Int(infoLogLength))
     
             let strShaderType : String;
             switch (type) {
@@ -198,9 +198,9 @@ extension Shader {
                 default: strShaderType = "";
             }
             
-            let splitText = text.components(separatedBy: .newlines())
+            let splitText = text.components(separatedBy: .newlines)
             
-            let numberedText = splitText.enumerated().reduce("", combine: { (text, line) -> String in
+            let numberedText = splitText.enumerated().reduce("", { (text, line) -> String in
                 return text + String(line.offset) + ":\t" + line.element + "\n"
             })
         
@@ -224,8 +224,9 @@ extension Shader {
         }
         
         var matrix = matrix
-        withUnsafePointer(&matrix) { (matrixPtr) -> Void in
-            glUniformMatrix4fv(uniformRef, 1, false, UnsafePointer(matrixPtr))
+        withUnsafePointer(to: &matrix) { (matrixPtr) -> Void in
+            matrixPtr.withMemoryRebound(to: Float.self, capacity: 16, { glUniformMatrix4fv(uniformRef, 1, false, $0) })
+            
         }
     }
 
@@ -235,8 +236,8 @@ extension Shader {
         }
         
         matrices.withUnsafeBufferPointer { (matrices) -> Void in
-            let floatPtr = UnsafePointer<Float>(matrices.baseAddress)
-            glUniformMatrix4fv(uniformRef, GLsizei(matrices.count), false, floatPtr)
+            matrices.baseAddress?.withMemoryRebound(to: Float.self, capacity: 16 * matrices.count, { glUniformMatrix4fv(uniformRef, GLsizei(matrices.count), false, $0) })
+            
         }
     }
 

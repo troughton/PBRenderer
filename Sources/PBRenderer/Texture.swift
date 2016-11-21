@@ -80,7 +80,7 @@ struct TextureDescriptor {
     }
 }
 
-public class Texture {
+open class Texture {
     
     static func formatForInternalFormat(_ pixelFormat: SGLOpenGL.GLenum) -> SGLOpenGL.GLenum {
         switch pixelFormat {
@@ -233,8 +233,8 @@ public class Texture {
         }
     }
     
-    private let _glTexture : GLuint!
-    private let _renderBuffer : GLuint!
+    fileprivate let _glTexture : GLuint!
+    fileprivate let _renderBuffer : GLuint!
     
     let descriptor : TextureDescriptor
     
@@ -268,7 +268,7 @@ public class Texture {
         
         glBindTexture(descriptor.textureType, _glTexture)
         
-        let texCreationFunction : (target: SGLOpenGL.GLenum, levels: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei) -> ()
+        let texCreationFunction : (_ target: SGLOpenGL.GLenum, _ levels: GLint, _ internalformat: GLint, _ width: GLsizei, _ height: GLsizei, _ depth: GLsizei) -> ()
         
         switch descriptor.textureType {
         case GL_TEXTURE_1D:
@@ -294,12 +294,12 @@ public class Texture {
         }
         
         
-        texCreationFunction(target: descriptor.textureType,
-                            levels: GLint(descriptor.mipmapLevelCount),
-                            internalformat: descriptor.pixelFormat,
-                            width: GLsizei(descriptor.width),
-                            height: GLsizei(descriptor.height),
-                            depth: GLsizei(descriptor.depth))
+        texCreationFunction(descriptor.textureType,
+                            GLint(descriptor.mipmapLevelCount),
+                            descriptor.pixelFormat,
+                            GLsizei(descriptor.width),
+                            GLsizei(descriptor.height),
+                            GLsizei(descriptor.depth))
         
         self.setMipRange(0..<descriptor.mipmapLevelCount)
         
@@ -333,7 +333,7 @@ public class Texture {
         glBindTexture(descriptor.textureType, 0)
     }
     
-    func fillSubImage(target: SGLOpenGL.GLenum, mipmapLevel: Int, width: Int, height: Int, type: SGLOpenGL.GLenum, data: UnsafePointer<Void>) {
+    func fillSubImage(target: SGLOpenGL.GLenum, mipmapLevel: Int, width: Int, height: Int, type: SGLOpenGL.GLenum, data: UnsafeRawPointer) {
         glBindTexture(descriptor.textureType, _glTexture)
         glTexSubImage2D(target, GLint(mipmapLevel), 0, 0, GLint(width), GLint(height), Texture.formatForInternalFormat(descriptor.pixelFormat), type, data)
         glBindTexture(descriptor.textureType, 0)

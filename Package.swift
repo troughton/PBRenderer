@@ -2,19 +2,20 @@ import PackageDescription
 
 let package = Package(
     name: "PBRenderer",
-    dependencies: [
-                      .Package(url: "https://github.com/troughton/OpenGL.git", majorVersion: 2),
-                      .Package(url: "https://github.com/troughton/Math.git", majorVersion: 1),
-                      .Package(url: "https://github.com/troughton/CLibXML2.git", majorVersion: 1),
-                      .Package(url: "https://github.com/troughton/CPBRendererLibs", majorVersion: 1)
-                      ],
     targets: [
                  Target(name: "PBRendererApp", dependencies: [ .Target(name: "PBRenderer"), .Target(name: "ColladaParser")
                     ]),
                  Target(name: "PBRenderer", dependencies: [ .Target(name: "ColladaParser")
                                                                ]),
                  Target(name: "ColladaParser")
-    ]
+    ],
+    dependencies: [
+                      .Package(url: "https://github.com/troughton/OpenGL.git", majorVersion: 2),
+                      .Package(url: "https://github.com/troughton/Math.git", majorVersion: 1),
+                      .Package(url: "https://github.com/troughton/CLibXML2.git", majorVersion: 1),
+                      .Package(url: "https://github.com/troughton/CPBRendererLibs", majorVersion: 1)
+                      ]
+    
 )
 
 #if os(Linux)

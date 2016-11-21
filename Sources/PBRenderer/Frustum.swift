@@ -59,31 +59,31 @@ private let isGL = true
 struct Frustum {
     
     enum PlaneDirection {
-        case Far
-        case Near
-        case Left
-        case Right
-        case Top
-        case Bottom
+        case far
+        case near
+        case left
+        case right
+        case top
+        case bottom
         
         var extentsOfPlane : [Extent] { //ordered anti-clockwise as viewed from the inside of the frustum
             switch self {
-            case Far:
-                return [.MaxX_MaxY_MaxZ, .MinX_MaxY_MaxZ, .MinX_MinY_MaxZ, .MaxX_MinY_MaxZ]
-            case Near:
-                return [.MaxX_MaxY_MinZ, .MaxX_MinY_MinZ, .MinX_MinY_MinZ, .MinX_MaxY_MinZ]
-            case Left:
-                return [.MinX_MaxY_MaxZ, .MinX_MaxY_MinZ, .MinX_MinY_MinZ, .MinX_MinY_MaxZ]
-            case Right:
-                return [.MaxX_MaxY_MaxZ, .MaxX_MinY_MaxZ, .MaxX_MinY_MinZ, .MaxX_MaxY_MinZ]
-            case Top:
-                return [.MaxX_MaxY_MaxZ, .MaxX_MaxY_MinZ, .MinX_MaxY_MinZ, .MinX_MaxY_MaxZ]
-            case Bottom:
-                return [.MaxX_MinY_MaxZ, .MinX_MinY_MaxZ, .MinX_MinY_MinZ, .MaxX_MinY_MinZ]
+            case .far:
+                return [.maxX_MaxY_MaxZ, .minX_MaxY_MaxZ, .minX_MinY_MaxZ, .maxX_MinY_MaxZ]
+            case .near:
+                return [.maxX_MaxY_MinZ, .maxX_MinY_MinZ, .minX_MinY_MinZ, .minX_MaxY_MinZ]
+            case .left:
+                return [.minX_MaxY_MaxZ, .minX_MaxY_MinZ, .minX_MinY_MinZ, .minX_MinY_MaxZ]
+            case .right:
+                return [.maxX_MaxY_MaxZ, .maxX_MinY_MaxZ, .maxX_MinY_MinZ, .maxX_MaxY_MinZ]
+            case .top:
+                return [.maxX_MaxY_MaxZ, .maxX_MaxY_MinZ, .minX_MaxY_MinZ, .minX_MaxY_MaxZ]
+            case .bottom:
+                return [.maxX_MinY_MaxZ, .minX_MinY_MaxZ, .minX_MinY_MinZ, .maxX_MinY_MinZ]
             }
         }
         
-        static let frustumPlanes : [PlaneDirection] = [.Near, .Far, .Left, .Right, .Top, .Bottom]
+        static let frustumPlanes : [PlaneDirection] = [.near, .far, .left, .right, .top, .bottom]
     }
     
     let planes : [PlaneDirection : FrustumPlane]
@@ -97,38 +97,38 @@ struct Frustum {
         let n1y = (vp[1][3] + vp[1][0])
         let n1z = (vp[2][3] + vp[2][0])
         let n1 = vec3(n1x, n1y, n1z)
-        planes[.Left] = FrustumPlane(normalVector: n1, constant: (vp[3][3] + vp[3][0]))
+        planes[.left] = FrustumPlane(normalVector: n1, constant: (vp[3][3] + vp[3][0]))
         
         let n2x = (vp[0][3] - vp[0][0])
         let n2y = (vp[1][3] - vp[1][0])
         let n2z = (vp[2][3] - vp[2][0])
-        planes[.Right] = FrustumPlane(normalVector: vec3(n2x, n2y, n2z), constant: (vp[3][3] - vp[3][0]))
+        planes[.right] = FrustumPlane(normalVector: vec3(n2x, n2y, n2z), constant: (vp[3][3] - vp[3][0]))
         
         let n3x = (vp[0][3] - vp[0][0])
         let n3y = (vp[1][3] - vp[1][0])
         let n3z = (vp[2][3] - vp[2][0])
         
-        planes[.Top] = FrustumPlane(normalVector: vec3(n3x, n3y, n3z), constant: (vp[3][3] - vp[3][0]))
+        planes[.top] = FrustumPlane(normalVector: vec3(n3x, n3y, n3z), constant: (vp[3][3] - vp[3][0]))
         
         let n4x = (vp[0][3] + vp[0][1])
         let n4y = (vp[1][3] + vp[1][1])
         let n4z = (vp[2][3] + vp[2][1])
-        planes[.Bottom] = FrustumPlane(normalVector: vec3(n4x, n4y, n4z), constant: (vp[3][3] + vp[3][1]))
+        planes[.bottom] = FrustumPlane(normalVector: vec3(n4x, n4y, n4z), constant: (vp[3][3] + vp[3][1]))
         
         let n5xGL = (vp[0][3] + vp[0][2])
         let n5yGL = (vp[1][3] + vp[1][2])
         let n5zGL = (vp[2][3] + vp[2][2])
         
         if isGL {
-            planes[.Near] = FrustumPlane(normalVector: vec3(n5xGL, n5yGL, n5zGL), constant: (vp[3][3] + vp[3][2]))
+            planes[.near] = FrustumPlane(normalVector: vec3(n5xGL, n5yGL, n5zGL), constant: (vp[3][3] + vp[3][2]))
         } else {
-            planes[.Near] = FrustumPlane(normalVector: vec3(vp[0][2], vp[1][2], vp[2][2]), constant: vp[3][2]);
+            planes[.near] = FrustumPlane(normalVector: vec3(vp[0][2], vp[1][2], vp[2][2]), constant: vp[3][2]);
         }
             
         let n6x = (vp[0][3] - vp[0][2])
         let n6y = (vp[1][3] - vp[1][2])
         let n6z = (vp[2][3] - vp[2][2])
-        planes[.Far] = FrustumPlane(normalVector: vec3(n6x, n6y, n6z), constant: (vp[3][3] - vp[3][2]));
+        planes[.far] = FrustumPlane(normalVector: vec3(n6x, n6y, n6z), constant: (vp[3][3] - vp[3][2]));
         
         self.planes = planes
     }

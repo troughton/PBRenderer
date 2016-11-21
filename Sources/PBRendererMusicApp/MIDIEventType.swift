@@ -23,29 +23,29 @@ enum MIDIEventType {
     case parameter(ParameterEvent)
     case auPreset(AUPresetEvent)
     
-    init?(_ eventType: MusicEventType, data: UnsafePointer<Void>?) {
+    init?(_ eventType: MusicEventType, data: UnsafeRawPointer?) {
         guard let data = data else { return nil }
         switch eventType {
         case kMusicEventType_ExtendedNote:
-            self = .extendedNote(UnsafePointer<ExtendedNoteOnEvent>(data).pointee)
+            self = .extendedNote(data.assumingMemoryBound(to: ExtendedNoteOnEvent.self).pointee)
         case MusicEventType(kMusicEventType_ExtendedControl):
-            self = .extendedControl(UnsafePointer<ExtendedControlEvent>(data).pointee)
+            self = .extendedControl(data.assumingMemoryBound(to: ExtendedControlEvent.self).pointee)
         case kMusicEventType_ExtendedTempo:
-            self = .extendedTempo(UnsafePointer<ExtendedTempoEvent>(data).pointee)
+            self = .extendedTempo(data.assumingMemoryBound(to: ExtendedTempoEvent.self).pointee)
         case kMusicEventType_User:
-            self = .user(UnsafePointer<MusicEventUserData>(data).pointee)
+            self = .user(data.assumingMemoryBound(to: MusicEventUserData.self).pointee)
         case kMusicEventType_Meta:
-            self = .meta(UnsafePointer<MIDIMetaEvent>(data).pointee)
+            self = .meta(data.assumingMemoryBound(to: MIDIMetaEvent.self).pointee)
         case kMusicEventType_MIDINoteMessage:
-            self = .noteMessage(UnsafePointer<MIDINoteMessage>(data).pointee)
+            self = .noteMessage(data.assumingMemoryBound(to: MIDINoteMessage.self).pointee)
         case kMusicEventType_MIDIChannelMessage:
-            self = .channelMessage(UnsafePointer<MIDIChannelMessage>(data).pointee)
+            self = .channelMessage(data.assumingMemoryBound(to: MIDIChannelMessage.self).pointee)
         case kMusicEventType_MIDIRawData:
-            self = .rawData(UnsafePointer<MIDIRawData>(data).pointee)
+            self = .rawData(data.assumingMemoryBound(to: MIDIRawData.self).pointee)
         case kMusicEventType_Parameter:
-            self = .parameter(UnsafePointer<ParameterEvent>(data).pointee)
+            self = .parameter(data.assumingMemoryBound(to: ParameterEvent.self).pointee)
         case kMusicEventType_AUPreset:
-            self = .auPreset(UnsafePointer<AUPresetEvent>(data).pointee)
+            self = .auPreset(data.assumingMemoryBound(to: AUPresetEvent.self).pointee)
         default:
             return nil
         }

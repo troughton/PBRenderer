@@ -30,8 +30,8 @@ func luminanceFromEV(_ ev: ExposureValue) -> CandelasPerMetreSq {
 }
 
 public enum LightColourMode {
-    case Temperature(Kelvin)
-    case Colour(vec3)
+    case temperature(Kelvin)
+    case colour(vec3)
     
     //Adapted from http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
     func kelvinToRGB(_ kelvin: Kelvin) -> vec3 {
@@ -75,30 +75,30 @@ public enum LightColourMode {
     
     public var rgbColour : vec3 {
         switch self {
-        case .Colour(let colour):
+        case .colour(let colour):
             return colour
-        case .Temperature(let kelvin):
+        case .temperature(let kelvin):
             return kelvinToRGB(kelvin)
         }
     }
 }
 
 public enum LightIntensity {
-    case LuminousPower(Lumens)
-    case Luminance(CandelasPerMetreSq)
-    case LuminousIntensity(Candelas)
-    case Illuminance(Lux)
+    case luminousPower(Lumens)
+    case luminance(CandelasPerMetreSq)
+    case luminousIntensity(Candelas)
+    case illuminance(Lux)
     
     public init(unit: LightIntensity, value: Float) {
         switch unit {
-        case .LuminousPower(_):
-            self = .LuminousPower(value)
-        case .Illuminance(_):
-            self = .Illuminance(value)
-        case .Luminance(value):
-            self = .Luminance(value)
-        case .LuminousIntensity(_):
-            self = .LuminousIntensity(value)
+        case .luminousPower(_):
+            self = .luminousPower(value)
+        case .illuminance(_):
+            self = .illuminance(value)
+        case .luminance(value):
+            self = .luminance(value)
+        case .luminousIntensity(_):
+            self = .luminousIntensity(value)
         default:
             fatalError()
         }
@@ -107,25 +107,25 @@ public enum LightIntensity {
     public func toLuminousIntensity(forLightType lightType: LightType) -> Candelas {
         
         switch self {
-        case let .LuminousIntensity(candelas):
+        case let .luminousIntensity(candelas):
             return candelas
-        case let .Luminance(candelasPerMetreSq):
+        case let .luminance(candelasPerMetreSq):
             return candelasPerMetreSq * lightType.surfaceArea
-        case let .LuminousPower(lumens):
+        case let .luminousPower(lumens):
             switch lightType {
-            case .SunArea(_):
+            case .sunArea(_):
                 fallthrough
-            case .SphereArea(_):
+            case .sphereArea(_):
                 fallthrough
-            case .Point:
+            case .point:
                 return lumens / (4 * Float(M_PI))
-            case .DiskArea(_):
+            case .diskArea(_):
                 fallthrough
-            case .Spot(innerCutoff: _, outerCutoff: _):
+            case .spot(innerCutoff: _, outerCutoff: _):
                 return lumens * Float(M_PI) //not physically correct, but prevents the intensity from changing as the angle changes.
-            case .TriangleArea(_, _, _):
+            case .triangleArea(_, _, _):
                 fallthrough
-            case .RectangleArea(_, _, _):
+            case .rectangleArea(_, _, _):
                 return lumens // TODO this is not correct at all.
             default:
                 fatalError()
@@ -138,26 +138,26 @@ public enum LightIntensity {
     public var value : Float {
         get {
             switch self {
-            case let .LuminousIntensity(candelas):
+            case let .luminousIntensity(candelas):
                 return candelas
-            case let .Luminance(candelasPerMetreSq):
+            case let .luminance(candelasPerMetreSq):
                 return candelasPerMetreSq
-            case let .LuminousPower(lumens):
+            case let .luminousPower(lumens):
                 return lumens
-            case let .Illuminance(lux):
+            case let .illuminance(lux):
                 return lux
             }
         }
         set(newValue) {
             switch self {
-            case .LuminousIntensity(_):
-                self = .LuminousIntensity(newValue)
-            case .Luminance(_):
-                self = .Luminance(newValue)
-            case .LuminousPower(_):
-                self = .LuminousPower(newValue)
-            case .Illuminance(_):
-                self = .Illuminance(newValue)
+            case .luminousIntensity(_):
+                self = .luminousIntensity(newValue)
+            case .luminance(_):
+                self = .luminance(newValue)
+            case .luminousPower(_):
+                self = .luminousPower(newValue)
+            case .illuminance(_):
+                self = .illuminance(newValue)
             }
         }
         
@@ -167,7 +167,7 @@ public enum LightIntensity {
     func toStoredIntensity(forLightType lightType: LightType) -> Float {
         
         switch self {
-        case let .Illuminance(lux):
+        case let .illuminance(lux):
             return lux
         default:
             return self.toLuminousIntensity(forLightType: lightType)
@@ -176,93 +176,93 @@ public enum LightIntensity {
     
     public func isSameTypeAs(_ other: LightIntensity) -> Bool {
         switch self {
-        case .Illuminance(_):
-            if case .Illuminance = other { return true } else { return false }
-        case .Luminance(_):
-            if case .Luminance = other { return true } else { return false }
-        case .LuminousIntensity(_):
-            if case .LuminousIntensity = other { return true } else { return false }
-        case .LuminousPower(_):
-            if case .LuminousPower = other { return true } else { return false }
+        case .illuminance(_):
+            if case .illuminance = other { return true } else { return false }
+        case .luminance(_):
+            if case .luminance = other { return true } else { return false }
+        case .luminousIntensity(_):
+            if case .luminousIntensity = other { return true } else { return false }
+        case .luminousPower(_):
+            if case .luminousPower = other { return true } else { return false }
         }
     }
     
 }
 
 public enum LightType {
-    case Point
-    case Spot(innerCutoff: Float, outerCutoff: Float)
-    case Directional
-    case SphereArea(radius: Float)
-    case DiskArea(radius: Float)
-    case RectangleArea(width: Float, height: Float, twoSided: Bool)
-    case TriangleArea(base: Float, height: Float, twoSided: Bool)
-    case SunArea(radius: Float)
+    case point
+    case spot(innerCutoff: Float, outerCutoff: Float)
+    case directional
+    case sphereArea(radius: Float)
+    case diskArea(radius: Float)
+    case rectangleArea(width: Float, height: Float, twoSided: Bool)
+    case triangleArea(base: Float, height: Float, twoSided: Bool)
+    case sunArea(radius: Float)
     
-    private var lightTypeFlag : LightTypeFlag {
+    fileprivate var lightTypeFlag : LightTypeFlag {
         switch self {
-        case .Point:
-            return .Point
-        case .Spot(_, _):
-            return .Spot
-        case .Directional(_):
-            return .Directional
-        case .SphereArea(_):
-            return .SphereArea
-        case .DiskArea(_):
-            return .DiskArea
-        case .RectangleArea(_, _, _):
-            return .RectangleArea
-        case .TriangleArea(_, _, _):
-            return .TriangleArea
-        case .SunArea(_):
-            return .SunArea
+        case .point:
+            return .point
+        case .spot(_, _):
+            return .spot
+        case .directional(_):
+            return .directional
+        case .sphereArea(_):
+            return .sphereArea
+        case .diskArea(_):
+            return .diskArea
+        case .rectangleArea(_, _, _):
+            return .rectangleArea
+        case .triangleArea(_, _, _):
+            return .triangleArea
+        case .sunArea(_):
+            return .sunArea
         }
     }
     
     public var validUnits : [LightIntensity] {
         switch self {
-        case .Point:
+        case .point:
             fallthrough
-        case .Spot(_, _):
-            return [.LuminousPower(1.0)]
-        case .TriangleArea(_, _, _):
+        case .spot(_, _):
+            return [.luminousPower(1.0)]
+        case .triangleArea(_, _, _):
             fallthrough
-        case .RectangleArea(_, _, _):
+        case .rectangleArea(_, _, _):
             fallthrough
-        case .DiskArea(_):
+        case .diskArea(_):
             fallthrough
-        case .SphereArea(_):
-            return [.LuminousPower(1.0), .Luminance(1.0)]
-        case .Directional:
-            return [.Illuminance(1.0)]
-        case .SunArea(_):
-            return [.Illuminance(1.0)]
+        case .sphereArea(_):
+            return [.luminousPower(1.0), .luminance(1.0)]
+        case .directional:
+            return [.illuminance(1.0)]
+        case .sunArea(_):
+            return [.illuminance(1.0)]
         }
     }
     
-    func fillGPULight(gpuLight: inout GPULight, light: Light) {
+    func fillGPULight(_ gpuLight: inout GPULight, light: Light) {
         gpuLight.lightTypeFlag = self.lightTypeFlag
         
         switch self {
-        case let .Spot(innerCutoff, outerCutoff):
+        case let .spot(innerCutoff, outerCutoff):
             let cosInner = cos(innerCutoff)
             let cosOuter = cos(outerCutoff)
             
             let lightAngleScale = 1.0 / max(0.001, (cosInner - cosOuter));
             let lightAngleOffset = -cosOuter * lightAngleScale;
             gpuLight.extraData = vec4(lightAngleScale, lightAngleOffset, 0, 0)
-        case let .SphereArea(radius):
+        case let .sphereArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
-        case let .DiskArea(radius):
+        case let .diskArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
-        case let .RectangleArea(_, _, isTwoSided):
+        case let .rectangleArea(_, _, isTwoSided):
             let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
             gpuLight.extraData = vec4(bufferIndex, isTwoSided ? 1 : 0, 0, 0)
-        case let .TriangleArea(_, _, isTwoSided):
+        case let .triangleArea(_, _, isTwoSided):
             let bufferIndex = unsafeBitCast(Int32(light.lightPointsBufferIndex), to: Float.self)
             gpuLight.extraData = vec4(bufferIndex, isTwoSided ? 1 : 0, 0, 0)
-        case let .SunArea(radius):
+        case let .sunArea(radius):
             gpuLight.extraData = vec4(radius, 0, 0, 0)
         default:
             break
@@ -271,11 +271,11 @@ public enum LightType {
     
     var surfaceArea : Float {
         switch self {
-        case let .SphereArea(radius: radius):
+        case let .sphereArea(radius: radius):
             return 4 * Float(M_PI) * radius * radius
-        case let .DiskArea(radius: radius):
+        case let .diskArea(radius: radius):
             return Float(M_PI) * radius * radius
-        case let .RectangleArea(width: width, height: height, _):
+        case let .rectangleArea(width: width, height: height, _):
             return width * height
         default:
             fatalError()
@@ -284,38 +284,38 @@ public enum LightType {
     
     public func isSameTypeAs(_ other: LightType) -> Bool {
         switch self {
-        case .Point:
-            if case .Point = other { return true } else { return false }
-        case .Directional:
-            if case .Directional = other { return true } else { return false }
-        case .DiskArea(_):
-            if case .DiskArea(_) = other {
+        case .point:
+            if case .point = other { return true } else { return false }
+        case .directional:
+            if case .directional = other { return true } else { return false }
+        case .diskArea(_):
+            if case .diskArea(_) = other {
                 return true
             } else { return false }
-        case .SphereArea(_):
-            if case .SphereArea(_) = other {
+        case .sphereArea(_):
+            if case .sphereArea(_) = other {
                 return true
             } else { return false }
-        case .Spot(_, _):
-            if case .Spot(_, _) = other {
+        case .spot(_, _):
+            if case .spot(_, _) = other {
                 return true
             } else {
                 return false
             }
-        case .RectangleArea(_, _, _):
-            if case .RectangleArea(_, _, _) = other {
+        case .rectangleArea(_, _, _):
+            if case .rectangleArea(_, _, _) = other {
                 return true
             } else {
                 return false
             }
-        case .TriangleArea(_, _, _):
-            if case .TriangleArea(_, _, _) = other {
+        case .triangleArea(_, _, _):
+            if case .triangleArea(_, _, _) = other {
                 return true
             } else {
                 return false
             }
-        case .SunArea(_):
-            if case .SunArea(_) = other {
+        case .sunArea(_):
+            if case .sunArea(_) = other {
                 return true
             } else {
                 return false
@@ -327,12 +327,12 @@ public enum LightType {
 
 public final class Light {
     
-    private static let initialLightPointBufferCapacity = 128
+    fileprivate static let initialLightPointBufferCapacity = 128
     
-    private static let maxPointsPerLight = 4
+    fileprivate static let maxPointsPerLight = 4
     
-    private static var lightPointCount = 0
-    private static var lightPointsGPUBuffer = GPUBuffer<vec4>(capacity: initialLightPointBufferCapacity, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+    fileprivate static var lightPointCount = 0
+    fileprivate static var lightPointsGPUBuffer = GPUBuffer<vec4>(capacity: initialLightPointBufferCapacity, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .dynamic, accessType: .draw)
     
     static let pointsTexture = Texture(buffer: Light.lightPointsGPUBuffer, internalFormat: GL_RGBA32F)
     
@@ -344,7 +344,7 @@ public final class Light {
     
     public var type : LightType {
         didSet {
-            self.backingGPULight.withElement { self.type.fillGPULight(gpuLight: &$0, light: self) }
+            self.backingGPULight.withElement { self.type.fillGPULight(&$0, light: self) }
             self.lightPointsDidChange()
         }
     }
@@ -376,9 +376,9 @@ public final class Light {
     
     public var falloffRadiusOrInfinity : Float {
         switch self.type {
-        case .Directional:
+        case .directional:
             fallthrough
-        case .SunArea(radius: _):
+        case .sunArea(radius: _):
             return 1048576 //a very large number (2^20 metres) since actual infinity causes issues.
         default:
             return self.falloffRadius
@@ -407,12 +407,12 @@ public final class Light {
         
         // double the light points buffer if we run out of space
         if Light.lightPointCount > Light.lightPointsGPUBuffer.capacity {
-            Light.lightPointsGPUBuffer.reserveCapacity(capacity: Light.lightPointsGPUBuffer.capacity * 2)
+            Light.lightPointsGPUBuffer.reserveCapacity(Light.lightPointsGPUBuffer.capacity * 2)
             print("Doubling light points capacity. (This may or may not work)")
         }
         
         // only the sun (and only the first sun in the scene) has a shadow map at the moment
-        if type.isSameTypeAs(.SunArea(radius: 1.0)) {
+        if type.isSameTypeAs(.sunArea(radius: 1.0)) {
             shadowMapArrayIndex = 1
         }
         
@@ -422,7 +422,7 @@ public final class Light {
             gpuLight.inverseSquareAttenuationRadius = inverseRadiusSquared
             
             gpuLight.colourAndIntensity = vec4(self.colour.rgbColour, intensity.toStoredIntensity(forLightType: self.type))
-            self.type.fillGPULight(gpuLight: &gpuLight, light: self)
+            self.type.fillGPULight(&gpuLight, light: self)
         }
     }
     
@@ -436,12 +436,12 @@ public final class Light {
     }
     
     
-    private func lightPointsDidChange() {
+    fileprivate func lightPointsDidChange() {
         if self.sceneNode == nil {
             return
         }
         switch self.type {
-        case let .RectangleArea(width, height, _):
+        case let .rectangleArea(width, height, _):
             let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
             let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
             
@@ -462,7 +462,7 @@ public final class Light {
             let range : Range<Int> = lightPointsBufferIndex..<lightPointsBufferIndex + 4 //4 vertices for a rectangle
             Light.lightPointsGPUBuffer[range] = [topRight, topLeft, bottomLeft, bottomRight]
             Light.lightPointsGPUBuffer.didModifyRange(range)
-        case let .TriangleArea(base, height, _):
+        case let .triangleArea(base, height, _):
             let upInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.up);
             let rightInWorldSpace = normalize(self.sceneNode.transform.nodeToWorldMatrix * vec4.right);
             
@@ -486,14 +486,14 @@ public final class Light {
 }
 
 enum LightTypeFlag : UInt32 {
-    case Point = 0
-    case Directional = 1
-    case Spot = 2
-    case SphereArea = 3
-    case DiskArea = 4
-    case RectangleArea = 5
-    case TriangleArea = 6
-    case SunArea = 7
+    case point = 0
+    case directional = 1
+    case spot = 2
+    case sphereArea = 3
+    case diskArea = 4
+    case rectangleArea = 5
+    case triangleArea = 6
+    case sunArea = 7
 }
 
 

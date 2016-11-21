@@ -61,20 +61,28 @@ func GenerateLightBounds(light: Light, lightPositionView: vec3, box: inout Light
 
 func CoarseRasterizeLights(lights: [Light], lightPositions: [vec3], bounds: inout [LightBounds], camera: Camera, dim: LightGridDimensions)
 {
-    let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)!
-    let group = dispatch_group_create()!
+    
+
     
     bounds.withUnsafeMutableBufferPointer { (bounds) -> Void in
+        
+        let queue = DispatchQueue.global()
+        let group = DispatchGroup()
+        
+        let boundsPtr = bounds
+        
         for idx in 0..<lights.count {
             if !lights[idx].isOn { continue }
-            dispatch_group_async(group, queue) {
+            queue.async(group: group, execute: {
                 var box = LightBounds()
                 GenerateLightBounds(light: lights[idx], lightPositionView: lightPositions[idx], box: &box, camera: camera, dim: dim)
-                bounds[idx] = box
-            }
+                boundsPtr[idx] = box
+            })
         }
+        
+        
+        _ = group.wait(timeout: DispatchTime.distantFuture);
     }
-    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 }
 
 struct Fragment {
@@ -88,8 +96,7 @@ struct Fragment {
     }
 }
 
-    func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, cameraProj11: Float, cameraProj22: Float, cameraZNear: Float, cameraZFar: Float, lightGrid: LightGridBuilder) -> UInt64
-{
+func ComputeCoverage(cellIndex: Int, lightPosition: vec3, lightSize: Float, cameraProj11: Float, cameraProj22: Float, cameraZNear: Float, cameraZFar: Float, lightGrid: LightGridBuilder) -> UInt64 {
     
     let dim = lightGrid.dim
     let cz = cellIndex % (dim.depth / 4);
@@ -195,30 +202,36 @@ struct Fragment {
     return coverage;
 }
 
-func FineRasterizeLights(lights: [Light], lightPositions: [vec3], fragments: inout [Fragment], camera: Camera, lightGridBuilder: LightGridBuilder)
-{
-    let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)!
-    let group = dispatch_group_create()!
-    
+func FineRasterizeLights(lights: [Light], lightPositions: [vec3], fragments: inout [Fragment], camera: Camera, lightGridBuilder: LightGridBuilder) {
     
     let cameraProj11 = camera.projectionMatrix[0][0]
     let cameraProj22 = camera.projectionMatrix[1][1]
+
     
-    fragments.withUnsafeMutableBufferPointer { (fragments) -> () in
+    fragments.withUnsafeMutableBufferPointer { (fragments) -> Void in
         
+        let queue = DispatchQueue.global()
+        let group = DispatchGroup()
+        
+        let fragmentsPtr = fragments
         for idx in 0..<fragments.count {
-            dispatch_group_async(group, queue) {
-                let lightIndex = fragments[idx].lightIndex
+            
+            let lightIndex = fragmentsPtr[idx].lightIndex
+            let cellIndex = fragmentsPtr[idx].cellIndex
+            
+            queue.async(group: group, execute: {
                 let light = lights[lightIndex]
                 let lightPosition = lightPositions[lightIndex]
-                fragments[idx].coverage = ComputeCoverage(cellIndex: fragments[idx].cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadiusOrInfinity,
+                let coverage = ComputeCoverage(cellIndex: cellIndex, lightPosition: lightPosition, lightSize: light.falloffRadiusOrInfinity,
                                                           cameraProj11: cameraProj11, cameraProj22: cameraProj22, cameraZNear: camera.zNear, cameraZFar: camera.zFar,
                                                           lightGrid: lightGridBuilder)
-            }
+                fragmentsPtr[idx].coverage = coverage
+            })
         }
+        
+        _ = group.wait(timeout: DispatchTime.distantFuture);
     }
     
-    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 }
 
 #endif

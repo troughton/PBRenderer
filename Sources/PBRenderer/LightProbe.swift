@@ -24,7 +24,7 @@ public final class LightProbe {
     static let maxTotalLightProbes = 64
     static let maxLightProbesPerPass = 4 //because we're limited by the amount of available texture units.
     
-    static let lightProbeBuffer = GPUBuffer<GPULightProbe>(capacity: maxTotalLightProbes, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Dynamic, accessType: .Draw)
+    static let lightProbeBuffer = GPUBuffer<GPULightProbe>(capacity: maxTotalLightProbes, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .dynamic, accessType: .draw)
     static var lightProbeCount = 0
     
     
@@ -53,9 +53,9 @@ public final class LightProbe {
         let minZ = self.transform.nodeToWorldMatrix * vec4(0, 0, -1, 1)
         let maxZ = self.transform.nodeToWorldMatrix * vec4(0, 0, 1, 1)
         
-        let width = distance(p0: minX, maxX)
-        let height = distance(p0: minY, maxY)
-        let depth = distance(p0: minZ, maxZ)
+        let width = distance(minX, maxX)
+        let height = distance(minY, maxY)
+        let depth = distance(minZ, maxZ)
         
         return width * height * depth
     }
@@ -68,16 +68,16 @@ public final class LightProbe {
     public let nearPlane : Float
     public let farPlane : Float
     
-    private let colourAttachments : [RenderPassColourAttachment]
-    private let sceneRenderers : [SceneRenderer]
+    fileprivate let colourAttachments : [RenderPassColourAttachment]
+    fileprivate let sceneRenderers : [SceneRenderer]
     
-    private let backingElement : GPUBufferElement<GPULightProbe>
+    fileprivate let backingElement : GPUBufferElement<GPULightProbe>
     
     public var indexInBuffer : Int {
         return self.backingElement.bufferIndex
     }
     
-    public init(localLightProbeWithResolution resolution: Int, position: vec3, nearPlane: Float, farPlane: Float) {
+    public init(localLightProbeWithResolution resolution: Int, position: vec3?, nearPlane: Float, farPlane: Float) {
         
         let cubeMapDescriptor = TextureDescriptor(textureCubeWithPixelFormat: GL_RGBA16F, width: resolution, height: resolution, mipmapped: true)
         let localCubeMap = Texture(textureWithDescriptor: cubeMapDescriptor)
@@ -91,8 +91,8 @@ public final class LightProbe {
             
             var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
             colourAttachment.texture = localCubeMap
-            colourAttachment.loadAction = .Load
-            colourAttachment.storeAction = .Store
+            colourAttachment.loadAction = .load
+            colourAttachment.storeAction = .store
             colourAttachment.blendState = blendState
             colourAttachment.textureSlice = slice
             return colourAttachment
@@ -132,8 +132,8 @@ public final class LightProbe {
             
             var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
             colourAttachment.texture = texture
-            colourAttachment.loadAction = .Load
-            colourAttachment.storeAction = .Store
+            colourAttachment.loadAction = .load
+            colourAttachment.storeAction = .store
             colourAttachment.blendState = blendState
             colourAttachment.textureSlice = slice
             return colourAttachment

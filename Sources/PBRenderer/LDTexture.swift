@@ -30,28 +30,28 @@ public final class LDTexture {
     let diffuseTexture : Texture
     let specularTexture : Texture
     
-    private var diffusePipelineState : PipelineState! = nil
-    private var specularPipelineStates : [PipelineState]! = nil
+    fileprivate var diffusePipelineState : PipelineState! = nil
+    fileprivate var specularPipelineStates : [PipelineState]! = nil
     
-    private static let diffuseShader : Shader = {
+    fileprivate static let diffuseShader : Shader = {
        let vertexText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
         let fragmentText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LDDiffuseTexture.frag"))
         return Shader(withVertexShader: vertexText, fragmentShader: fragmentText)
     }()
     
-    private static let specularMipmapShader : Shader = {
+    fileprivate static let specularMipmapShader : Shader = {
         let vertexText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
         let fragmentText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LDSpecularTexture.frag"))
         return Shader(withVertexShader: vertexText, fragmentShader: fragmentText)
     }()
     
-    private static let specularBaseLevelShader : Shader = {
+    fileprivate static let specularBaseLevelShader : Shader = {
         let vertexText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "PassthroughQuad.vert"))
         let fragmentText = try! Shader.shaderTextByExpandingIncludes(fromFile: Resources.pathForResource(named: "LDSpecularTexturePassthrough.frag"))
         return Shader(withVertexShader: vertexText, fragmentShader: fragmentText)
     }()
     
-    private static let sampler : Sampler = {
+    fileprivate static let sampler : Sampler = {
         let sampler = Sampler()
         sampler.minificationFilter = GL_LINEAR_MIPMAP_NEAREST
         return sampler
@@ -93,14 +93,14 @@ public final class LDTexture {
         self.specularPipelineStates = specularPipelineStates
     }
     
-    private func generateDiffuseFramebuffer(resolution: Int) -> Framebuffer {
+    fileprivate func generateDiffuseFramebuffer(resolution: Int) -> Framebuffer {
 
         let colourAttachments = (0..<UInt(6)).map { (i) -> RenderPassColourAttachment? in
             var attachment = RenderPassColourAttachment(clearColour: vec4(0))
             attachment.texture = self.diffuseTexture
             attachment.textureSlice = i
-            attachment.loadAction = .Clear
-            attachment.storeAction = .Store
+            attachment.loadAction = .clear
+            attachment.storeAction = .store
             return attachment
         }
     
@@ -110,12 +110,12 @@ public final class LDTexture {
         
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.texture = diffuseDepthTexture
-            depthAttachment.loadAction = .Clear
+            depthAttachment.loadAction = .clear
         
         return Framebuffer(width: Int32(resolution), height: Int32(resolution), colourAttachments: colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     
-    private func generateSpecularFramebuffers(resolution: Int) -> [Framebuffer] {
+    fileprivate func generateSpecularFramebuffers(resolution: Int) -> [Framebuffer] {
         
         var depthTextureDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: specularResolution, height: specularResolution, mipmapped: true)
         depthTextureDescriptor.usage = .RenderTarget
@@ -130,21 +130,21 @@ public final class LDTexture {
                 attachment.texture = self.specularTexture
                 attachment.textureSlice = i
                 attachment.mipmapLevel = Int(mipmapLevel)
-                attachment.loadAction = .Clear
-                attachment.storeAction = .Store
+                attachment.loadAction = .clear
+                attachment.storeAction = .store
                 return attachment
             }
             var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
             depthAttachment.texture = specularDepthTexture
             depthAttachment.mipmapLevel = Int(mipmapLevel)
-            depthAttachment.loadAction = .Clear
+            depthAttachment.loadAction = .clear
             
             return Framebuffer(width: Int32(mipLevelSize), height: Int32(mipLevelSize), colourAttachments: colourAttachments, depthAttachment: depthAttachment, stencilAttachment: nil)
         }
         return framebuffers
     }
     
-    private func fillDiffuseFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
+    fileprivate func fillDiffuseFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
         //Algorithm: for each face, compute the terms.
         
         texture.bindToIndex(0)
@@ -158,7 +158,7 @@ public final class LDTexture {
         
     }
     
-    private func fillSpecularMipmapsFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
+    fileprivate func fillSpecularMipmapsFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
         //Algorithm: for each face, for each mip level, compute the terms.
         
         texture.bindToIndex(0)
@@ -183,7 +183,7 @@ public final class LDTexture {
         }
     }
     
-    private func fillSpecularBaseLevelFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
+    fileprivate func fillSpecularBaseLevelFromCubeMap(_ texture: Texture, valueMultiplier: Float) {
         
         
         texture.bindToIndex(0)

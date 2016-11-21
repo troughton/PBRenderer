@@ -14,9 +14,9 @@ public protocol XMLNode {
 }
 
 
-public class XMLDocument {
-    private let _documentPointer : xmlDocPtr!
-    public var rootElement : XMLElement? = nil
+open class XMLDocument {
+    fileprivate let _documentPointer : xmlDocPtr!
+    open var rootElement : XMLElement? = nil
     
     public init?(contentsOfFile filePath: String) {
         _documentPointer = xmlReadFile(filePath, nil, Int32(XML_PARSE_HUGE.rawValue))
@@ -36,40 +36,40 @@ public class XMLDocument {
     
 }
 
-public class XMLAttribute : XMLNode {
-    private let _document : XMLDocument
-    private let _attributePointer : xmlAttrPtr!
-    public let name: String?
+open class XMLAttribute : XMLNode {
+    fileprivate let _document : XMLDocument
+    fileprivate let _attributePointer : xmlAttrPtr!
+    open let name: String?
     
     init(document: XMLDocument, attributePointer: xmlAttrPtr) {
         _document = document
         _attributePointer = attributePointer
         
-        self.name = String(cString: UnsafePointer<CChar>(attributePointer.pointee.name))
+        self.name = String(cString: attributePointer.pointee.name)
     }
     
-    public var stringValue: String? {
+    open var stringValue: String? {
         if let value = xmlNodeListGetString(_attributePointer.pointee.doc, _attributePointer.pointee.children, 1) {
             defer { xmlFree(value) }
             
-            return String(cString: UnsafePointer<CChar>(value))
+            return String(cString: value)
         } else {
             return nil
         }
     }
 }
 
-public class XMLElement : XMLNode {
-    private let _document : XMLDocument
-    private let _nodePointer : xmlNodePtr
+open class XMLElement : XMLNode {
+    fileprivate let _document : XMLDocument
+    fileprivate let _nodePointer : xmlNodePtr
     let childElements : [XMLElement]
     let attributes : [XMLAttribute]
-    public let name : String?
+    open let name : String?
     
     init(document: XMLDocument, nodePointer: xmlNodePtr) {
         _document = document
         _nodePointer = nodePointer
-        self.name = String(cString: UnsafePointer<CChar>(nodePointer.pointee.name))
+        self.name = String(cString: nodePointer.pointee.name)
         
         var childElements = [XMLElement]()
         
@@ -93,20 +93,20 @@ public class XMLElement : XMLNode {
         self.attributes = attributes
     }
     
-    public var stringValue: String? {
+    open var stringValue: String? {
         if let content = xmlNodeGetContent(_nodePointer) {
             defer { xmlFree(content) }
-            return String(cString: UnsafePointer<CChar>(content))
+            return String(cString: content)
         } else {
             return nil
         }
     }
 
-    public func attribute(forName name: String) -> XMLAttribute? {
+    open func attribute(forName name: String) -> XMLAttribute? {
         return self.attributes.filter { $0.name == name }.first
     }
     
-    public func elements(forName name: String) -> [XMLElement] {
+    open func elements(forName name: String) -> [XMLElement] {
         return self.childElements.filter { $0.name == name }
     }
 }

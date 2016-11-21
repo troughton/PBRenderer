@@ -28,7 +28,7 @@ final class LightBlurPass {
         return sampler
     }()
     
-    private var pipelineStates : [(PipelineState, PipelineState)]! = nil
+    fileprivate var pipelineStates : [(PipelineState, PipelineState)]! = nil
     
     init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment) {
         self.resize(newPixelDimensions: pixelDimensions.width, pixelDimensions.height, lightAccumulationAttachment: lightAccumulationAttachment)
@@ -41,7 +41,7 @@ final class LightBlurPass {
         let depthTexture = Texture(textureWithDescriptor: TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: baseWidth, height: baseHeight, mipmapped: false))
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.texture = depthTexture
-        depthAttachment.loadAction = .Clear
+        depthAttachment.loadAction = .clear
         
         var depthStencilState = DepthStencilState()
         depthStencilState.isDepthWriteEnabled = false
@@ -105,7 +105,7 @@ final class ScreenSpaceReflectionConeTracePass {
         return sampler
     }()
     
-    private var _pipelineState : PipelineState
+    fileprivate var _pipelineState : PipelineState
     
     init(pixelDimensions: Size) {
         
@@ -126,12 +126,12 @@ final class ScreenSpaceReflectionConeTracePass {
         let depthTexture = Texture(textureWithDescriptor: TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: Int(width), height: Int(height), mipmapped: false))
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         depthAttachment.texture = depthTexture
-        depthAttachment.loadAction = .Clear
+        depthAttachment.loadAction = .clear
         
         let colourTexture = Texture(textureWithDescriptor: TextureDescriptor(texture2DWithPixelFormat: GL_RGBA16F, width: Int(width), height: Int(height), mipmapped: false))
         var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0))
-        colourAttachment.loadAction = .Clear
-        colourAttachment.storeAction = .Store
+        colourAttachment.loadAction = .clear
+        colourAttachment.storeAction = .store
         colourAttachment.texture = colourTexture
         
         return Framebuffer(width: width, height: height, colourAttachments: [colourAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
@@ -210,8 +210,8 @@ final class ScreenSpaceReflectionConeTracePass {
 
 final class ScreenSpaceReflectionsPasses {
     
-    private let _lightBlurPass : LightBlurPass
-    private let _ssrConeTracePass : ScreenSpaceReflectionConeTracePass
+    fileprivate let _lightBlurPass : LightBlurPass
+    fileprivate let _ssrConeTracePass : ScreenSpaceReflectionConeTracePass
     
     init(pixelDimensions: Size, lightAccumulationAttachment: RenderPassColourAttachment) {
         _lightBlurPass = LightBlurPass(pixelDimensions: pixelDimensions, lightAccumulationAttachment: lightAccumulationAttachment)

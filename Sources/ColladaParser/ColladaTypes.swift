@@ -39,7 +39,7 @@ extension Double : StringInitialisable {}
 
 public extension Array where Element : StringInitialisable {
 	public init?(_ string: String) {
-        let components = string.components(separatedBy: .whitespaces())
+        let components = string.components(separatedBy: .whitespaces)
 		self = components.flatMap { Element($0) }
 	}
 }
@@ -874,7 +874,7 @@ return nil
 		} else { self.material = nil }
 		self.input = xmlElement.elements(forName: "input").map { InputLocalOffsetType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { PolygonsTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { PolygonsTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
 
 }
@@ -2072,8 +2072,8 @@ public final class Optics : ColladaType {
 
 
         public enum Projection {
-            case Orthographic(xMag: Float?, yMag: Float?, aspectRatio: Float? , zNear: Float, zFar: Float)
-            case Perspective(xFov: Float?, yFov: Float?, aspectRatio: Float?, zNear: Float, zFar: Float)
+            case orthographic(xMag: Float?, yMag: Float?, aspectRatio: Float? , zNear: Float, zFar: Float)
+            case perspective(xFov: Float?, yFov: Float?, aspectRatio: Float?, zNear: Float, zFar: Float)
             
             
         }
@@ -2087,14 +2087,14 @@ public final class Optics : ColladaType {
                 let aspectRatio = orthographicElement.elements(forName: "aspect_ratio").first.map { Float($0.stringValue!)! }
                 let zNear = orthographicElement.elements(forName: "znear").first.map { Float($0.stringValue!)! }!
                 let zFar = orthographicElement.elements(forName: "zfar").first.map { Float($0.stringValue!)! }!
-                self.projection = .Orthographic(xMag: xMag, yMag: yMag, aspectRatio: aspectRatio, zNear: zNear, zFar: zFar)
+                self.projection = .orthographic(xMag: xMag, yMag: yMag, aspectRatio: aspectRatio, zNear: zNear, zFar: zFar)
             } else if let perspectiveElement = xmlElement.elements(forName: "perspective").first {
                 let xFov = perspectiveElement.elements(forName: "xfov").first.map { Float($0.stringValue!)! }
                 let yFov = perspectiveElement.elements(forName: "yfov").first.map { Float($0.stringValue!)! }
                 let aspectRatio = perspectiveElement.elements(forName: "aspect_ratio").first.map { Float($0.stringValue!)! }
                 let zNear = perspectiveElement.elements(forName: "znear").first.map { Float($0.stringValue!)! }!
                 let zFar = perspectiveElement.elements(forName: "zfar").first.map { Float($0.stringValue!)! }!
-                self.projection = .Perspective(xFov: xFov, yFov: yFov, aspectRatio: aspectRatio, zNear: zNear, zFar: zFar)
+                self.projection = .perspective(xFov: xFov, yFov: yFov, aspectRatio: aspectRatio, zNear: zNear, zFar: zFar)
             } else {
                 fatalError()
             }
@@ -2217,23 +2217,23 @@ public final class TechniqueCommon : ColladaType {
 
 
     public enum LightTypeEnum {
-        case Ambient(colour: Float3Type)
-        case Point(colour: Float3Type)
-        case Directional(colour: Float3Type)
-        case Spot(colour: Float3Type, falloffAngle : Float, falloffExponent: Float)
+        case ambient(colour: Float3Type)
+        case point(colour: Float3Type)
+        case directional(colour: Float3Type)
+        case spot(colour: Float3Type, falloffAngle : Float, falloffExponent: Float)
         
         init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
             let colour = Float3Type(xmlElement.childElements.first!.elements(forName: "color").first!.stringValue!)!
             if let _ = xmlElement.elements(forName: "directional").first {
-                self = .Directional(colour: colour)
+                self = .directional(colour: colour)
             } else if let _ = xmlElement.elements(forName: "point").first {
-                self = .Point(colour: colour)
+                self = .point(colour: colour)
             } else if let _ = xmlElement.elements(forName: "spot").first {
                 let falloffAngle = Float(xmlElement.childElements.first!.elements(forName: "falloff_angle").first!.stringValue!)!
                 let falloffExponent = Float(xmlElement.childElements.first!.elements(forName: "falloff_exponent").first!.stringValue!)!
-                self = .Spot(colour: colour, falloffAngle: falloffAngle, falloffExponent: falloffExponent)
+                self = .spot(colour: colour, falloffAngle: falloffAngle, falloffExponent: falloffExponent)
             } else if let _ = xmlElement.elements(forName: "ambient").first {
-                self = .Ambient(colour: colour)
+                self = .ambient(colour: colour)
             } else {
                 fatalError()
             }
@@ -2595,7 +2595,7 @@ public final class InstanceControllerType : ColladaType {
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
-		self.skeleton = xmlElement.elements(forName: "skeleton").map { String($0) }
+		self.skeleton = xmlElement.elements(forName: "skeleton").map { String(describing: $0) }
 		if let childElement = xmlElement.elements(forName: "bind_material").first {
 			self.bindMaterial = BindMaterialType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.bindMaterial = nil }
@@ -3406,7 +3406,7 @@ return nil
 
 
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
-		self.choice0 = xmlElement.childElements.flatMap { FxSourcesTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { FxSourcesTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -4409,7 +4409,7 @@ return nil
 		self.newparam = xmlElement.elements(forName: "newparam").map { Newparam(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.technique = xmlElement.elements(forName: "technique").map { Technique(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { ProfileGles2TypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ProfileGles2TypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -4756,7 +4756,7 @@ return nil
 		self.newparam = xmlElement.elements(forName: "newparam").map { GlslNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.technique = xmlElement.elements(forName: "technique").map { Technique(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { ProfileGlslTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ProfileGlslTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -5161,7 +5161,7 @@ return nil
 		self.newparam = xmlElement.elements(forName: "newparam").map { CgNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.technique = xmlElement.elements(forName: "technique").map { Technique(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { ProfileCgTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ProfileCgTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -6631,12 +6631,12 @@ public final class TechniqueCommon : ColladaType {
 								The source element may contain an
 								IDREF_array.
 							*/
-		case IDREFArray(IdrefArrayType)
+		case idrefArray(IdrefArrayType)
 		/**
 								The source element may contain a
 								Name_array.
 							*/
-		case NameArray(NameArrayType)
+		case nameArray(NameArrayType)
 		/**
 								The source element may contain a
 								bool_array.
@@ -6653,7 +6653,7 @@ public final class TechniqueCommon : ColladaType {
 							*/
 		case intArray(IntArrayType)
 		/***/
-		case SIDREFArray(SidrefArrayType)
+		case sidrefArray(SidrefArrayType)
 	init?(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 if xmlElement.name == "token_array" {	self = .tokenArray(TokenArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
@@ -6662,18 +6662,18 @@ if let element = xmlElement.elements(forName: "token_array").first {
 	self = .tokenArray(TokenArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
 	return
 }
-if xmlElement.name == "IDREF_array" {	self = .IDREFArray(IdrefArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+if xmlElement.name == "IDREF_array" {	self = .idrefArray(IdrefArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
 if let element = xmlElement.elements(forName: "IDREF_array").first {
-	self = .IDREFArray(IdrefArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
+	self = .idrefArray(IdrefArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
 	return
 }
-if xmlElement.name == "Name_array" {	self = .NameArray(NameArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+if xmlElement.name == "Name_array" {	self = .nameArray(NameArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
 if let element = xmlElement.elements(forName: "Name_array").first {
-	self = .NameArray(NameArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
+	self = .nameArray(NameArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
 	return
 }
 if xmlElement.name == "bool_array" {	self = .boolArray(BoolArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
@@ -6697,11 +6697,11 @@ if let element = xmlElement.elements(forName: "int_array").first {
 	self = .intArray(IntArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
 	return
 }
-if xmlElement.name == "SIDREF_array" {	self = .SIDREFArray(SidrefArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
+if xmlElement.name == "SIDREF_array" {	self = .sidrefArray(SidrefArrayType(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects))
 	return
 }
 if let element = xmlElement.elements(forName: "SIDREF_array").first {
-	self = .SIDREFArray(SidrefArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
+	self = .sidrefArray(SidrefArrayType(xmlElement: element, sourcesToObjects: &sourcesToObjects))
 	return
 }
 return nil
@@ -7072,7 +7072,7 @@ return nil
 		self.source = xmlElement.elements(forName: "source").map { SourceType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.vertices = VerticesType(xmlElement: xmlElement.elements(forName: "vertices").first!, sourcesToObjects: &sourcesToObjects)
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { ConvexMeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { ConvexMeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
 
 }
@@ -7190,7 +7190,7 @@ return nil
 		self.source = xmlElement.elements(forName: "source").map { SourceType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.vertices = VerticesType(xmlElement: xmlElement.elements(forName: "vertices").first!, sourcesToObjects: &sourcesToObjects)
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { MeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { MeshTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
 
 }
@@ -8343,7 +8343,7 @@ return nil
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.joint = String(xmlElement.attribute(forName: "joint")!.stringValue!)
 		self.link = LinkType(xmlElement: xmlElement.elements(forName: "link").first!, sourcesToObjects: &sourcesToObjects)
-		self.choice0 = xmlElement.childElements.flatMap { AttachmentFullChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { AttachmentFullChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 	}
 
 }
@@ -8419,8 +8419,8 @@ return nil
 		if let attribute = xmlElement.attribute(forName: "name") {
 			self.name = String(attribute.stringValue!)
 		} else { self.name = nil }
-		self.choice0 = xmlElement.childElements.flatMap { LinkTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
-		self.choice1 = xmlElement.childElements.flatMap { LinkTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { LinkTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
+		self.choice1 = xmlElement.childElements.flatMap { LinkTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -8490,7 +8490,7 @@ return nil
 			self.rigidBody = String(attribute.stringValue!)
 		} else { self.rigidBody = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { RefAttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { RefAttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -8549,7 +8549,7 @@ return nil
 			self.rigidBody = String(attribute.stringValue!)
 		} else { self.rigidBody = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { AttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { AttachmentChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -9003,7 +9003,7 @@ public final class NodeType : ColladaType {
 		self.instanceNode = xmlElement.elements(forName: "instance_node").map { InstanceNodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.nodes = xmlElement.elements(forName: "node").map { NodeType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.transforms = xmlElement.childElements.flatMap { NodeTypeTransforms(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.transforms = xmlElement.childElements.flatMap { NodeTypeTransforms(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -9217,7 +9217,7 @@ public final class Bind : ColladaType {
 		if let attribute = xmlElement.attribute(forName: "camera_node") {
 			self.cameraNode = String(attribute.stringValue!)
 		} else { self.cameraNode = nil }
-		self.layer = xmlElement.elements(forName: "layer").map { String($0) }
+		self.layer = xmlElement.elements(forName: "layer").map { String(describing: $0) }
 		if let childElement = xmlElement.elements(forName: "instance_material").first {
 			self.instanceMaterial = InstanceMaterial(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.instanceMaterial = nil }
@@ -9603,7 +9603,7 @@ return nil
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.choice0 = ShapeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)
 		self.choice1 = ShapeChoice1(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
-		self.choice2 = xmlElement.childElements.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice2 = xmlElement.childElements.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -9944,7 +9944,7 @@ return nil
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.choice0 = ShapeChoice0(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)
 		self.choice1 = ShapeChoice1(xmlElement: xmlElement, sourcesToObjects: &sourcesToObjects)!
-		self.choice2 = xmlElement.childElements.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice2 = xmlElement.childElements.flatMap { ShapeChoice2(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -11133,7 +11133,7 @@ return nil
 			self.sid = SidType(attribute.stringValue!)
 		} else { self.sid = nil }
 		self.extra = xmlElement.elements(forName: "extra").map { ExtraType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { JointTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { JointTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 		if let id = self.id { sourcesToObjects[id] = self	} }
 
 }
@@ -11490,8 +11490,8 @@ return nil
 	init(xmlElement: XMLElement, sourcesToObjects: inout [String : ColladaType]) {
 		self.newparam = xmlElement.elements(forName: "newparam").map { KinematicsNewparamType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
 		self.link = xmlElement.elements(forName: "link").map { LinkType(xmlElement: $0, sourcesToObjects: &sourcesToObjects) }
-		self.choice0 = xmlElement.childElements.flatMap { KinematicsModelTechniqueTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
-		self.choice1 = xmlElement.childElements.flatMap { KinematicsModelTechniqueTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { KinematicsModelTechniqueTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
+		self.choice1 = xmlElement.childElements.flatMap { KinematicsModelTechniqueTypeChoice1(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }
@@ -11652,7 +11652,7 @@ return nil
 		if let childElement = xmlElement.elements(forName: "limits").first {
 			self.limits = KinematicsLimitsType(xmlElement: childElement, sourcesToObjects: &sourcesToObjects)
 		} else { self.limits = nil }
-		self.choice0 = xmlElement.childElements.flatMap { KinematicsAxisInfoTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } ?? []
+		self.choice0 = xmlElement.childElements.flatMap { KinematicsAxisInfoTypeChoice0(xmlElement: $0, sourcesToObjects: &sourcesToObjects) } 
 	}
 
 }

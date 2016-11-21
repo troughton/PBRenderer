@@ -27,6 +27,14 @@ public func lerp<T : ArithmeticType>(from: T, to: T, percentage: T) -> T {
     return from + (to - from) * percentage
 }
 
+public func degrees<T : FloatingPointArithmeticType>(radians: T) -> T {
+    return radians * 57.2957795131
+}
+
+public func radians<T : FloatingPointArithmeticType>(degrees: T) -> T{
+    return degrees * 0.01745329252
+}
+
 func clamp<T : ArithmeticType>(_ x: T, min: T, max: T) -> T {
     if x < min {
         return min
@@ -66,7 +74,7 @@ func dot<T:FloatingPoint>(_ lhs: Quaternion<T>, _ rhs: Quaternion<T>)  -> T {
     return lhs.w * rhs.w + lhs.x * rhs.x +  lhs.y * rhs.y + lhs.z * rhs.z;
 }
 
-func length_q<T:FloatingPoint>(q: Quaternion<T>) -> T {
+func length_q<T:FloatingPoint>(_ q: Quaternion<T>) -> T {
     let unsafeQ = unsafeBitCast(q, to: Vector4<T>.self)
     return length(unsafeQ)
 }
@@ -86,7 +94,7 @@ func *<T>(lhs: Matrix4x4<T>, rhs: Quaternion<T>) -> Matrix4x4<T> {
 }
 
 func *<T>(lhs: Quaternion<T>, rhs: Matrix4x4<T>) -> Matrix4x4<T> {
-    return Matrix4x4(withQuaternion: lhs) * lhs
+    return Matrix4x4(withQuaternion: lhs) * rhs
 }
 
 func *<T>(quaternion: Quaternion<T>, vector: Vector3<T>) -> Vector3<T> {
@@ -125,9 +133,9 @@ func sin<T : FloatingPointArithmeticType>(_ x : T) -> T {
 }
 
 func atan2<T : FloatingPointArithmeticType>(_ x : T, _ y: T) -> T {
-    if let x = x as? Float, y = y as? Float {
+    if let x = x as? Float, let y = y as? Float {
         return T(atan2f(x, y))
-    } else if let x = x as? Double, y = y as? Double {
+    } else if let x = x as? Double, let y = y as? Double {
         return T(atan2(x, y))
     } else {
         fatalError()
@@ -145,9 +153,9 @@ func asin<T : FloatingPointArithmeticType>(_ x : T) -> T {
 }
 
 func clamp<T : FloatingPointArithmeticType>(_ x : T, _ low: T, _ high: T) -> T {
-    if let x = x as? Float, low = low as? Float, high = high as? Float  {
+    if let x = x as? Float, let low = low as? Float, let high = high as? Float  {
         return T(min(max(x, low), high))
-    } else if let x = x as? Double, low = low as? Double, high = high as? Double {
+    } else if let x = x as? Double, let low = low as? Double, let high = high as? Double {
         return T(min(max(x, low), high))
     } else {
         fatalError()
@@ -213,23 +221,28 @@ extension Quaternion where T : FloatingPoint {
     }
 }
 
-@warn_unused_result
-public func normalize<T : FloatingPointArithmeticType>(_ x: Quaternion<T>) -> Quaternion<T> {
+
+public func normalize(_ x: Quaternion<Float>) -> Quaternion<Float> {
     //http://stackoverflow.com/questions/11667783/quaternion-and-normalization
-    let qmagsq : Double
-    if let x = x as? quat {
-        qmagsq = Double(x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w)
-    } else if let x = x as? Quaternion<Double> {
-        qmagsq = x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w
-    } else {
-        fatalError()
-    }
+    let qmagsq = Double(x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w)
     
     if (abs(1.0 - qmagsq) < 2.107342e-08) {
-        return x * T(2.0 / (1.0 + qmagsq));
+        return x * Float(2.0 / (1.0 + qmagsq));
     }
     else {
-        return x * (1.0 / T(sqrt(qmagsq)));
+        return x * (1.0 / Float(sqrt(qmagsq)));
+    }
+}
+
+public func normalize(_ x: Quaternion<Double>) -> Quaternion<Double> {
+    //http://stackoverflow.com/questions/11667783/quaternion-and-normalization
+    let qmagsq = (x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w)
+    
+    if (abs(1.0 - qmagsq) < 2.107342e-08) {
+        return x * (2.0 / (1.0 + qmagsq));
+    }
+    else {
+        return x * (1.0 / sqrt(qmagsq));
     }
 }
 
@@ -380,14 +393,14 @@ extension Matrix4x4 where T : FloatingPointArithmeticType {
     }
 
 
-@warn_unused_result
-public func lerp<genType:VectorType where
+
+public func lerp<genType:VectorType>(from: genType, to: genType, t: genType.Element) -> genType where
     genType.Element:FloatingPointArithmeticType
-    >(from: genType, to: genType, t: genType.Element) -> genType {
+     {
     return from + t * (to - from)
 }
 
-@warn_unused_result
+
 public func distanceSquared<T: FloatingPointArithmeticType
     >(_ a: Vector3<T>, _ b: Vector3<T>) -> T {
     

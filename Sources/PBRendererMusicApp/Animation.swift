@@ -17,7 +17,7 @@ final class AnimationSystem {
     private static var animations = [Animation]()
     private static var animationsToRemove = [Int]()
     
-    typealias AnimationTickFunction = (elapsedBeats: Beat, percentage: Double) -> ()
+    typealias AnimationTickFunction = (_ elapsedBeats: Beat, _ percentage: Double) -> ()
     
     struct Animation {
         let startBeat : Beat
@@ -37,7 +37,7 @@ final class AnimationSystem {
             if currentBeat > animationEndTime {
                 let elapsedBeats = currentBeat - animation.startBeat
                 if elapsedBeats >= 0 {
-                    animation.onTick(elapsedBeats: elapsedBeats, percentage: 1.0)
+                    animation.onTick(elapsedBeats, 1.0)
                 }
                 
                 animationsToRemove.append(i)
@@ -45,7 +45,7 @@ final class AnimationSystem {
                 let elapsedBeats = currentBeat - animation.startBeat
                 if elapsedBeats >= 0 {
                     let percentage = fmod(elapsedBeats, animation.duration) / animation.duration
-                    animation.onTick(elapsedBeats: elapsedBeats, percentage: percentage)
+                    animation.onTick(elapsedBeats, percentage)
                 }
             }
         }

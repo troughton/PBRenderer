@@ -43,7 +43,7 @@ final class OutlinePass {
     class func outlinePassFramebuffer(width: GLint, height: GLint, gBufferPassState: PipelineState, lightAccumulationAttachment: RenderPassColourAttachment) -> Framebuffer {
         
         var depthAttachment = gBufferPassState.framebuffer.depthAttachment
-        depthAttachment.loadAction = .Load
+        depthAttachment.loadAction = .load
         return Framebuffer(width: width, height: height, colourAttachments: [lightAccumulationAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
     }
     

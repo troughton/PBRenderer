@@ -13,17 +13,17 @@ final class OctreeNode<T> {
     
     var values = [T]()
     let boundingVolume : BoundingBox
-    private var children = [OctreeNode<T>?](repeating: nil, count: Extent.LastElement.rawValue)
+    fileprivate var children = [OctreeNode<T>?](repeating: nil, count: Extent.lastElement.rawValue)
     
     lazy var boundingSphere : (centre: vec3, radius: Float) = {
         let diameter = max(self.boundingVolume.width, self.boundingVolume.height, self.boundingVolume.depth)
         return (self.boundingVolume.centre, diameter/2)
     }()
     
-    private let _subVolumes : [BoundingBox]
+    fileprivate let _subVolumes : [BoundingBox]
     
-    private static func computeSubVolumesForBox(_ boundingBox: BoundingBox) -> [BoundingBox] {
-        var volumes = [BoundingBox?](repeating: nil, count: Extent.LastElement.rawValue)
+    fileprivate static func computeSubVolumesForBox(_ boundingBox: BoundingBox) -> [BoundingBox] {
+        var volumes = [BoundingBox?](repeating: nil, count: Extent.lastElement.rawValue)
         
         let centre = boundingBox.centre
         
@@ -59,7 +59,7 @@ final class OctreeNode<T> {
         return self[extent.rawValue]
     }
     
-    private subscript(index: Int) -> OctreeNode<T>? {
+    fileprivate subscript(index: Int) -> OctreeNode<T>? {
         return self.children[index]
     }
     
@@ -80,10 +80,10 @@ final class OctreeNode<T> {
         values.append(element)
     }
     
-    func traverse(function: @noescape ([T]) -> ()) {
+    func traverse(_ function: ([T]) -> ()) {
         function(values)
         for child in children {
-            child?.traverse(function: function)
+            child?.traverse(function)
         }
     }
 }

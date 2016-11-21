@@ -20,14 +20,14 @@ private struct VertexLayout {
     }
     
     func alignedOffsetForValue<T>(_ value: T, offset: Int) -> Int {
-        return alignedOffsetForValueWithAlignment(alignofValue(value), offset: offset)
+        return alignedOffsetForValueWithAlignment(MemoryLayout.alignment(ofValue: value), offset: offset)
     }
     
     func alignedOffsetForType<T>(_ type: T.Type, offset: Int) -> Int {
-        return alignedOffsetForValueWithAlignment(alignof(type), offset: offset)
+        return alignedOffsetForValueWithAlignment(MemoryLayout<T>.alignment, offset: offset)
     }
     
-    mutating func addAttribute(_ type : AttributeType, glType: GLint, alignment: Int, lengthInBytes: Int) {
+    mutating func addAttribute(type : AttributeType, glType: GLint, alignment: Int, lengthInBytes: Int) {
         if let existingAttribute = self.attributes[type] {
             assert(existingAttribute.lengthInBytes == lengthInBytes && existingAttribute.glType == glType)
             return
@@ -46,13 +46,13 @@ private struct VertexLayout {
 
 private class Vertex : Hashable {
     let layout : VertexLayout
-    let data : UnsafeMutablePointer<UInt8>!
+    let data : UnsafeMutableRawPointer!
     
     lazy var hashValue : Int = {
         var h = 2166136261;
         
         for i in 0..<self.layout.size {
-            h = (h &* 16777619) ^ Int(self.data.advanced(by: i).pointee);
+            h = (h &* 16777619) ^ Int(self.data.advanced(by: i).assumingMemoryBound(to: UInt8.self).pointee);
         }
         
         return h;
@@ -60,10 +60,10 @@ private class Vertex : Hashable {
     
     init(layout: VertexLayout) {
         self.layout = layout
-        self.data = UnsafeMutablePointer<UInt8>(calloc(1, layout.size))
+        self.data = calloc(1, layout.size)
     }
     
-    func setAttribute<T>(attribute: AttributeType, value: UnsafePointer<T>) {
+    func setAttribute(_ attribute: AttributeType, value: UnsafeRawPointer) {
         guard let (lengthInBytes, offset, _) = layout.attributes[attribute] else {
             fatalError("No such attribute \(attribute) in layout.")
         }
@@ -73,11 +73,11 @@ private class Vertex : Hashable {
     
     //Note: this assumes that the data is in the form of floats, which may not always be the case.
     var position : vec3 {
-        guard let (_, offset, _) = layout.attributes[.Position] else {
-            fatalError("No attribute for position in layout.")
+        guard let (_, offset, _) = layout.attributes[.position] else {
+            fatalError("No attribute for position in layout \(layout.attributes).")
         }
         
-        let xPositionPointer = UnsafePointer<Float>(self.data.advanced(by: offset))
+        let xPositionPointer = self.data.advanced(by: offset).assumingMemoryBound(to: Float.self)
         return vec3(xPositionPointer.pointee, xPositionPointer.successor().pointee, xPositionPointer.advanced(by: 2).pointee)
     }
     
@@ -111,18 +111,17 @@ extension GLMesh {
                 }
                 return
             case "POSITION":
-                attributeType = .Position
+                attributeType = .position
             case "NORMAL":
-                attributeType = .Normal
+                attributeType = .normal
             case "TEXCOORD":
-                attributeType = .TextureCoordinate
+                attributeType = .textureCoordinate
             default:
                 fatalError("Unknown attribute")
             }
         
         guard let source = root[input.source] as? SourceType else { fatalError("The source must be of type SourceType") }
         dictionary[attributeType] = (offset, source)
-
     }
     
     static func meshesFromCollada(_ colladaMesh: MeshType, root: Collada) -> ([GLMesh], boundingBox: BoundingBox) {
@@ -147,9 +146,9 @@ extension GLMesh {
                     let typeSize : Int
                     let glType : GLint
                     switch value.source.choice0! {
-                    case .boolArray(_): typeSize = sizeof(Bool); glType = GL_BOOL
-                    case .floatArray(_): typeSize = sizeof(Float); glType = GL_FLOAT
-                    case .intArray(_): typeSize = sizeof(Int32); glType = GL_INT
+                    case .boolArray(_): typeSize = MemoryLayout<Bool>.size; glType = GL_BOOL
+                    case .floatArray(_): typeSize = MemoryLayout<Float>.size; glType = GL_FLOAT
+                    case .intArray(_): typeSize = MemoryLayout<Int32>.size; glType = GL_INT
                     default: fatalError("No valid type size for type \(value.source.choice0!)")
                     }
                     let sizeInBytes = typeSize * stride
@@ -159,7 +158,7 @@ extension GLMesh {
                         alignment = roundUpToNearestMultiple(numToRound: alignment, of: 16)
                     }
                     
-                    vertexLayout.addAttribute(type, glType: glType, alignment: alignment, lengthInBytes: sizeInBytes)
+                    vertexLayout.addAttribute(type: type, glType: glType, alignment: alignment, lengthInBytes: sizeInBytes)
                 }
             }
         }
@@ -181,26 +180,26 @@ extension GLMesh {
                         for (type, offsetAndSource) in attributesToSources {
                             let indexInArray = Int(tris.p!.data[stride * vertexIndex + offsetAndSource.offset]) * Int(offsetAndSource.source.techniqueCommon!.accessor.stride!)
                             
-                            var valuePtr : UnsafePointer<UInt8>!
+                            var valuePtr : UnsafeRawPointer!
                             
                             switch offsetAndSource.source.choice0! {
                             case let .boolArray(array):
                                 array.data.withUnsafeBufferPointer { bufferPointer in
-                                    valuePtr = UnsafePointer<UInt8>(bufferPointer.baseAddress?.advanced(by: indexInArray))
+                                    valuePtr = UnsafeRawPointer(bufferPointer.baseAddress?.advanced(by: indexInArray))
                                 }
                             case let .floatArray(array):
                                 array.data.withUnsafeBufferPointer { bufferPointer in
-                                    valuePtr = UnsafePointer<UInt8>(bufferPointer.baseAddress?.advanced(by: indexInArray))
+                                    valuePtr = UnsafeRawPointer(bufferPointer.baseAddress?.advanced(by: indexInArray))
                                 }
                             case let .intArray(array):
                                 array.data.withUnsafeBufferPointer { bufferPointer in
-                                    valuePtr = UnsafePointer<UInt8>(bufferPointer.baseAddress?.advanced(by: indexInArray))
+                                    valuePtr = UnsafeRawPointer(bufferPointer.baseAddress?.advanced(by: indexInArray))
                                 }
                             default:
                                 fatalError("Array type \(offsetAndSource.source.choice0!) not supported.")
                             }
                             
-                            vertex.setAttribute(attribute: type, value: valuePtr)
+                            vertex.setAttribute(type, value: valuePtr)
                         }
                         
                         
@@ -220,7 +219,7 @@ extension GLMesh {
                     }
                 }
                 
-                let indexBuffer = GPUBuffer<GLuint>(capacity: Int(tris.count * 3), data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+                let indexBuffer = GPUBuffer<GLuint>(capacity: Int(tris.count * 3), data: indices, bufferBinding: GL_ELEMENT_ARRAY_BUFFER, accessFrequency: .static, accessType: .draw)
                 
                 materialNames.append(tris.material)
                 
@@ -233,9 +232,9 @@ extension GLMesh {
         }
 
             
-        let vertexBuffer = GPUBuffer<UInt8>(capacity: vertices.count * vertexLayout.alignedSize, data: nil, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .Static, accessType: .Draw)
+        let vertexBuffer = GPUBuffer<UInt8>(capacity: vertices.count * vertexLayout.alignedSize, data: nil, bufferBinding: GL_ARRAY_BUFFER, accessFrequency: .static, accessType: .draw)
         for (i, vertex) in vertices.enumerated() {
-                vertexBuffer.copyToIndex(i * vertexLayout.alignedSize, value: vertex.data, sizeInBytes: vertexLayout.size)
+                vertexBuffer.copyToIndex(i * vertexLayout.alignedSize, value: vertex.data.assumingMemoryBound(to: UInt8.self), sizeInBytes: vertexLayout.size)
         }
         
         vertexBuffer.didModify()

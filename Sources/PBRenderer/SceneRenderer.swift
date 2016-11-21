@@ -11,7 +11,6 @@ import SGLOpenGL
 import SGLMath
 import CGLFW3
 import ColladaParser
-import CPBRendererLibs
 
 final class GBufferPass {
     
@@ -96,8 +95,8 @@ final class GBufferPass {
         
         var attachment1 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment1.texture = attachment1Texture
-        attachment1.loadAction = .Clear
-        attachment1.storeAction = .Store
+        attachment1.loadAction = .clear
+        attachment1.storeAction = .store
         
         let rgba8Descriptor = TextureDescriptor(texture2DWithPixelFormat: GL_RGBA8, width: Int(width), height: Int(height), mipmapped: false)
         
@@ -105,25 +104,25 @@ final class GBufferPass {
         
         var attachment2 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment2.texture = attachment2Texture
-        attachment2.loadAction = .Clear
-        attachment2.storeAction = .Store
+        attachment2.loadAction = .clear
+        attachment2.storeAction = .store
         
         let attachment3Texture = Texture(textureWithDescriptor: rgba8Descriptor)
         
         var attachment3 = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         attachment3.texture = attachment3Texture
-        attachment3.loadAction = .Clear
-        attachment3.storeAction = .Store
+        attachment3.loadAction = .clear
+        attachment3.storeAction = .store
         
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT32F, width: Int(width), height: Int(height), mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
-        depthAttachment.loadAction = .Clear
-        depthAttachment.storeAction = .Store
+        depthAttachment.loadAction = .clear
+        depthAttachment.storeAction = .store
         depthAttachment.texture = depthTexture
 
         var lightAccumulationAttachment = lightAccumulationAttachment
-        lightAccumulationAttachment.loadAction = .Clear
+        lightAccumulationAttachment.loadAction = .clear
         lightAccumulationAttachment.blendState = BlendState()
         
         return Framebuffer(width: width, height: height, colourAttachments: [attachment1, attachment2, attachment3, lightAccumulationAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)
@@ -185,14 +184,14 @@ final class GBufferPass {
     }
     
     func zSort(nodes: inout [SceneNode], worldToCameraMatrix: mat4) {
-        nodes.sort { (mesh1, mesh2) -> Bool in
+        nodes.sort(by:  { (mesh1, mesh2) -> Bool in
             let z1 = mesh1.meshes.1.maxZForBoundingBoxInSpace(nodeToSpaceTransform: worldToCameraMatrix * mesh1.transform.nodeToWorldMatrix)
             let z2 = mesh2.meshes.1.maxZForBoundingBoxInSpace(nodeToSpaceTransform: worldToCameraMatrix * mesh2.transform.nodeToWorldMatrix)
             return z1 > z2
-        }
+        })
     }
     
-    private func recurseTree(nodes: inout [SceneNode], node: OctreeNode<SceneNode>, frustum: Frustum) {
+    fileprivate func recurseTree(nodes: inout [SceneNode], node: OctreeNode<SceneNode>, frustum: Frustum) {
         
         if !frustum.containsBox(node.boundingVolume) {
             return
@@ -202,7 +201,7 @@ final class GBufferPass {
             nodes.append(node)
         }
         
-        for i in 0..<Extent.LastElement.rawValue {
+        for i in 0..<Extent.lastElement.rawValue {
             if let child = node[Extent(rawValue: i)!] {
                 recurseTree(nodes: &nodes, node: child, frustum: frustum)
             }
@@ -347,7 +346,7 @@ public final class SceneRenderer {
         
         self.finalPass = FinalPass(pixelDimensions: pixelDimensions)
         
-        window.registerForFramebufferResize(onResize: self.framebufferDidResize)
+        window.registerForFramebufferResize(self.framebufferDidResize)
         
     }
     
@@ -371,8 +370,8 @@ public final class SceneRenderer {
         
         var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0));
         colourAttachment.texture = texture
-        colourAttachment.loadAction = .Load
-        colourAttachment.storeAction = .Store
+        colourAttachment.loadAction = .load
+        colourAttachment.storeAction = .store
         colourAttachment.blendState = blendState
         return colourAttachment
     }
@@ -390,7 +389,7 @@ public final class SceneRenderer {
     public func renderScene(_ scene: Scene, camera: Camera, outlineMeshes: [(GLMesh, modelToWorld: mat4)] = [], useLightProbes: Bool = true) {
         
         let (gBuffers, gBufferDepth) = self.gBufferPass.renderScene(scene, camera: camera, useLightProbes: useLightProbes)
-        let (shadowMapDepthTexture, worldToLightClipMatrix) = self.shadowMapPass.performPass(scene: scene)
+        let (shadowMapDepthTexture, worldToLightClipMatrix) = self.shadowMapPass.performPass(scene)
         let (lightAccumulationTexture, _) = self.lightAccumulationPass.performPass(scene: scene, camera: camera, gBufferColours: gBuffers, gBufferDepth: gBufferDepth, shadowMapDepthTexture: shadowMapDepthTexture, worldToLightClipMatrix: worldToLightClipMatrix)
        // let lightAccumulationAndReflections = self.screenSpaceReflectionPasses?.render(camera: camera, lightAccumulationBuffer: lightAccumulationTexture, rayTracingBuffer: rayTracingTexture!, gBuffers: gBuffers, gBufferDepth: gBufferDepth)
         let _ = self.outlinePass?.performPass(meshes: outlineMeshes, camera: camera) //operates on the light accumulation texture.

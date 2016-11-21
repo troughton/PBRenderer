@@ -41,12 +41,12 @@ func swapWordPair(_ pair: UInt32) -> UInt32 {
 
 final class LightGridBuilder {
     var dim = LightGridDimensions(width: 0, height: 0, depth: 0)
-    private var lightIndexLists = [[Int32]]()
-    private var coverageLists = [[UInt64]]()
-    private var allocatedBytes : size_t = 0
+    fileprivate var lightIndexLists = [[Int32]]()
+    fileprivate var coverageLists = [[UInt64]]()
+    fileprivate var allocatedBytes : size_t = 0
     
-    let lightGridBuffer1 = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
-    let lightGridBuffer2 = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .Stream, accessType: .Draw) //32MB + 256 KB margin: max allocation per cell
+    let lightGridBuffer1 = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .stream, accessType: .draw) //32MB + 256 KB margin: max allocation per cell
+    let lightGridBuffer2 = GPUBuffer<LightGridEntry>(capacity: 64 * 1024 * 32 + 16 * 1024, bufferBinding: GL_UNIFORM_BUFFER, accessFrequency: .stream, accessType: .draw) //32MB + 256 KB margin: max allocation per cell
     let lightGridTexture1 : Texture
     let lightGridTexture2 : Texture
     var lightGridBuffer : GPUBuffer<LightGridEntry>
@@ -94,7 +94,7 @@ final class LightGridBuilder {
                 let headerIndex = (y*dim.width + x)*dim.depth + z;
                 let element = lightGridBuffer.contents.advanced(by: headerIndex)
                 
-                UnsafeMutablePointer<UInt32>(element).pointee = 0; // list size: 0
+                element.withMemoryRebound(to: UInt32.self, capacity: 1, { $0.pointee = 0 }) // list size: 0
             }
             return;
         }
@@ -106,8 +106,8 @@ final class LightGridBuilder {
         }
         
         let coverageListPtr = coverageLists[cellIndex].withUnsafeMutableBufferPointer { (array) -> UnsafeMutablePointer<UInt32>? in
-            let baseAddress = UnsafeMutablePointer<UInt32>(array.baseAddress)
-            return baseAddress
+            let result = array.baseAddress?.withMemoryRebound(to: UInt32.self, capacity: array.count * 2, { return $0 }) //pointer aliasing all over the place
+            return result
         }
         
         
@@ -122,9 +122,11 @@ final class LightGridBuilder {
             
             let headerIndex = (y*dim.width + x)*dim.depth + z;
             
-            let entryPtr = UnsafeMutablePointer<UInt32>(lightGridBuffer.contents.advanced(by: headerIndex))
+            let entryPtr = lightGridBuffer.contents.advanced(by: headerIndex).withMemoryRebound(to: UInt32.self, capacity: 1, { return $0 })
             
-            let tailPtr = UnsafeMutablePointer<UInt16>(UnsafeMutablePointer<UInt8>(lightGridBuffer.contents).advanced(by: allocatedBytes))
+            let lightGridContents = UnsafeMutableRawPointer(lightGridBuffer.contents).advanced(by: allocatedBytes)
+            
+            let tailPtr = lightGridContents.assumingMemoryBound(to: UInt16.self)
             
             let fineIndex = self.getFineIndex(xx, yy) * 4 + zz;
             let mask = 1 << fineIndex;
@@ -142,9 +144,9 @@ final class LightGridBuilder {
                 cursor += ((sub_coverageList_ptr![k * 2] & sub_mask) != 0) ? 1 : 0
             }
             
-            entryPtr[1] = swapWordPair(UnsafePointer<UInt32>(tailPtr.advanced(by: cursor - 2)).pointee)
-            entryPtr[2] = swapWordPair(UnsafePointer<UInt32>(tailPtr.advanced(by: cursor - 4)).pointee)
-            entryPtr[3] = swapWordPair(UnsafePointer<UInt32>(tailPtr.advanced(by: cursor - 6)).pointee)
+            entryPtr[1] = swapWordPair(tailPtr.advanced(by: cursor - 2).withMemoryRebound(to: UInt32.self, capacity: 1, { return $0.pointee }))
+            entryPtr[2] = swapWordPair(tailPtr.advanced(by: cursor - 4).withMemoryRebound(to: UInt32.self, capacity: 1, { return $0.pointee }))
+            entryPtr[3] = swapWordPair(tailPtr.advanced(by: cursor - 6).withMemoryRebound(to: UInt32.self, capacity: 1, { return $0.pointee }))
             
             let list_size = cursor;
             assert(list_size < 0x100);
@@ -199,7 +201,7 @@ final class LightGridBuilder {
                 }
             }
         }
-        self.lightGridBuffer.didModifyRange(0..<self.allocatedBytes/sizeof(LightGridEntry))
+        self.lightGridBuffer.didModifyRange(0..<self.allocatedBytes/MemoryLayout<LightGridEntry>.size)
         self.swapBuffers()
     }
     

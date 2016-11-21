@@ -14,151 +14,151 @@ import ColladaParser
 
 public enum InputKey : Int32 {
     /* The unknown key */
-    case Unknown =    -1
+    case unknown =    -1
     
     /* Printable keys */
-    case Space =      32
-    case Apostrophe = 39  /* ' */
-    case Comma =      44  /* , */
-    case Minus =      45  /* - */
-    case Period =     46  /* . */
-    case Slash =      47  /* / */
-    case Key0 = 48
-    case Key1 = 49
-    case Key2 = 50
-    case Key3 = 51
-    case Key4 = 52
-    case Key5 = 53
-    case Key6 = 54
-    case Key7 = 55
-    case Key8 = 56
-    case Key9 = 57
-    case Semicolon =  59  /* ; */
-    case Equal =      61  /* = */
-    case A = 65
-    case B = 66
-    case C = 67
-    case D = 68
-    case E = 69
-    case F = 70
-    case G = 71
-    case H = 72
-    case I = 73
-    case J = 74
-    case K = 75
-    case L = 76
-    case M = 77
-    case N = 78
-    case O = 79
-    case P = 80
-    case Q = 81
-    case R = 82
-    case S = 83
-    case T = 84
-    case U = 85
-    case V = 86
-    case W = 87
-    case X = 88
-    case Y = 89
-    case Z = 90
-    case LeftBracket    =  91  /* [ */
-    case Backslash =  92  /* \ */
-    case RightBracket   =   93  /* ] */
-    case GraveAccent    =   96  /* ` */
-    case World1 =    161 /* non-US #1 */
-    case World2 =    162 /* non-US #2 */
+    case space =      32
+    case apostrophe = 39  /* ' */
+    case comma =      44  /* , */
+    case minus =      45  /* - */
+    case period =     46  /* . */
+    case slash =      47  /* / */
+    case key0 = 48
+    case key1 = 49
+    case key2 = 50
+    case key3 = 51
+    case key4 = 52
+    case key5 = 53
+    case key6 = 54
+    case key7 = 55
+    case key8 = 56
+    case key9 = 57
+    case semicolon =  59  /* ; */
+    case equal =      61  /* = */
+    case a = 65
+    case b = 66
+    case c = 67
+    case d = 68
+    case e = 69
+    case f = 70
+    case g = 71
+    case h = 72
+    case i = 73
+    case j = 74
+    case k = 75
+    case l = 76
+    case m = 77
+    case n = 78
+    case o = 79
+    case p = 80
+    case q = 81
+    case r = 82
+    case s = 83
+    case t = 84
+    case u = 85
+    case v = 86
+    case w = 87
+    case x = 88
+    case y = 89
+    case z = 90
+    case leftBracket    =  91  /* [ */
+    case backslash =  92  /* \ */
+    case rightBracket   =   93  /* ] */
+    case graveAccent    =   96  /* ` */
+    case world1 =    161 /* non-US #1 */
+    case world2 =    162 /* non-US #2 */
     
     /* Function keys */
-    case Escape =     256
-    case Enter =      257
-    case Tab =        258
-    case Backspace =  259
-    case Insert =     260
-    case Delete =     261
-    case Right =      262
-    case Left =       263
-    case Down =       264
-    case Up =         265
-    case PageUp =  267
-    case Home =       268
-    case End =        269
-    case CapsLock =  280
-    case ScrollLock   =     281
-    case NumLock =   282
-    case PrintScreen  =     283
-    case Pause =      284
-    case F1 =         290
-    case F2 =         291
-    case F3 =         292
-    case F4 =         293
-    case F5 =         294
-    case F6 =         295
-    case F7 =         296
-    case F8 =         297
-    case F9 =         298
-    case F10 =        299
-    case F11 =        300
-    case F12 =        301
-    case F13 =        302
-    case F14 =        303
-    case F15 =        304
-    case F16 =        305
-    case F17 =        306
-    case F18 =        307
-    case F19 =        308
-    case F20 =        309
-    case F21 =        310
-    case F22 =        311
-    case F23 =        312
-    case F24 =        313
-    case F25 =        314
-    case KP0 =       320
-    case KP1 =       321
-    case KP2 =       322
-    case KP3 =       323
-    case KP4 =       324
-    case KP5 =       325
-    case KP6 =       326
-    case KP7 =       327
-    case KP8 =       328
-    case KP9 =       329
-    case KPDecimal = 330
-    case KPDivide =  331
-    case KPMultiply   =    332
-    case KPSubtract    =    333
-    case KPAdd =     334
-    case KPEnter =   335
-    case KPEqual =   336
-    case LeftShift = 340
-    case LeftControl  =     341
-    case LeftAlt =   342
-    case LeftSuper = 343
-    case RightShift     =   344
-    case RightControl  =    345
-    case RightAlt =  346
-    case RightSuper     =   347
-    case Menu =       348
+    case escape =     256
+    case enter =      257
+    case tab =        258
+    case backspace =  259
+    case insert =     260
+    case delete =     261
+    case right =      262
+    case left =       263
+    case down =       264
+    case up =         265
+    case pageUp =  267
+    case home =       268
+    case end =        269
+    case capsLock =  280
+    case scrollLock   =     281
+    case numLock =   282
+    case printScreen  =     283
+    case pause =      284
+    case f1 =         290
+    case f2 =         291
+    case f3 =         292
+    case f4 =         293
+    case f5 =         294
+    case f6 =         295
+    case f7 =         296
+    case f8 =         297
+    case f9 =         298
+    case f10 =        299
+    case f11 =        300
+    case f12 =        301
+    case f13 =        302
+    case f14 =        303
+    case f15 =        304
+    case f16 =        305
+    case f17 =        306
+    case f18 =        307
+    case f19 =        308
+    case f20 =        309
+    case f21 =        310
+    case f22 =        311
+    case f23 =        312
+    case f24 =        313
+    case f25 =        314
+    case kp0 =       320
+    case kp1 =       321
+    case kp2 =       322
+    case kp3 =       323
+    case kp4 =       324
+    case kp5 =       325
+    case kp6 =       326
+    case kp7 =       327
+    case kp8 =       328
+    case kp9 =       329
+    case kpDecimal = 330
+    case kpDivide =  331
+    case kpMultiply   =    332
+    case kpSubtract    =    333
+    case kpAdd =     334
+    case kpEnter =   335
+    case kpEqual =   336
+    case leftShift = 340
+    case leftControl  =     341
+    case leftAlt =   342
+    case leftSuper = 343
+    case rightShift     =   344
+    case rightControl  =    345
+    case rightAlt =  346
+    case rightSuper     =   347
+    case menu =       348
 }
 
 public enum MouseButton : Int32 {
-    case MouseButton1 = 0
-    case MouseButton2 = 1
-    case MouseButton3 = 2
-    case MouseButton4 = 3
-    case MouseButton5 = 4
-    case MouseButton6 = 5
-    case MouseButton7 = 6
-    case MouseButton8 = 7
+    case mouseButton1 = 0
+    case mouseButton2 = 1
+    case mouseButton3 = 2
+    case mouseButton4 = 3
+    case mouseButton5 = 4
+    case mouseButton6 = 5
+    case mouseButton7 = 6
+    case mouseButton8 = 7
     
-    static let MouseButtonLeft = MouseButton.MouseButton1
-    static let MouseButtonRight = MouseButton.MouseButton2
-    static let MouseButtonMiddle = MouseButton.MouseButton3
+    static let MouseButtonLeft = MouseButton.mouseButton1
+    static let MouseButtonRight = MouseButton.mouseButton2
+    static let MouseButtonMiddle = MouseButton.mouseButton3
 }
 
 public enum InputAction : Int32 {
-    case Release = 0
-    case Press = 1
-    case Repeat = 2
+    case release = 0
+    case press = 1
+    case `repeat` = 2
 }
 
 public struct InputModifiers : OptionSet {
@@ -223,13 +223,13 @@ public struct Size {
 public final class PBWindow {
     
     // called whenever a key is pressed/released via GLFW
-    func keyCallback(window: OpaquePointer!, key: Int32, scancode: Int32, action: Int32, mode: Int32) {
+    func keyCallback(_ window: OpaquePointer!, key: Int32, scancode: Int32, action: Int32, mode: Int32) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GL_TRUE)
         }
     }
     
-    private static var glfwWindowsToWindows = [OpaquePointer : PBWindow]()
+    fileprivate static var glfwWindowsToWindows = [OpaquePointer : PBWindow]()
     
     public let glfwWindow : OpaquePointer!
     
@@ -272,17 +272,17 @@ public final class PBWindow {
         return glfwGetTime()
     }
     
-    public typealias OnUpdate = (window: PBWindow, deltaTime: Double) -> ()
-    private var onUpdateClosures = [OnUpdate]()
+    public typealias OnUpdate = (_ window: PBWindow, _ deltaTime: Double) -> ()
+    fileprivate var onUpdateClosures = [OnUpdate]()
     
-    public typealias OnFramebufferResize = (width: Int32, height: Int32) -> ()
-    private var onFramebufferResizeClosures = [OnFramebufferResize]()
+    public typealias OnFramebufferResize = (_ width: Int32, _ height: Int32) -> ()
+    fileprivate var onFramebufferResizeClosures = [OnFramebufferResize]()
 
     
-    private var _timeLastFrame = 0.0
+    fileprivate var _timeLastFrame = 0.0
     
-    private var _previousMouseX = 0.0;
-    private var _previousMouseY = 0.0;
+    fileprivate var _previousMouseX = 0.0;
+    fileprivate var _previousMouseY = 0.0;
     
     public var inputDelegates: [WindowInputDelegate] = []
     
@@ -339,12 +339,12 @@ public final class PBWindow {
 
             let character = UnicodeScalar(codePoint)
             
-            window.inputDelegates.forEach { $0.char(character: character) }
+            window.inputDelegates.forEach { $0.char(character: character!) }
         }
         
         glfwSetFramebufferSizeCallback(self.glfwWindow) { (glfwWindow, width, height) in
             let window = PBWindow.glfwWindowsToWindows[glfwWindow!]!
-            window.onFramebufferResizeClosures.forEach { $0(width: width, height: height) }
+            window.onFramebufferResizeClosures.forEach { $0(width, height) }
         }
     }
     
@@ -357,7 +357,7 @@ public final class PBWindow {
         let elapsedTime = self.currentTime - _timeLastFrame
         
         for closure in self.onUpdateClosures {
-            closure(window: self, deltaTime: elapsedTime)
+            closure(self, elapsedTime)
         }
         
         _timeLastFrame = currentTime
@@ -365,11 +365,11 @@ public final class PBWindow {
         glfwSwapBuffers(self.glfwWindow)
     }
     
-    public func registerForUpdate(onUpdate: OnUpdate) {
+    public func registerForUpdate(_ onUpdate: @escaping OnUpdate) {
         self.onUpdateClosures.append(onUpdate)
     }
     
-    public func registerForFramebufferResize(onResize: OnFramebufferResize) {
+    public func registerForFramebufferResize(_ onResize: @escaping OnFramebufferResize) {
         self.onFramebufferResizeClosures.append(onResize)
     }
 }

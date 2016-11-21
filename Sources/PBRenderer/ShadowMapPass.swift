@@ -40,7 +40,7 @@ final class ShadowMapPass {
         let depthAttachment : RenderPassDepthAttachment = {
             var attachment = RenderPassDepthAttachment(clearDepth: 1.0)
             attachment.texture = shadowMapTexture
-            attachment.loadAction = .Clear
+            attachment.loadAction = .clear
             
             return attachment
         }()
@@ -52,12 +52,12 @@ final class ShadowMapPass {
     
        static let lightToClip = SGLMath.ortho(Float(-160), 160, -160, 160, 1.0, 1000.0);
     
-    func performPass(scene: Scene) -> (Texture, mat4) {
+    func performPass(_ scene: Scene) -> (Texture, mat4) {
         var worldToLightClipMatrix : mat4? = nil
         
         let lights = scene.lights
         
-        for (index, light) in lights.enumerated() where light.type.isSameTypeAs(.SunArea(radius: 0)) {
+        for (index, light) in lights.enumerated() where light.type.isSameTypeAs(.sunArea(radius: 0)) {
             pipelineState.renderPass { (framebuffer, shader) in
                     light.shadowMapArrayIndex = index
 

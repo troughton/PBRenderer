@@ -23,7 +23,7 @@ final class DFGTexture {
         
         var colourAttachment = RenderPassColourAttachment(clearColour: vec4(0))
         colourAttachment.texture = self.texture
-        colourAttachment.storeAction = .Store
+        colourAttachment.storeAction = .store
         
         let depthDescriptor = TextureDescriptor(texture2DWithPixelFormat: GL_DEPTH_COMPONENT16, width: resolution, height: resolution, mipmapped: false)
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)

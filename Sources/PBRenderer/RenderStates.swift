@@ -171,11 +171,11 @@ struct PipelineState {
     var blendColour : vec4 = vec4(0)
     
     enum DepthClipMode {
-        case Clip
-        case Clamp
+        case clip
+        case clamp
     }
     
-    var depthClipMode : DepthClipMode = .Clip
+    var depthClipMode : DepthClipMode = .clip
     
     var frontFaceWinding : GLint = GL_CCW
     
@@ -218,9 +218,9 @@ struct PipelineState {
         glBlendColor(blendColour.r, blendColour.g, blendColour.b, blendColour.a)
         
         switch depthClipMode {
-        case .Clip:
+        case .clip:
             glDisable(GL_DEPTH_CLAMP)
-        case .Clamp:
+        case .clamp:
             glEnable(GL_DEPTH_CLAMP)
         }
         
@@ -276,7 +276,7 @@ struct PipelineState {
         }
     }
     
-    func renderPass(_ function: @noescape (Framebuffer, Shader) -> ()) {
+    func renderPass(_ function: (Framebuffer, Shader) -> ()) {
         self.applyState()
         
         self.framebuffer.renderPass { 

@@ -13,28 +13,28 @@ import AudioToolbox
 import AVFoundation
 
 protocol CGetterObject {
-    func get<T>(_ function: (inSequence: Self, out: UnsafeMutablePointer<T>) -> OSStatus) -> T
-    func get<T, U>(_ u: U, _ function: (inSequence: Self, arg: U, out: UnsafeMutablePointer<T>) -> OSStatus) -> T
+    func get<T>(_ function: (_ inSequence: Self, _ out: UnsafeMutablePointer<T>) -> OSStatus) -> T
+    func get<T, U>(_ u: U, _ function: (_ inSequence: Self, _ arg: U, _ out: UnsafeMutablePointer<T>) -> OSStatus) -> T
 }
 
 extension CGetterObject {
-    func get<T>(_ function: (inSequence: Self, out: UnsafeMutablePointer<T>) -> OSStatus) -> T {
-        var result = UnsafeMutablePointer<T>(allocatingCapacity: 1)
+    func get<T>(_ function: (_ inSequence: Self, _ out: UnsafeMutablePointer<T>) -> OSStatus) -> T {
+        var result = UnsafeMutablePointer<T>.allocate(capacity: 1)
         defer {
             result.deinitialize()
-            result.deallocateCapacity(1)
+            result.deallocate(capacity: 1)
         }
-        let _ = function(inSequence: self, out: result)
+        let _ = function(self, result)
         return result.pointee
     }
     
-    func get<T, U>(_ u: U, _ function: (inSequence: Self, arg: U, out: UnsafeMutablePointer<T>) -> OSStatus) -> T {
-        var result = UnsafeMutablePointer<T>(allocatingCapacity: 1)
+    func get<T, U>(_ u: U, _ function: (_ inSequence: Self, _ arg: U, _ out: UnsafeMutablePointer<T>) -> OSStatus) -> T {
+        var result = UnsafeMutablePointer<T>.allocate(capacity: 1)
         defer {
             result.deinitialize()
-            result.deallocateCapacity(1)
+            result.deallocate(capacity: 1)
         }
-        let _ = function(inSequence: self, arg: u, out: result)
+        let _ = function(self, u, result)
         return result.pointee
     }
     
@@ -47,7 +47,7 @@ protocol SongDelegate : class {
     func processEvent(_ event: MIDIEventType, onTrack track: Int, beatNumber: Double)
 }
 
-enum SongError : ErrorProtocol {
+enum SongError : Error {
     case SequenceCreationError
 }
 
@@ -74,7 +74,7 @@ final class Song : NSObject, AVAudioPlayerDelegate {
             return track.get(NewMusicEventIterator)!
         }
         
-        self.audioPlayer = try AVAudioPlayer(contentsOf: NSURL(fileURLWithPath: audioFilePath))
+        self.audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: audioFilePath))
         
         self.audioPlayer.prepareToPlay()
         
@@ -92,10 +92,10 @@ final class Song : NSObject, AVAudioPlayerDelegate {
         let currentBeat = self.beatNumber
         
         for (i, iterator) in iterators.enumerated() {
-            while iterator.get(MusicEventIteratorHasCurrentEvent) {
+            while iterator.get(MusicEventIteratorHasCurrentEvent) == true {
                 var timestamp = MusicTimeStamp(0)
                 var eventType = MusicEventType(0)
-                var eventData : UnsafePointer<Void>? = nil
+                var eventData : UnsafeRawPointer? = nil
                 var eventDataSize = UInt32(0)
                 
                 MusicEventIteratorGetEventInfo(iterator, &timestamp, &eventType, &eventData, &eventDataSize)

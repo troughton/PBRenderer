@@ -19,7 +19,7 @@ final class OpenCLKernel {
     
     func setArgument<T>(_ argument: T, size: Int? = nil, index: Int) {
         var argument = argument
-        let argSize = size ?? sizeofValue(argument)
+        let argSize = size ?? MemoryLayout.size(ofValue: argument)
         let result = clSetKernelArg(self.clKernel, cl_uint(index), argSize, &argument)
         if result != CL_SUCCESS {
             print("Error: Failed to set kernel argument at index \(index) to value \(argument): \(OpenCLError(rawValue: result)!)")
@@ -28,7 +28,7 @@ final class OpenCLKernel {
     
     func maxWorkGroupSize(onDevice device: cl_device_id) -> size_t {
         var size = size_t(0)
-        let err = clGetKernelWorkGroupInfo(self.clKernel, device, cl_kernel_work_group_info(CL_KERNEL_WORK_GROUP_SIZE), sizeof(size_t), &size, nil);
+        let err = clGetKernelWorkGroupInfo(self.clKernel, device, cl_kernel_work_group_info(CL_KERNEL_WORK_GROUP_SIZE), MemoryLayout<size_t>.size, &size, nil);
         if (err != CL_SUCCESS) {
             print("Error: Failed to retrieve kernel work group info. (%d)", err);
         }
@@ -41,9 +41,9 @@ final class OpenCLKernel {
     
 }
 
-enum OpenCLProgramError : ErrorProtocol {
-    case FailedProgramCreation(OpenCLError)
-    case FailedProgramBuild(String, OpenCLError)
+enum OpenCLProgramError : Error {
+    case failedProgramCreation(OpenCLError)
+    case failedProgramBuild(String, OpenCLError)
 }
 
 final class OpenCLProgram {
@@ -59,7 +59,7 @@ final class OpenCLProgram {
         }
         
         if err != CL_SUCCESS {
-            throw OpenCLProgramError.FailedProgramCreation(OpenCLError(rawValue: err)!)
+            throw OpenCLProgramError.failedProgramCreation(OpenCLError(rawValue: err)!)
         }
         
         // Build the program executable
@@ -87,7 +87,7 @@ final class OpenCLProgram {
         if (err != CL_SUCCESS) {
             
             print("Error: Failed to build program executable!\n");
-            throw OpenCLProgramError.FailedProgramBuild(buildString, OpenCLError(rawValue: err)!)
+            throw OpenCLProgramError.failedProgramBuild(buildString, OpenCLError(rawValue: err)!)
         }
         
     }
@@ -95,7 +95,7 @@ final class OpenCLProgram {
     convenience init(contentsOfFile filePath: String, clContext: cl_context, deviceID: cl_device_id) throws {
         
         let directory = filePath.components(separatedBy: "/").dropLast().joined(separator: "/")
-        let contents = try String(contentsOfFile: filePath, encoding: NSUTF8StringEncoding)
+        let contents = try String(contentsOfFile: filePath, encoding: String.Encoding.utf8)
         
         try self.init(withText: contents, path: directory, clContext: clContext, deviceID: deviceID)
     }

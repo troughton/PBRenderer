@@ -21,7 +21,7 @@ let mainMelodyNotes : [UInt8] = [50, 52, 55, 57, 59, 62]
             let lightNumber = mainMelodyNotes.index(of: noteMessage.note)!
             
             let light = scene.idsToNodes["BackgroundAreaLight\(lightNumber + 1)"]?.lights.first
-            light?.colour = .Temperature(8000)
+            light?.colour = .temperature(8000)
             
             let backgroundAreaLightPlane = scene.idsToNodes["BackgroundAreaLightPlane\(lightNumber + 1)"]!
             let materialElement = backgroundAreaLightPlane.materials.values.first!

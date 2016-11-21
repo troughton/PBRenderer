@@ -82,8 +82,8 @@ final class LightAccumulationPass {
             let reflectionTexture = Texture(textureWithDescriptor: reflectionBufferDescriptor)
             
             reflectionAttachment = RenderPassColourAttachment(clearColour: vec4(0))
-            reflectionAttachment!.loadAction = .Clear
-            reflectionAttachment!.storeAction = .Store
+            reflectionAttachment!.loadAction = .clear
+            reflectionAttachment!.storeAction = .store
             reflectionAttachment!.texture = reflectionTexture
         }
         
@@ -93,8 +93,8 @@ final class LightAccumulationPass {
         let depthTexture = Texture(textureWithDescriptor: depthDescriptor)
     
         var depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
-        depthAttachment.loadAction = .Clear
-        depthAttachment.storeAction = .Store
+        depthAttachment.loadAction = .clear
+        depthAttachment.storeAction = .store
         depthAttachment.texture = depthTexture
         
         return Framebuffer(width: width, height: height, colourAttachments: [lightAccumulationAttachment, reflectionAttachment], depthAttachment: depthAttachment, stencilAttachment: nil)

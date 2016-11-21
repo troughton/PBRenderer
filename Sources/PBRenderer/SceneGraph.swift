@@ -221,7 +221,7 @@ public final class Transform {
             self.setNeedsRecalculateTransform()
         }
     }
-    private var children = [Transform]()
+    fileprivate var children = [Transform]()
     
     public var translation : vec3 {
         didSet {
@@ -240,11 +240,11 @@ public final class Transform {
         }
     }
     
-    private var _nodeToWorldMatrix : mat4? = nil
-    private var _worldToNodeMatrix : mat4? = nil
+    fileprivate var _nodeToWorldMatrix : mat4? = nil
+    fileprivate var _worldToNodeMatrix : mat4? = nil
     
-    private var _worldSpacePosition : vec4? = nil
-    private var _worldSpaceDirection : vec4? = nil
+    fileprivate var _worldSpacePosition : vec4? = nil
+    fileprivate var _worldSpaceDirection : vec4? = nil
 
     
     init(parent: Transform?, translation: vec3 = vec3(0), rotation: quat = quat(1, 0, 0, 0), scale: vec3 = vec3(1)) {
@@ -256,7 +256,7 @@ public final class Transform {
         self.parent?.children.append(self)
     }
     
-    private func setNeedsRecalculateTransform() {
+    fileprivate func setNeedsRecalculateTransform() {
         _nodeToWorldMatrix = nil
         _worldToNodeMatrix = nil
         _worldSpacePosition = nil
@@ -268,7 +268,7 @@ public final class Transform {
         self.children.forEach { $0.setNeedsRecalculateTransform() }
     }
     
-    private func calculateNodeToWorldMatrix() -> mat4 {
+    fileprivate func calculateNodeToWorldMatrix() -> mat4 {
         
         var transform = SGLMath.translate(mat4(1), self.translation)
         transform = transform * self.rotation
@@ -277,7 +277,7 @@ public final class Transform {
         return (self.parent?.nodeToWorldMatrix ?? mat4(1)) * transform;
     }
     
-    private func calculateWorldToNodeMatrix() -> mat4 {
+    fileprivate func calculateWorldToNodeMatrix() -> mat4 {
         let parentTransform = self.parent?.worldToNodeMatrix ?? mat4(1)
         
         var transform = SGLMath.scale(mat4(1), vec3(1/self.scale.x, 1/self.scale.y, 1/self.scale.z))

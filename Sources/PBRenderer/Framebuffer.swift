@@ -12,17 +12,17 @@ import SGLMath
 import SGLOpenGL
 
 enum LoadAction : UInt {
-    case DontCare = 0
-    case Load = 1
-    case Clear = 2
+    case dontCare = 0
+    case load = 1
+    case clear = 2
 }
 
 enum StoreAction {
-    case DontCare
-    case Store
-    case MultisampleResolveColour(Framebuffer, attachmentIndex: Int)
-    case MultisampleResolveDepth(Framebuffer)
-    case MultisampleResolveStencil(Framebuffer)
+    case dontCare
+    case store
+    case multisampleResolveColour(Framebuffer, attachmentIndex: Int)
+    case multisampleResolveDepth(Framebuffer)
+    case multisampleResolveStencil(Framebuffer)
 }
 
 protocol RenderPassAttachment {
@@ -44,8 +44,8 @@ struct RenderPassColourAttachment : RenderPassAttachment {
     var textureSlice : UInt = 0
     var depthPlane : Int = 0
     
-    var loadAction : LoadAction = .DontCare
-    var storeAction : StoreAction = .DontCare
+    var loadAction : LoadAction = .dontCare
+    var storeAction : StoreAction = .dontCare
     
     var blendState = BlendState()
     
@@ -63,8 +63,8 @@ struct RenderPassDepthAttachment : RenderPassAttachment {
     var textureSlice : UInt = 0
     var depthPlane : Int = 0
     
-    var loadAction : LoadAction = .DontCare
-    var storeAction : StoreAction = .DontCare
+    var loadAction : LoadAction = .dontCare
+    var storeAction : StoreAction = .dontCare
     
     init(clearDepth: Double) {
         self.clearDepth = clearDepth
@@ -80,8 +80,8 @@ struct RenderPassStencilAttachment : RenderPassAttachment {
     var textureSlice : UInt = 0
     var depthPlane : Int = 0
     
-    var loadAction : LoadAction = .DontCare
-    var storeAction : StoreAction = .DontCare
+    var loadAction : LoadAction = .dontCare
+    var storeAction : StoreAction = .dontCare
     
     init(clearStencil: UInt32) {
         self.clearStencil = clearStencil
@@ -89,13 +89,13 @@ struct RenderPassStencilAttachment : RenderPassAttachment {
 }
 
 
-public class Framebuffer {
+open class Framebuffer {
     
     static func defaultFramebuffer(width: Int32, height: Int32) -> Framebuffer {
         return Framebuffer(defaultFramebufferWithWidth: width, height: height)
     }
     
-    private let _glFramebuffer : GLuint!
+    fileprivate let _glFramebuffer : GLuint!
     
     let width : Int32
     let height : Int32
@@ -140,7 +140,7 @@ public class Framebuffer {
         regenerate()
     }
     
-    private func regenerate()  {
+    fileprivate func regenerate()  {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _glFramebuffer)
         
         for (i, colourAttachment) in colourAttachments.enumerated() where colourAttachment?.texture != nil {
@@ -189,7 +189,7 @@ public class Framebuffer {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
     }
     
-    private convenience init(defaultFramebufferWithWidth width: Int32, height: Int32) {
+    fileprivate convenience init(defaultFramebufferWithWidth width: Int32, height: Int32) {
         let colourAttachments : [RenderPassColourAttachment?] = [ RenderPassColourAttachment(clearColour: vec4(0, 0, 0, 0)) ]
         let depthAttachment = RenderPassDepthAttachment(clearDepth: 1.0)
         
@@ -202,13 +202,13 @@ public class Framebuffer {
         }
     }
     
-    func renderPass(_ function: @noescape () -> ()){
+    func renderPass(_ function: () -> ()){
         self.beginRenderPass()
         function()
         self.endRenderPass()
     }
     
-    private func beginRenderPass() {
+    fileprivate func beginRenderPass() {
         
         if let glFramebuffer = _glFramebuffer {
             glBindFramebuffer(GL_FRAMEBUFFER, glFramebuffer)
@@ -216,7 +216,7 @@ public class Framebuffer {
         
         for (i, attachment) in self.colourAttachments.enumerated() where attachment != nil {
             
-            if attachment!.loadAction == .Clear {
+            if attachment!.loadAction == .clear {
             
                 if let _ = attachment!.texture {
                     glDrawBuffer(GL_COLOR_ATTACHMENT0 + i)
@@ -232,7 +232,7 @@ public class Framebuffer {
         
         if _glFramebuffer != nil {
             let drawBuffers : [GLenum] = self.colourAttachments.enumerated().flatMap { (i, attachment) in
-                if let attachment = attachment where attachment.isEnabled {
+                if let attachment = attachment , attachment.isEnabled {
                     return GL_COLOR_ATTACHMENT0 + i
                 } else { return nil }
             }
@@ -242,22 +242,22 @@ public class Framebuffer {
             glDrawBuffer(GL_BACK)
         }
         
-        if self.depthAttachment.loadAction == .Clear {
+        if self.depthAttachment.loadAction == .clear {
             glClearDepth(self.depthAttachment.clearDepth)
             glClear(GL_DEPTH_BUFFER_BIT)
         }
         
-        if self.stencilAttachment?.loadAction == .Clear {
+        if self.stencilAttachment?.loadAction == .clear {
             glClearStencil(unsafeBitCast(self.stencilAttachment!.clearStencil, to: GLint.self))
             glClear(GL_STENCIL_BUFFER_BIT)
         }
         
     }
     
-    private func endRenderPass() {
+    fileprivate func endRenderPass() {
         
         for attachment in colourAttachments where attachment?.texture != nil {
-            if case let .MultisampleResolveColour(framebuffer, attachmentIndex) = attachment!.storeAction {
+            if case let .multisampleResolveColour(framebuffer, attachmentIndex) = attachment!.storeAction {
                     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer._glFramebuffer ?? 0)   // Make sure no FBO is set as the draw framebuffer
                     glBindFramebuffer(GL_READ_FRAMEBUFFER, _glFramebuffer) // Make sure your multisampled FBO is the read framebuffer
                     glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex)
@@ -267,20 +267,20 @@ public class Framebuffer {
             glBindFramebuffer(GL_FRAMEBUFFER, 0)
         }
         
-        if case let .MultisampleResolveDepth(framebuffer) = self.depthAttachment.storeAction {
+        if case let .multisampleResolveDepth(framebuffer) = self.depthAttachment.storeAction {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer._glFramebuffer ?? 0)   // Make sure no FBO is set as the draw framebuffer
             glBindFramebuffer(GL_READ_FRAMEBUFFER, _glFramebuffer) // Make sure your multisampled FBO is the read framebuffer
             glBlitFramebuffer(0, 0, self.width, self.height, 0, 0, framebuffer.width, framebuffer.height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         }
         
-        if self.stencilAttachment != nil, case let .MultisampleResolveStencil(framebuffer) = self.stencilAttachment!.storeAction {
+        if self.stencilAttachment != nil, case let .multisampleResolveStencil(framebuffer) = self.stencilAttachment!.storeAction {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer._glFramebuffer ?? 0)   // Make sure no FBO is set as the draw framebuffer
             glBindFramebuffer(GL_READ_FRAMEBUFFER, _glFramebuffer) // Make sure your multisampled FBO is the read framebuffer
             glBlitFramebuffer(0, 0, self.width, self.height, 0, 0, framebuffer.width, framebuffer.height, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
         }
     }
     
-    func asReadBuffer<T>(_ function: @noescape (GLuint) throws -> T) rethrows -> T {
+    func asReadBuffer<T>(_ function: (GLuint) throws -> T) rethrows -> T {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _glFramebuffer) // Make sure your multisampled FBO is the read framebuffer
         
         let result = try function(_glFramebuffer)

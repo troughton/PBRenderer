@@ -4,7 +4,6 @@ import SGLOpenGL
 import SGLMath
 import ColladaParser
 import PBRenderer
-import CPBRendererLibs
 
 let mainWindow : PBWindow
 
@@ -31,19 +30,19 @@ final class CameraControl : WindowInputDelegate {
     
     func keyAction(key: InputKey, action: InputAction, modifiers: InputModifiers) {
         switch action {
-        case .Press:
+        case .press:
             heldKeys.insert(key)
-        case .Release:
+        case .release:
             heldKeys.remove(key)
-            if key == .Space {
+            if key == .space {
                 mouseEnabled = !mouseEnabled
             }
             
-            if key == .L {
+            if key == .l {
                 scene.lightProbesSorted.forEach { $0.render(scene: scene) }
             }
             
-            if key == .G {
+            if key == .g {
                 renderGUI = !renderGUI
             }
         default: break
@@ -64,13 +63,13 @@ final class CameraControl : WindowInputDelegate {
         var movement = vec4(0, 0, 0, 0)
         for key in heldKeys {
             switch key {
-            case .W:
+            case .w:
                 movement += vec4(0, 0, -movementSpeed, 0)
-            case .S:
+            case .s:
                 movement += vec4(0, 0, movementSpeed, 0)
-            case .A:
+            case .a:
                 movement += vec4(-movementSpeed, 0, 0, 0)
-            case .D:
+            case .d:
                 movement += vec4(movementSpeed, 0, 0, 0)
             default:
                 break
@@ -103,7 +102,7 @@ func main() {
     
     let mainWindow = PBWindow(name: "PBRenderer", width: 800, height: 600)
     
-    guard let collada = Collada(contentsOfFile: Process.arguments[1]) else { fatalError("Couldn't load Collada file") }
+    guard let collada = Collada(contentsOfFile: CommandLine.arguments[1]) else { fatalError("Couldn't load Collada file") }
     
     let scene = Scene(fromCollada: collada)
     let camera = scene.cameras.first!
@@ -167,14 +166,14 @@ func main() {
     }
 
     let sun = scene.lights.filter { (light) -> Bool in
-        light.type.isSameTypeAs(.Directional)
+        light.type.isSameTypeAs(.directional)
     }.first!
-    sun.type = .SunArea(radius: radians(degrees: 0.263))
-    sun.intensity = .Illuminance(98000)
+    sun.type = .sunArea(radius: radians(degrees: 0.263))
+    sun.intensity = .illuminance(98000)
     
     for light in scene.lights
     {
-        var intensity = light.intensity.value
+        let intensity = light.intensity.value
         light.intensity = LightIntensity(unit: light.type.validUnits.first!, value: intensity)
     }
     
